@@ -4,6 +4,26 @@ All notable changes to ReleaseDock are documented here. The format follows [Keep
 
 ## [Unreleased]
 
+## [0.1.2] - 2026-11-22
+
+### Fixed
+- GitHub Updates explains update verification accurately (EdDSA signature; Developer ID check only for Developer ID builds).
+
+## [0.1.1] - 2026-11-22
+
+### Added
+- Arrow keys move through the Products and Release History lists.
+
+### Changed
+- "Use existing working copy" shows the local details immediately and refreshes from the server in the background; repository reads run in parallel.
+
+### Fixed
+- Plugin readme files are found regardless of case (e.g. `README.txt`), as on WordPress.org.
+
+## [0.1.0] - 2026-11-22
+
+First public build.
+
 ### Added
 - Native SwiftUI app: Dashboard, Products, Release Wizard (9 steps), Release History, GitHub Updates, Settings; open ZIPs/folders from Finder or by drag and drop.
 - Product management for WordPress.org plugins and themes with validation of slugs, URLs and paths, and detection from a development folder.
