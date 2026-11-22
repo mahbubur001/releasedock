@@ -64,7 +64,7 @@ struct GitHubUpdatesView: View {
                 }
 
                 SectionCard(title: "How updates are verified", systemImage: "lock.shield") {
-                    Text("ReleaseDock checks the GitHub REST API for the newest release and notifies you. Installation uses Sparkle 2, which only installs an update whose EdDSA signature matches the key built into this app and whose Developer ID signature matches the installed app.")
+                    Text("ReleaseDock checks the GitHub REST API for the newest release and notifies you. Installation uses Sparkle 2, which downloads the update over HTTPS and installs it only if its EdDSA signature matches the public key built into this app; Developer ID builds are additionally checked against the installed app's code signature.")
                         .font(.callout).foregroundStyle(.secondary)
                 }
             }
