@@ -136,6 +136,9 @@ final class AppModel {
 
     func start() async {
         reload()
+        #if DEBUG
+        KeySelfTest.scheduleIfRequested(model: self)
+        #endif
         do {
             let reconciled = try await pipeline.reconcileInterruptedReleases()
             if reconciled.contains(where: { $0.state == .recoveryRequired }) {

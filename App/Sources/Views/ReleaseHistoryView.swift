@@ -49,6 +49,7 @@ struct ReleaseHistoryView: View {
                         }
                         .padding(8)
                     }
+                    .arrowKeySelection(releases.map(\.id), selection: Binding(get: { model.historySelection }, set: { model.historySelection = $0 }))
                 }
             }
         } detail: {

@@ -49,6 +49,7 @@ struct ProductsView: View {
                         }
                         .padding(8)
                     }
+                    .arrowKeySelection(filtered.map(\.id), selection: $selection)
                 }
             }
         } detail: {

@@ -264,3 +264,63 @@ struct StatTile: View {
         .background(.background.secondary, in: RoundedRectangle(cornerRadius: 10))
     }
 }
+
+extension View {
+    /// ↑/↓ move the selection through `ids` while this list is on screen, including while
+    /// typing in its search box. Implemented with an AppKit key monitor because SwiftUI focus
+    /// does not reliably land on a scrolling list of buttons.
+    func arrowKeySelection<ID: Hashable & Sendable>(_ ids: [ID], selection: Binding<ID?>) -> some View {
+        background(ArrowKeyMonitor(ids: ids.map(AnyHashable.init)) { newValue in
+            if let id = newValue.base as? ID { selection.wrappedValue = id }
+        } current: {
+            selection.wrappedValue.map(AnyHashable.init)
+        })
+    }
+}
+
+private struct ArrowKeyMonitor: NSViewRepresentable {
+    let ids: [AnyHashable]
+    let select: (AnyHashable) -> Void
+    let current: () -> AnyHashable?
+
+    func makeNSView(context: Context) -> MonitorView { MonitorView() }
+
+    func updateNSView(_ view: MonitorView, context: Context) {
+        view.ids = ids
+        view.select = select
+        view.current = current
+    }
+
+    final class MonitorView: NSView {
+        var ids: [AnyHashable] = []
+        var select: (AnyHashable) -> Void = { _ in }
+        var current: () -> AnyHashable? = { nil }
+        private var monitor: Any?
+
+        override func viewDidMoveToWindow() {
+            super.viewDidMoveToWindow()
+            if let monitor { NSEvent.removeMonitor(monitor) }
+            monitor = nil
+            guard window != nil else { return }
+            monitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
+                guard let self, let window = self.window, event.window === window else { return event }
+                let offset: Int
+                switch event.keyCode {
+                case 125: offset = 1   // ↓
+                case 126: offset = -1  // ↑
+                default: return event
+                }
+                // Arrows typed in a single-line field (the list's search box) move through the list,
+                // as in other searchable lists; multi-line text keeps its arrows.
+                if let text = window.firstResponder as? NSTextView, !text.isFieldEditor { return event }
+                if !event.modifierFlags.intersection([.command, .option, .control, .shift]).isEmpty { return event }
+                guard !self.ids.isEmpty else { return event }
+                let index = self.current().flatMap { self.ids.firstIndex(of: $0) }
+                let next = index.map { min(max($0 + offset, 0), self.ids.count - 1) } ?? 0
+                self.select(self.ids[next])
+                return nil
+            }
+        }
+        // The monitor is removed in viewDidMoveToWindow when the view leaves its window.
+    }
+}

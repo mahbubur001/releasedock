@@ -24,6 +24,7 @@
 		8B4E1F9C78DD3B921760B028 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = AA246EB95A26EEE70176B560 /* Sparkle */; };
 		92F47382E21EE21ED47F43DB /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05A9A10F06D5B7E0C55567D5 /* SettingsView.swift */; };
 		9535B2BE57411BCB202EF683 /* AppModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F672711661C3EDA8AAD0B526 /* AppModel.swift */; };
+		9E2BC362F6F65D45684F4AAB /* KeySelfTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6FFEB43BA03F78710FB5DEB /* KeySelfTest.swift */; };
 		A00AD7B3E5ED060BB725BB82 /* ReleaseWizardModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A47D22DFF7B56ED473C92AF3 /* ReleaseWizardModel.swift */; };
 		A623318B8D560AC74EB8775B /* SparkleUpdateService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67188E8428EB7AF570C07664 /* SparkleUpdateService.swift */; };
 		AFFADAB6E9267DE3F2C21743 /* ProductsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 337D4647CE01008B8CC02A25 /* ProductsView.swift */; };
@@ -60,6 +61,7 @@
 		DA0382A66D69F0CD0FC38C7B /* GitHubUpdatesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GitHubUpdatesView.swift; sourceTree = "<group>"; };
 		F053256259338271C9AE9E8C /* Components.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Components.swift; sourceTree = "<group>"; };
 		F672711661C3EDA8AAD0B526 /* AppModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppModel.swift; sourceTree = "<group>"; };
+		F6FFEB43BA03F78710FB5DEB /* KeySelfTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeySelfTest.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -80,6 +82,7 @@
 			children = (
 				6E2E64523A782BA688E4480F /* AppUpdateChecker.swift */,
 				4DF4D5FE265B87477771F59A /* CursorSelfTest.swift */,
+				F6FFEB43BA03F78710FB5DEB /* KeySelfTest.swift */,
 				23AFFF1B2C9D61F8F43023F3 /* PointingHandCursor.swift */,
 				67188E8428EB7AF570C07664 /* SparkleUpdateService.swift */,
 				675821BFBD1F4CF960E35EE8 /* UserNotificationService.swift */,
@@ -264,6 +267,7 @@
 				707B93196B45F7892F93470C /* CursorSelfTest.swift in Sources */,
 				1D66D8058064C0027781D4A8 /* DashboardView.swift in Sources */,
 				7C9B283FC017FF7A0DBE86E6 /* GitHubUpdatesView.swift in Sources */,
+				9E2BC362F6F65D45684F4AAB /* KeySelfTest.swift in Sources */,
 				5A0F49425046F125980BE816 /* PointingHandCursor.swift in Sources */,
 				1C96EEE35A75FF9D3A7104F4 /* ProductEditorView.swift in Sources */,
 				AFFADAB6E9267DE3F2C21743 /* ProductsView.swift in Sources */,
