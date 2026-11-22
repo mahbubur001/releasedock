@@ -68,7 +68,7 @@ struct DashboardView: View {
                                         model.wizardProductID = product.id
                                         model.selection = .wizard
                                     }
-                                    .buttonStyle(.link)
+                                    .buttonStyle(InlineLinkButtonStyle())
                                 }
                             }
                         }
@@ -137,7 +137,6 @@ struct DashboardView: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .pointingHandCursor()
     }
 
     private func banner(_ text: String, systemImage: String, color: Color, @ViewBuilder action: () -> some View = { EmptyView() }) -> some View {

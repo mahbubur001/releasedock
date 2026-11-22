@@ -111,7 +111,6 @@ private struct SidebarRow: View {
         }
         .buttonStyle(.plain)
         .onHover { isHovering = $0 }
-        .pointingHandCursor()
         .animation(.easeOut(duration: 0.12), value: isHovering)
         .accessibilityAddTraits(isSelected ? .isSelected : [])
     }

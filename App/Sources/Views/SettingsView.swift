@@ -49,7 +49,7 @@ struct SettingsView: View {
             Section("Data") {
                 LabeledContent("Data folder") {
                     Button(model.paths.root.path) { NSWorkspace.shared.open(model.paths.root) }
-                        .buttonStyle(.link)
+                        .buttonStyle(InlineLinkButtonStyle())
                 }
                 Button("Export Diagnostics…") {
                     if let url = model.exportDiagnostics() {

@@ -158,7 +158,6 @@ private struct AddProductContent: View {
                 if add.mode != nil {
                     Button { add.mode = nil; add.errorMessage = nil } label: { Image(systemName: "chevron.left") }
                         .buttonStyle(.borderless)
-                        .pointingHandCursor(!add.isWorking)
                         .disabled(add.isWorking)
                 }
                 Text(title).font(.title2.bold())
@@ -220,7 +219,6 @@ private struct AddProductContent: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .pointingHandCursor()
     }
 
     // MARK: Checkout

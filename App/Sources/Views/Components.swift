@@ -215,7 +215,6 @@ struct SelectableRow<Content: View>: View {
         }
         .buttonStyle(.plain)
         .onHover { isHovering = $0 }
-        .pointingHandCursor()
         .animation(.easeOut(duration: 0.12), value: isHovering)
         .accessibilityAddTraits(isSelected ? .isSelected : [])
     }
@@ -232,8 +231,7 @@ struct SearchField: View {
             if !text.isEmpty {
                 Button { text = "" } label: { Image(systemName: "xmark.circle.fill").foregroundStyle(.secondary) }
                     .buttonStyle(.plain)
-                    .pointingHandCursor()
-                                .help("Clear")
+                                            .help("Clear")
             }
         }
         .padding(.horizontal, 8)

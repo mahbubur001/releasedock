@@ -1,6 +1,56 @@
 import AppKit
 import SwiftUI
 
+/// App-wide replacement for `SwiftUI.Button` that adds `pointingHandCursor` to every
+/// button. Declaring it in the app module shadows SwiftUI's `Button`. Menus,
+/// `confirmationDialog`s and `commands` use `SwiftUI.Button` explicitly. Avoid AppKit-backed
+/// styles such as `.link` (use `InlineLinkButtonStyle`): hover tracking overrides their
+/// AppKit cursor rectangles.
+struct Button<Label: View>: View {
+    private let button: SwiftUI.Button<Label>
+    @Environment(\.isEnabled) private var isEnabled
+
+    init(action: @escaping @MainActor () -> Void, @ViewBuilder label: () -> Label) {
+        button = SwiftUI.Button(action: action, label: label)
+    }
+
+    init(role: ButtonRole?, action: @escaping @MainActor () -> Void, @ViewBuilder label: () -> Label) {
+        button = SwiftUI.Button(role: role, action: action, label: label)
+    }
+
+    var body: some View {
+        button.pointingHandCursor(isEnabled)
+    }
+}
+
+extension Button where Label == Text {
+    init(_ titleKey: LocalizedStringKey, action: @escaping @MainActor () -> Void) {
+        button = SwiftUI.Button(titleKey, action: action)
+    }
+
+    init<S: StringProtocol>(_ title: S, action: @escaping @MainActor () -> Void) {
+        button = SwiftUI.Button(title, action: action)
+    }
+
+    init(_ titleKey: LocalizedStringKey, role: ButtonRole?, action: @escaping @MainActor () -> Void) {
+        button = SwiftUI.Button(titleKey, role: role, action: action)
+    }
+
+    init<S: StringProtocol>(_ title: S, role: ButtonRole?, action: @escaping @MainActor () -> Void) {
+        button = SwiftUI.Button(title, role: role, action: action)
+    }
+}
+
+/// Link-looking button drawn by SwiftUI (`.link` is an AppKit control).
+struct InlineLinkButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .foregroundStyle(Color.accentColor)
+            .opacity(configuration.isPressed ? 0.6 : 1)
+            .contentShape(Rectangle())
+    }
+}
+
 extension View {
     /// Shows the pointing-hand cursor over this view (buttons and custom clickable rows).
     ///
@@ -16,7 +66,7 @@ extension View {
 
 private struct PointingHandCursorModifier: ViewModifier {
     let enabled: Bool
-    @State private var isHovering = false
+    @State private var id = UUID()
 
     func body(content: Content) -> some View {
         content
@@ -26,22 +76,37 @@ private struct PointingHandCursorModifier: ViewModifier {
             #endif
             .onContinuousHover { phase in
                 switch phase {
-                case .active:
-                    isHovering = true
-                    (enabled ? NSCursor.pointingHand : NSCursor.arrow).set()
-                case .ended:
-                    guard isHovering else { return }
-                    isHovering = false
-                    NSCursor.arrow.set()
+                case .active: HoverCursor.enter(id, enabled: enabled)
+                case .ended: HoverCursor.leave(id)
                 }
             }
-            .onChange(of: enabled) { _, enabled in
-                if isHovering { (enabled ? NSCursor.pointingHand : NSCursor.arrow).set() }
-            }
+            .onChange(of: enabled) { _, enabled in HoverCursor.update(id, enabled: enabled) }
             // A view removed while hovered (e.g. replaced after a click) must not leave the hand behind.
-            .onDisappear {
-                if isHovering { NSCursor.arrow.set() }
-            }
+            .onDisappear { HoverCursor.leave(id) }
+    }
+}
+
+/// Hover "ended" for the previous view can arrive after "active" for the next one. Only the
+/// view that most recently received hover may reset the cursor, so the late "ended" no
+/// longer overwrites the hand that the next view just set.
+@MainActor
+enum HoverCursor {
+    private static var owner: UUID?
+
+    static func enter(_ id: UUID, enabled: Bool) {
+        owner = id
+        (enabled ? NSCursor.pointingHand : NSCursor.arrow).set()
+    }
+
+    static func update(_ id: UUID, enabled: Bool) {
+        guard owner == id else { return }
+        (enabled ? NSCursor.pointingHand : NSCursor.arrow).set()
+    }
+
+    static func leave(_ id: UUID) {
+        guard owner == id else { return }
+        owner = nil
+        NSCursor.arrow.set()
     }
 }
 
