@@ -112,6 +112,7 @@ final class AppModel {
         if let section = ProcessInfo.processInfo.environment["RELEASEDOCK_UI_TEST_SECTION"].flatMap(SidebarItem.init(rawValue:)) {
             selection = section
         }
+        if ProcessInfo.processInfo.environment["RELEASEDOCK_UI_TEST_EXISTING_WC"] != nil { showAddProduct = true }
         #endif
         if settings.githubRepository.isEmpty, let bundled = Bundle.main.object(forInfoDictionaryKey: "RDGitHubRepository") as? String, !bundled.isEmpty {
             settings.githubRepository = bundled

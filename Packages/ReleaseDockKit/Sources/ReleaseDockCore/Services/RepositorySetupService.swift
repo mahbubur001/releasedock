@@ -103,56 +103,61 @@ public struct RepositorySetupService: Sendable {
             throw RepositorySetupError.notProductRoot(found: url.absoluteString, suggestion: root.absoluteString.trimmingTrailingSlash)
         }
 
-        let info: SVNInfo
-        do {
-            info = try await svn.info(url.absoluteString)
-        } catch let error as SVNError where error.kind == .notFound {
-            throw RepositorySetupError.repositoryNotFound(url.absoluteString)
-        }
-        let entries = try await svn.list(url.absoluteString, recursive: false)
-        let directories = Set(entries.filter { $0.kind == .dir }.map(\.name))
-        let hasPluginLayout = directories.contains("trunk") && directories.contains("tags")
-        let hasThemeLayout = directories.contains { ThemeReleaseStrategy.isVersionDirectory($0) }
-
-        let layoutType: ProductType? = hasPluginLayout ? .plugin : (hasThemeLayout ? .theme : nil)
-        let type = Self.inferredType(host: url.host) ?? layoutType ?? expectedType
-        var description = RepositoryDescription(url: url, slug: url.lastPathComponent, type: type, revision: info.lastChangedRevision ?? info.revision)
-        guard let type else {
-            if entries.isEmpty {
-                description.notes.append("The repository is empty; choose Plugin or Theme.")
-                return description
+        // On WordPress.org the host decides the type; elsewhere the layout does.
+        let hostType = Self.inferredType(host: url.host)
+        var type = hostType
+        var revision: Int?
+        if hostType == nil {
+            async let infoRequest = svn.info(url.absoluteString)
+            async let listRequest = svn.list(url.absoluteString, recursive: false)
+            let info: SVNInfo
+            do {
+                info = try await infoRequest
+            } catch let error as SVNError where error.kind == .notFound {
+                throw RepositorySetupError.repositoryNotFound(url.absoluteString)
             }
-            throw RepositorySetupError.unknownLayout(url.absoluteString)
+            revision = info.lastChangedRevision ?? info.revision
+            let entries = try await listRequest
+            let directories = Set(entries.filter { $0.kind == .dir }.map(\.name))
+            let layoutType: ProductType? = directories.contains("trunk") && directories.contains("tags")
+                ? .plugin : (directories.contains { ThemeReleaseStrategy.isVersionDirectory($0) } ? .theme : nil)
+            type = layoutType ?? expectedType
+            if type == nil {
+                if entries.isEmpty {
+                    return RepositoryDescription(url: url, slug: url.lastPathComponent, type: nil, revision: revision, notes: ["The repository is empty; choose Plugin or Theme."])
+                }
+                throw RepositorySetupError.unknownLayout(url.absoluteString)
+            }
         }
+        guard let type else { throw RepositorySetupError.unknownLayout(url.absoluteString) }
 
-        let probe = Product(name: description.slug, slug: description.slug, type: type, svnRepositoryURL: url, workingCopyPath: "/")
+        let slug = url.lastPathComponent
+        let probe = Product(name: slug, slug: slug, type: type, svnRepositoryURL: url, workingCopyPath: "/")
+        // The main plugin file is usually <slug>.php; read it alongside the repository scan.
+        async let headerName = type == .plugin ? pluginHeaderName(url: url, slug: slug) : nil
         let snapshot = try await strategies.strategy(for: type).inspectRemote(product: probe, candidateVersion: nil, svn: svn)
+        if snapshot.repositoryExists == false { throw RepositorySetupError.repositoryNotFound(url.absoluteString) }
+
+        var description = RepositoryDescription(url: url, slug: slug, type: type, revision: snapshot.remoteRevision ?? revision)
         description.currentVersion = snapshot.currentVersion
         description.versions = snapshot.existingVersions
         description.notes = snapshot.structureProblems + snapshot.notes
-        description.productName = try await remoteProductName(url: url, type: type, slug: description.slug, currentVersion: snapshot.currentVersion)
+        switch type {
+        case .plugin: description.productName = try await headerName ?? snapshot.readmeTitle
+        case .theme: description.productName = try await themeName(url: url, currentVersion: snapshot.currentVersion)
+        }
         return description
     }
 
-    private func remoteProductName(url: URL, type: ProductType, slug: String, currentVersion: String?) async throws -> String? {
-        let base = url.absoluteString
-        switch type {
-        case .plugin:
-            if let data = try await WorkingCopyOperations.catIfExists("\(base)/trunk/\(slug).php", svn: svn),
-               let name = WordPressHeaders.parse(String(decoding: data.prefix(WordPressHeaders.readLimit), as: UTF8.self), headers: ["Plugin Name"])["Plugin Name"] {
-                return name
-            }
-            for readme in ["readme.txt", "readme.md"] {
-                if let data = try await WorkingCopyOperations.catIfExists("\(base)/trunk/\(readme)", svn: svn) {
-                    return ReadmeParser.parse(String(decoding: data, as: UTF8.self)).name
-                }
-            }
-            return nil
-        case .theme:
-            guard let currentVersion,
-                  let data = try await WorkingCopyOperations.catIfExists("\(base)/\(currentVersion)/style.css", svn: svn) else { return nil }
-            return WordPressHeaders.parse(String(decoding: data.prefix(WordPressHeaders.readLimit), as: UTF8.self), headers: ["Theme Name"])["Theme Name"]
-        }
+    private func pluginHeaderName(url: URL, slug: String) async throws -> String? {
+        guard let data = try await WorkingCopyOperations.catIfExists("\(url.absoluteString)/trunk/\(slug).php", svn: svn) else { return nil }
+        return WordPressHeaders.parse(String(decoding: data.prefix(WordPressHeaders.readLimit), as: UTF8.self), headers: ["Plugin Name"])["Plugin Name"]
+    }
+
+    private func themeName(url: URL, currentVersion: String?) async throws -> String? {
+        guard let currentVersion,
+              let data = try await WorkingCopyOperations.catIfExists("\(url.absoluteString)/\(currentVersion)/style.css", svn: svn) else { return nil }
+        return WordPressHeaders.parse(String(decoding: data.prefix(WordPressHeaders.readLimit), as: UTF8.self), headers: ["Theme Name"])["Theme Name"]
     }
 
     /// Sparse checkout into an empty (or new) folder, laid out exactly as releases need it.
@@ -168,9 +173,9 @@ public struct RepositorySetupService: Sendable {
 
     // MARK: Existing working copy
 
-    /// Describes a user-selected checkout. Server details are used when reachable;
-    /// otherwise the local copy is read.
-    public func describeWorkingCopy(at path: URL) async throws -> WorkingCopyDescription {
+    /// Describes a user-selected checkout from local data only (fast, no network): the
+    /// repository URL from `svn info`, layout, versions and headers from disk, local changes.
+    public func describeWorkingCopyLocally(at path: URL) async throws -> WorkingCopyDescription {
         let info: SVNInfo
         do {
             info = try await svn.info(path.path)
@@ -181,16 +186,34 @@ public struct RepositorySetupService: Sendable {
             throw RepositorySetupError.notWorkingCopyRoot(selected: path.path, root: root)
         }
         guard let url = URL(string: info.url) else { throw RepositorySetupError.invalidURL(info.url) }
-
-        var repository: RepositoryDescription
-        do {
-            repository = try await describeRemote(url)
-        } catch let error as SVNError where error.kind == .network || error.kind == .certificate {
-            repository = describeLocally(url: url, path: path)
-            repository.notes.append("The server could not be reached (\(error.localizedDescription)); details come from the local copy.")
+        let last = url.lastPathComponent
+        if last == "trunk" || last == "tags" || last == "assets" {
+            throw RepositorySetupError.notProductRoot(found: url.absoluteString, suggestion: url.deletingLastPathComponent().absoluteString.trimmingTrailingSlash)
         }
+        var repository = describeLocally(url: url, path: path)
+        repository.revision = info.revision
         let changes = try await WorkingCopyOperations.localChanges(at: path, svn: svn)
         return WorkingCopyDescription(path: path, repository: repository, revision: info.revision, localChanges: changes)
+    }
+
+    /// Local description refreshed with server details when the server is reachable.
+    public func describeWorkingCopy(at path: URL) async throws -> WorkingCopyDescription {
+        var description = try await describeWorkingCopyLocally(at: path)
+        do {
+            let remote = try await describeRemote(description.repository.url, expectedType: description.repository.type)
+            description.repository = Self.merge(local: description.repository, remote: remote)
+        } catch let error as SVNError where error.kind == .network || error.kind == .certificate {
+            description.repository.notes.append("The server could not be reached (\(error.localizedDescription)); details come from the local copy.")
+        }
+        return description
+    }
+
+    /// Server data wins for versions; the local name is kept if the server could not supply one.
+    public static func merge(local: RepositoryDescription, remote: RepositoryDescription) -> RepositoryDescription {
+        var merged = remote
+        merged.productName = remote.productName ?? local.productName
+        merged.type = remote.type ?? local.type
+        return merged
     }
 
     /// Builds a fully populated product from a repository and its local checkout. Identity
@@ -224,9 +247,9 @@ public struct RepositorySetupService: Sendable {
         if type == nil {
             type = names.contains("trunk") ? .plugin : (names.contains(where: ThemeReleaseStrategy.isVersionDirectory) ? .theme : nil)
         }
-        let versions = type == .plugin
+        let versions = (type == .plugin
             ? ((try? fm.contentsOfDirectory(atPath: path.appendingPathComponent("tags").path)) ?? [])
-            : names.filter(ThemeReleaseStrategy.isVersionDirectory)
+            : names.filter(ThemeReleaseStrategy.isVersionDirectory)).filter { !$0.hasPrefix(".") }
         let current = VersionService().highest(of: versions)
         var name: String?
         let productRoot = type == .plugin ? path.appendingPathComponent("trunk") : current.map { path.appendingPathComponent($0) }

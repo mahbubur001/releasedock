@@ -143,9 +143,12 @@ public struct PluginReleaseStrategy: ReleaseStrategy {
     public func inspectRemote(product: Product, candidateVersion: String?, svn: SVNServicing) async throws -> RepositorySnapshot {
         var snapshot = RepositorySnapshot()
         let base = product.svnRepositoryURL.absoluteString.trimmingTrailingSlash
+        // Independent requests run concurrently: each WordPress.org round trip takes seconds.
+        async let infoRequest = svn.info(base)
+        async let topRequest = svn.list(base, recursive: false)
         let info: SVNInfo
         do {
-            info = try await svn.info(base)
+            info = try await infoRequest
         } catch let error as SVNError where error.kind == .notFound {
             snapshot.repositoryExists = false
             return snapshot
@@ -153,28 +156,31 @@ public struct PluginReleaseStrategy: ReleaseStrategy {
         snapshot.repositoryExists = true
         snapshot.remoteRevision = info.lastChangedRevision ?? info.revision
 
-        let top = try await svn.list(base, recursive: false)
-        let names = Set(top.filter { $0.kind == .dir }.map(\.name))
+        let names = Set(try await topRequest.filter { $0.kind == .dir }.map(\.name))
         for required in ["trunk", "tags"] where !names.contains(required) {
             snapshot.structureProblems.append("Repository has no /\(required) directory; this does not look like a WordPress.org plugin repository")
         }
         guard snapshot.structureProblems.isEmpty else { return snapshot }
 
-        let tags = try await svn.list("\(base)/tags", recursive: false).filter { $0.kind == .dir }.map(\.name)
+        async let tagsRequest = svn.list("\(base)/tags", recursive: false)
+        async let trunkRequest = svn.list("\(base)/trunk", recursive: false)
+        let tags = try await tagsRequest.filter { $0.kind == .dir }.map(\.name)
+        let trunkFiles = try await trunkRequest.filter { $0.kind == .file }.map(\.name)
         snapshot.existingVersions = tags
 
         // Released version = trunk readme Stable tag when that tag exists; otherwise the
-        // highest tag (what the importer falls back to when trunk is empty).
+        // highest tag (what the importer falls back to when trunk is empty). WordPress.org
+        // matches the readme name case-insensitively, preferring readme.txt.
         var stable: String?
-        for readmeName in ["readme.txt", "readme.md"] {
-            if let data = try await WorkingCopyOperations.catIfExists("\(base)/trunk/\(readmeName)", svn: svn) {
-                stable = ReadmeParser.parse(String(decoding: data, as: UTF8.self)).stableTag
-                break
-            }
+        if let readme = Self.readmeName(in: trunkFiles),
+           let data = try await WorkingCopyOperations.catIfExists("\(base)/trunk/\(readme)", svn: svn) {
+            let parsed = ReadmeParser.parse(String(decoding: data, as: UTF8.self))
+            stable = parsed.stableTag
+            snapshot.readmeTitle = parsed.name
         }
         if let stable, !stable.isEmpty, stable != "trunk", tags.contains(stable) {
             snapshot.currentVersion = stable
-            snapshot.currentVersionSource = "trunk/readme.txt Stable tag"
+            snapshot.currentVersionSource = "trunk readme Stable tag"
         } else if let highest = VersionService().highest(of: tags) {
             snapshot.currentVersion = highest
             snapshot.currentVersionSource = "highest tag"
@@ -186,6 +192,14 @@ public struct PluginReleaseStrategy: ReleaseStrategy {
             snapshot.releasePathExists = tags.contains(candidateVersion)
         }
         return snapshot
+    }
+
+    /// `readme.txt` (preferred) or `readme.md`, matched case-insensitively like WordPress.org.
+    static func readmeName(in files: [String]) -> String? {
+        for wanted in ["readme.txt", "readme.md"] {
+            if let name = files.first(where: { $0.lowercased() == wanted }) { return name }
+        }
+        return nil
     }
 
     public func prepareWorkingCopy(product: Product, currentVersion: String?, svn: SVNServicing) async throws {
@@ -249,10 +263,12 @@ public struct PluginReleaseStrategy: ReleaseStrategy {
         let tree = try await WorkingCopyOperations.verifyRemoteTree(url: tagURL, candidate: candidate, svn: svn, scratch: scratch)
         var stableMatches: Bool?
         var notes: [String] = []
-        if let data = try await WorkingCopyOperations.catIfExists("\(base)/trunk/readme.txt", svn: svn) {
+        let trunkFiles = try await svn.list("\(base)/trunk", recursive: false).filter { $0.kind == .file }.map(\.name)
+        if let readme = Self.readmeName(in: trunkFiles),
+           let data = try await WorkingCopyOperations.catIfExists("\(base)/trunk/\(readme)", svn: svn) {
             let stable = ReadmeParser.parse(String(decoding: data, as: UTF8.self)).stableTag
             stableMatches = stable == version
-            if stableMatches == false { notes.append("trunk/readme.txt Stable tag is \(stable ?? "missing"), not \(version).") }
+            if stableMatches == false { notes.append("trunk readme Stable tag is \(stable ?? "missing"), not \(version).") }
         }
         if !tree.mismatched.isEmpty {
             notes.append("Checksum differences can come from svn:eol-style or keyword properties applied by the repository.")

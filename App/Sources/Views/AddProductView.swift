@@ -21,7 +21,12 @@ final class AddProductModel {
 
     // Existing working copy
     var existing: WorkingCopyDescription?
+    var selectedPath: URL?
     var chosenType: ProductType = .plugin
+    /// Progress or outcome of the background server refresh for an existing working copy.
+    var serverStatus: String?
+    var isCheckingServer = false
+    private var serverTask: Task<Void, Never>?
 
     // Shared
     var remote: RepositoryDescription?
@@ -84,10 +89,43 @@ final class AddProductModel {
         panel.prompt = "Use Working Copy"
         panel.message = "Select the root of an SVN checkout (the folder that contains trunk/ and tags/, or a theme's version folders)."
         guard panel.runModal() == .OK, let url = panel.url else { return }
+        await useExisting(url)
+    }
+
+    func useExisting(_ url: URL) async {
+        serverTask?.cancel()
+        selectedPath = url
         existing = nil
+        serverStatus = nil
+        // Local read first (no network): shows the product immediately.
         await run("Reading the working copy…") {
-            existing = try await model.repositorySetup.describeWorkingCopy(at: url)
+            existing = try await model.repositorySetup.describeWorkingCopyLocally(at: url)
             if let detected = existing?.repository.type { chosenType = detected }
+        }
+        guard let local = existing else { return }
+        refreshFromServer(local)
+    }
+
+    /// Fetches the released version and name from the server without blocking the dialog.
+    private func refreshFromServer(_ local: WorkingCopyDescription) {
+        isCheckingServer = true
+        serverStatus = "Checking the SVN server for the released version…"
+        let setup = model.repositorySetup
+        serverTask = Task { [weak self] in
+            do {
+                let remote = try await setup.describeRemote(local.repository.url, expectedType: local.repository.type)
+                guard let self, !Task.isCancelled, self.existing?.path == local.path else { return }
+                self.existing?.repository = RepositorySetupService.merge(local: local.repository, remote: remote)
+                if let serverRevision = remote.revision, serverRevision > local.revision {
+                    self.serverStatus = "The server has newer changes (r\(serverRevision)); ReleaseDock updates the working copy before each release."
+                } else {
+                    self.serverStatus = "Up to date with the server."
+                }
+            } catch {
+                guard let self, !Task.isCancelled else { return }
+                self.serverStatus = "Server not reachable; using details from the local copy. (\(error.localizedDescription))"
+            }
+            self?.isCheckingServer = false
         }
     }
 
@@ -144,7 +182,16 @@ struct AddProductView: View {
                 }
             }
         }
-        .onAppear { if add == nil { add = AddProductModel(model: model) } }
+        .onAppear {
+            if add == nil { add = AddProductModel(model: model) }
+            #if DEBUG
+            // UI verification: RELEASEDOCK_UI_TEST_EXISTING_WC=/path opens "Use existing working copy" with that folder.
+            if let path = ProcessInfo.processInfo.environment["RELEASEDOCK_UI_TEST_EXISTING_WC"], let add {
+                add.mode = .existing
+                Task { await add.useExisting(URL(fileURLWithPath: path, isDirectory: true)) }
+            }
+            #endif
+        }
     }
 }
 
@@ -256,14 +303,21 @@ private struct AddProductContent: View {
     @ViewBuilder private var existing: some View {
         SectionCard(title: "Working copy", systemImage: "folder") {
             HStack {
-                Text(add.existing?.path.path ?? "No folder selected").font(.callout.monospaced()).lineLimit(1).truncationMode(.middle)
+                Text(add.selectedPath?.path ?? "No folder selected").font(.callout.monospaced()).lineLimit(1).truncationMode(.middle)
                 Spacer()
-                Button(add.existing == nil ? "Choose Folder…" : "Change…") { Task { await add.chooseExisting() } }
+                Button(add.selectedPath == nil ? "Choose Folder…" : "Change…") { Task { await add.chooseExisting() } }
                     .disabled(add.isWorking)
             }
         }
         if let description = add.existing {
             detected(description.repository, revision: description.revision)
+            if let status = add.serverStatus {
+                HStack(spacing: 8) {
+                    if add.isCheckingServer { ProgressView().controlSize(.small) }
+                    else { Image(systemName: status.hasPrefix("Up to date") ? "checkmark.circle.fill" : "info.circle").foregroundStyle(status.hasPrefix("Up to date") ? Color.green : Color.secondary) }
+                    Text(status).font(.caption).foregroundStyle(.secondary)
+                }
+            }
             if description.repository.type == nil {
                 Picker("Type", selection: $add.chosenType) {
                     ForEach(ProductType.allCases) { Text($0.displayName).tag($0) }

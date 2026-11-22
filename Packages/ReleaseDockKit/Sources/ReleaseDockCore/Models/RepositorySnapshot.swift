@@ -32,6 +32,8 @@ public struct RepositorySnapshot: Codable, Hashable, Sendable {
     public var outOfDatePaths: [String]
     public var authentication: AuthenticationAvailability
     public var notes: [String]
+    /// Title line of the server's trunk readme (plugins), used to name new products.
+    public var readmeTitle: String?
 
     public init(
         svnVersion: String? = nil,

@@ -124,9 +124,11 @@ public struct ThemeReleaseStrategy: ReleaseStrategy {
     public func inspectRemote(product: Product, candidateVersion: String?, svn: SVNServicing) async throws -> RepositorySnapshot {
         var snapshot = RepositorySnapshot()
         let base = product.svnRepositoryURL.absoluteString.trimmingTrailingSlash
+        async let infoRequest = svn.info(base)
+        async let listRequest = svn.list(base, recursive: false)
         let info: SVNInfo
         do {
-            info = try await svn.info(base)
+            info = try await infoRequest
         } catch let error as SVNError where error.kind == .notFound {
             snapshot.repositoryExists = false
             snapshot.structureProblems.append("The theme has no SVN directory. New themes must be submitted at https://wordpress.org/themes/upload/ and pass review first.")
@@ -134,7 +136,7 @@ public struct ThemeReleaseStrategy: ReleaseStrategy {
         }
         snapshot.repositoryExists = true
         snapshot.remoteRevision = info.lastChangedRevision ?? info.revision
-        let entries = try await svn.list(base, recursive: false)
+        let entries = try await listRequest
         let versions = entries.filter { $0.kind == .dir && Self.isVersionDirectory($0.name) }.map(\.name)
         snapshot.existingVersions = versions
         if entries.contains(where: { $0.name == "trunk" || $0.name == "tags" }) {
