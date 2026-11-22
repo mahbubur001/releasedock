@@ -6,6 +6,9 @@ cd Packages/ReleaseDockKit && swift test --parallel
 swift test --filter PipelineIntegrationTests      # one suite
 RELEASEDOCK_KEYCHAIN_TESTS=1 swift test --filter KeychainTests   # real login-keychain round trip
 RELEASEDOCK_PERF_TESTS=1 swift test --filter PerformanceTests     # 5,000-file package timings
+# Read-only checks against WordPress.org (never commit):
+RELEASEDOCK_LIVE_SLUG=tlp-team RELEASEDOCK_LIVE_WC=~/svn/tlp-team swift test --filter LiveRepositoryTests
+RELEASEDOCK_LIVE_DRYRUN_SLUG=tlp-team RELEASEDOCK_LIVE_DRYRUN_VERSION=6.0.8 swift test --filter LiveDryRunTests
 ```
 
 Current result: **121 tests, 0 failures** (the keychain and performance tests are skipped unless opted in). Integration tests need `svn` and `svnadmin` (Homebrew `subversion`); they are skipped otherwise. Version tests compare against the real `php` binary when installed.
@@ -93,8 +96,16 @@ Debug builds read these environment variables (none exist in Release builds):
 | `RELEASEDOCK_UI_CURSOR_TEST`, `RELEASEDOCK_UI_CURSOR_POINTS=auto` | Hover every button/row and record the cursor shown |
 | `RELEASEDOCK_UI_DUMP_VIEWS` | Write the AppKit view hierarchy to a file |
 
+## Live checks against WordPress.org
+
+`LiveDryRunTests` exports a real plugin's trunk to a temporary folder, bumps the version there and
+runs the whole pipeline in Dry Run mode with an isolated data folder and a fresh checkout. On
+2026-11-22 against `tlp-team` it completed in 26 s: the current version was read from the
+trunk `README.txt` Stable tag (6.0.7), every required check passed, and the preview contained
+exactly `tags/6.0.8` (copy) plus the version changes in `README.txt` and `tlp-team.php`.
+
 ## Not covered by automated tests
 
-- Real WordPress.org servers (hook behaviour, Release Confirmation, realm/credential caching).
+- A real commit to WordPress.org (hook behaviour, Release Confirmation, credential prompts).
 - Sparkle installation end to end (requires a signed, notarized build and a hosted appcast).
 - SwiftUI views (no XCUITest target yet; see IMPLEMENTATION_PLAN.md).
