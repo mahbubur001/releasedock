@@ -75,6 +75,27 @@ WordPress.org reads are anonymous, so credentials can only be proven valid by a 
 
 ## Part 2 — Shipping ReleaseDock itself
 
+### Current channel: GitHub releases without a Developer ID
+
+Until a Developer ID certificate is available, builds are signed ad hoc and published to the
+public repository **mahbubur001/releasedock-releases** (source stays private):
+
+```bash
+scripts/publish-github-release.sh 0.1.1 2 --notes "What changed"
+```
+
+The script runs the tests, builds with `scripts/build-adhoc.sh`, signs the ZIP with Sparkle's
+EdDSA key from the login Keychain, creates the GitHub release `vX.Y.Z`, regenerates
+`appcast.xml` (served from `raw.githubusercontent.com`) and tags the source. The build number
+must increase every release. Installed copies show the update in **GitHub Updates** and install
+it with Sparkle after verifying the signature. Because these builds are not notarized, the very
+first download needs **System Settings → Privacy & Security → Open Anyway**; in-app updates do not.
+
+Back up the Sparkle private key (`generate_keys -x <file>`, then store it in a password manager):
+losing it means existing installs can no longer verify new updates.
+
+### Notarized distribution (Developer ID)
+
 ### One-time setup
 
 1. **Developer ID**: an Apple Developer account with a *Developer ID Application* certificate in the login keychain. Put your team ID in `Config/Local.xcconfig` (`DEVELOPMENT_TEAM`).
