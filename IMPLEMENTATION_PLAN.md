@@ -56,7 +56,6 @@ GitHub release checks (stable/beta, ETag cache, rate limits, private-repo token)
 |---|---|---|
 | First real release to WordPress.org with a test plugin | High | Validate hook messages, realm/credential caching and Release Confirmation guidance against production; use a dry run first. |
 | Developer ID signing + notarization run, Sparkle EdDSA keys, hosted appcast, end-to-end update | High | Follow RELEASE_WORKFLOW.md Part 2. |
-| XCUITest target for the main flows | Medium | Accessibility identifiers are not yet assigned. |
+| XCUITest target for the main flows | Medium | Needs Accessibility permission for the test runner; Debug-only launch hooks (TESTING.md) are used for screenshot and cursor verification meanwhile. |
 | Large-package SVN performance | Low | Inspection/extraction/staging measured at 5,000 files: 0.45 s / 1.2 s / 2.3 s (`RELEASEDOCK_PERF_TESTS=1`). `svn status`/commit at that scale not measured. |
-| Handle file↔directory type changes automatically | Low | Currently stops with an "obstructed" error. |
 | Localisation | Low | English only. |

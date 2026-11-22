@@ -113,6 +113,10 @@ final class AppModel {
             selection = section
         }
         if ProcessInfo.processInfo.environment["RELEASEDOCK_UI_TEST_EXISTING_WC"] != nil { showAddProduct = true }
+        if let package = ProcessInfo.processInfo.environment["RELEASEDOCK_UI_TEST_OPEN"] {
+            pendingSource = URL(fileURLWithPath: package)
+            selection = .wizard
+        }
         #endif
         if settings.githubRepository.isEmpty, let bundled = Bundle.main.object(forInfoDictionaryKey: "RDGitHubRepository") as? String, !bundled.isEmpty {
             settings.githubRepository = bundled

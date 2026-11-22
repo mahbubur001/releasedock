@@ -8,7 +8,7 @@ RELEASEDOCK_KEYCHAIN_TESTS=1 swift test --filter KeychainTests   # real login-ke
 RELEASEDOCK_PERF_TESTS=1 swift test --filter PerformanceTests     # 5,000-file package timings
 ```
 
-Current result: **119 tests, 0 failures** (the keychain and performance tests are skipped unless opted in). Integration tests need `svn` and `svnadmin` (Homebrew `subversion`); they are skipped otherwise. Version tests compare against the real `php` binary when installed.
+Current result: **121 tests, 0 failures** (the keychain and performance tests are skipped unless opted in). Integration tests need `svn` and `svnadmin` (Homebrew `subversion`); they are skipped otherwise. Version tests compare against the real `php` binary when installed.
 
 **No test uses WordPress.org or any real credentials.** Integration tests create throwaway repositories with `svnadmin create` and talk to them over `file://`.
 
@@ -60,6 +60,7 @@ Current result: **119 tests, 0 failures** (the keychain and performance tests ar
 | Retry after "verified not committed", then uncertain again with recovery offline | Flag cleared, abandon refused, recovery completes |
 | Crafted ZIP64 offsets near `Int.max` | Rejected as corrupt, no crash |
 | Add product: check out from server / adopt existing working copy (`RepositorySetupTests`) | Type, slug, name and version detected; sparse checkout; trunk URLs, non-roots, missing repos and non-empty folders rejected |
+| File ↔ directory type changes between versions | Replaced with `svn delete` + add, published and verified |
 | Theme release | `svn cp` from previous version (history verified), deletions applied, only `<version>/` changed |
 | Theme without any released version | Blocked (initial upload must use the review form) |
 
@@ -76,6 +77,21 @@ open -a build/DerivedData/Build/Products/Debug/ReleaseDock.app package.zip
 ```
 
 `RELEASEDOCK_UI_TEST_AUTOPREPARE` exists only in Debug builds and only runs preparation (never approval or publishing) when a package is opened. This was used to verify the Dashboard and the Wizard through *Previewed* against a local `file://` repository, and restart reconciliation (a release left in Previewed was cancelled and its working copy restored on relaunch).
+
+## Debug-only verification hooks
+
+Debug builds read these environment variables (none exist in Release builds):
+
+| Variable | Effect |
+|---|---|
+| `RELEASEDOCK_DATA_DIR` | Use an isolated data folder (also honoured in Release) |
+| `RELEASEDOCK_UI_TEST_SECTION` | Open a section (`dashboard`, `products`, `wizard`, `history`, `updates`, `settings`) |
+| `RELEASEDOCK_UI_TEST_OPEN` | Open a ZIP or folder in the wizard at launch |
+| `RELEASEDOCK_UI_TEST_AUTOPREPARE=1` | Run preparation when a package is opened |
+| `RELEASEDOCK_UI_TEST_AUTOPUBLISH=1` | Then approve and publish — refused unless the repository is a local `file://` URL |
+| `RELEASEDOCK_UI_TEST_EXISTING_WC` | Open Add Product → Use existing working copy with a folder |
+| `RELEASEDOCK_UI_CURSOR_TEST`, `RELEASEDOCK_UI_CURSOR_POINTS=auto` | Hover every button/row and record the cursor shown |
+| `RELEASEDOCK_UI_DUMP_VIEWS` | Write the AppKit view hierarchy to a file |
 
 ## Not covered by automated tests
 

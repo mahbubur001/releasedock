@@ -398,6 +398,29 @@ final class PipelineIntegrationTests: XCTestCase {
         XCTAssertEqual(record.state, .completed)
     }
 
+    func testFileAndDirectoryTypeChanges() async throws {
+        let product = try registerPlugin()
+        let src = TempDir()
+        let root = Fixtures.makePlugin(in: src, version: "1.1.0")
+        // includes/ (a directory in 1.0.0) becomes a file; assets/js/app.js (a file) becomes a directory.
+        try FileManager.default.removeItem(at: root.appendingPathComponent("includes"))
+        try Data("<?php // now a file\n".utf8).write(to: root.appendingPathComponent("includes"))
+        try FileManager.default.removeItem(at: root.appendingPathComponent("assets/js/app.js"))
+        src.write("sample-plugin/assets/js/app.js/index.js", "console.log('dir');\n")
+
+        var record = try await pipeline.createRelease(productID: product.id, source: .folder(path: root.path))
+        record = try await pipeline.prepare(record.id)
+        XCTAssertEqual(record.state, .previewed, "\(record.errors) \(record.validation?.blockingResults ?? [])")
+        XCTAssertTrue(record.preview!.changes.contains { $0.path == "trunk/includes" && $0.kind == .replaced })
+        _ = try await pipeline.approve(record.id, kind: .user)
+        record = try await pipeline.publish(record.id)
+        XCTAssertEqual(record.state, .completed, "\(record.errors)")
+        XCTAssertEqual(record.verification?.isClean, true, "\(String(describing: record.verification))")
+        let listing = try repo.run(["list", "-R", "\(repo.url)/sample-plugin/tags/1.1.0"])
+        XCTAssertTrue(listing.contains("assets/js/app.js/index.js"))
+        XCTAssertTrue(listing.components(separatedBy: "\n").contains("includes"))
+    }
+
     // MARK: Audit regressions
 
     func testRevertBacksUpBinaryAndAddedFilesBeforeDeleting() async throws {

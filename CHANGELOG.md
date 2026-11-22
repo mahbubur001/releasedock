@@ -22,6 +22,9 @@ All notable changes to ReleaseDock are documented here. The format follows [Keep
 - Products → Revert Working Copy… with full file backups.
 - Add Product: check out from the SVN server or adopt an existing working copy; name, type, slug, header name, main file and current version are detected automatically.
 
+- `scripts/install-local.sh`: Release build for personal use, installed to /Applications.
+- File ↔ directory type changes between versions are handled automatically.
+
 ### Fixed
 - Working-copy revert could lose binary or newly added files; every changed file is now backed up first and the revert aborts if a backup fails.
 - A preview changed after approval could be re-approved against a stale validation report.

@@ -48,7 +48,16 @@ enum WorkingCopyOperations {
     /// Makes `target` contain exactly the candidate files (ignoring `.svn`), then schedules
     /// unversioned paths for addition and missing paths for deletion.
     static func mirror(candidate: StagedCandidate, into target: URL, svn: SVNServicing) async throws {
+        // Paths that change between file and directory must be scheduled for deletion first;
+        // replacing them on disk alone leaves svn with an "obstructed" node.
+        let typeChanges = FileMirror.typeChanges(entries: candidate.entries, in: target)
+        if !typeChanges.isEmpty {
+            try await svn.delete(typeChanges)
+        }
         try FileMirror.mirror(source: candidate.rootURL, entries: candidate.entries, into: target)
+        if !typeChanges.isEmpty {
+            try await svn.add(typeChanges)
+        }
         try await scheduleAddsAndDeletes(in: target, svn: svn)
     }
 
@@ -130,6 +139,21 @@ enum WorkingCopyOperations {
 /// Filesystem mirroring with content comparison. Never follows symlinks and never
 /// touches `.svn` administrative directories.
 enum FileMirror {
+    /// Existing paths under `target` whose kind (file vs directory) differs in the candidate.
+    /// Only the outermost path of each change is returned.
+    static func typeChanges(entries: [PackageEntry], in target: URL) -> [URL] {
+        let fm = FileManager.default
+        var changes: [URL] = []
+        for entry in entries.sorted(by: { $0.path.count < $1.path.count }) where entry.kind != .symlink {
+            if changes.contains(where: { entry.path.hasPrefix($0.lastPathComponentPath(relativeTo: target) + "/") }) { continue }
+            let url = target.appendingPathComponent(entry.path)
+            var isDirectory: ObjCBool = false
+            guard fm.fileExists(atPath: url.path, isDirectory: &isDirectory) else { continue }
+            if isDirectory.boolValue != (entry.kind == .directory) { changes.append(url) }
+        }
+        return changes
+    }
+
     static func mirror(source: URL, entries: [PackageEntry], into target: URL) throws {
         let fm = FileManager.default
         try fm.createDirectory(at: target, withIntermediateDirectories: true)
@@ -169,5 +193,13 @@ enum FileMirror {
             if fm.fileExists(atPath: destination.path) { try fm.removeItem(at: destination) }
             try fm.copyItem(at: sourceFile, to: destination)
         }
+    }
+}
+
+private extension URL {
+    func lastPathComponentPath(relativeTo root: URL) -> String {
+        let base = root.standardizedFileURL.path + "/"
+        let full = standardizedFileURL.path
+        return full.hasPrefix(base) ? String(full.dropFirst(base.count)) : full
     }
 }

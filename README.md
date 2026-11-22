@@ -13,7 +13,7 @@
   <img alt="macOS 14+" src="https://img.shields.io/badge/macOS-14%2B-blue">
   <img alt="Swift 6" src="https://img.shields.io/badge/Swift-6-orange">
   <img alt="SwiftUI" src="https://img.shields.io/badge/UI-SwiftUI-purple">
-  <img alt="Tests" src="https://img.shields.io/badge/tests-119%20passing-brightgreen">
+  <img alt="Tests" src="https://img.shields.io/badge/tests-121%20passing-brightgreen">
 </p>
 
 ---
@@ -77,6 +77,10 @@ ReleaseDock is a native macOS app that does the whole release for you. It checks
   <img src="docs/images/dashboard.png" width="760" alt="Dashboard">
 </p>
 
+<p align="center">
+  <img src="docs/images/history.png" width="760" alt="Release History with a verified release report">
+</p>
+
 ## Requirements
 
 - macOS 14 Sonoma or later
@@ -90,7 +94,7 @@ ReleaseDock is a native macOS app that does the whole release for you. It checks
 
 Download the latest signed and notarized `ReleaseDock-<version>.zip` from the project's GitHub **Releases** page, unzip it, and move **ReleaseDock.app** to `/Applications`. Updates install from inside the app.
 
-To build it yourself, see [Building from source](#building-from-source).
+To build it yourself, see [Building from source](#building-from-source). To install your own build on this Mac, run `scripts/install-local.sh`.
 
 ## Getting started
 
@@ -139,7 +143,7 @@ When it finishes, the release report shows the committed revision, the release U
              └──► Manifest · History · Notification
 ```
 
-- All release logic lives in **ReleaseDockCore**, a Swift package with no UI code and 119 tests.
+- All release logic lives in **ReleaseDockCore**, a Swift package with no UI code and 121 tests.
 - Integration tests run the real `svn` binary against local repositories laid out like WordPress.org.
 - The SwiftUI app is a thin layer on top of the package.
 

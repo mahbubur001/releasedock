@@ -37,7 +37,14 @@ struct ReleaseWizardView: View {
         #if DEBUG
         // UI verification hook: prepare (never publish) as soon as a package is opened.
         if ProcessInfo.processInfo.environment["RELEASEDOCK_UI_TEST_AUTOPREPARE"] == "1" {
-            Task { await wizard.prepare() }
+            Task {
+                await wizard.prepare()
+                // Screenshot fixtures only: publishing is allowed solely to local file:// test repositories.
+                if ProcessInfo.processInfo.environment["RELEASEDOCK_UI_TEST_AUTOPUBLISH"] == "1",
+                   wizard.product?.svnRepositoryURL.isFileURL == true {
+                    await wizard.approveAndPublish(automatic: false)
+                }
+            }
         }
         #endif
     }
