@@ -72,12 +72,15 @@ struct StartupErrorView: View {
 
 struct RootView: View {
     @Environment(AppModel.self) private var model
+    @State private var columnVisibility = NavigationSplitViewVisibility.all
 
     var body: some View {
         @Bindable var model = model
-        NavigationSplitView {
+        NavigationSplitView(columnVisibility: $columnVisibility) {
             Sidebar()
                 .navigationSplitViewColumnWidth(min: 210, ideal: 230, max: 280)
+                // Our own toggle (below) replaces the system one so it gets the app's hover cursor.
+                .toolbar(removing: .sidebarToggle)
         } detail: {
             switch model.selection ?? .dashboard {
             case .dashboard: DashboardView()
@@ -86,6 +89,17 @@ struct RootView: View {
             case .history: ReleaseHistoryView()
             case .updates: GitHubUpdatesView()
             case .settings: SettingsView()
+            }
+        }
+        .toolbar {
+            // Window-level, so it stays available while the sidebar is hidden.
+            ToolbarItem(placement: .navigation) {
+                Button {
+                    withAnimation { columnVisibility = columnVisibility == .detailOnly ? .all : .detailOnly }
+                } label: {
+                    Label(columnVisibility == .detailOnly ? "Show Sidebar" : "Hide Sidebar", systemImage: "sidebar.left")
+                }
+                .help(columnVisibility == .detailOnly ? "Show Sidebar" : "Hide Sidebar")
             }
         }
         .task { await model.start() }
