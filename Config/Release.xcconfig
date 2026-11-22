@@ -1,0 +1,5 @@
+#include "Base.xcconfig"
+// Distribution builds are signed with a Developer ID Application certificate and notarized.
+// Set DEVELOPMENT_TEAM in Config/Local.xcconfig.
+CODE_SIGN_IDENTITY = Developer ID Application
+OTHER_CODE_SIGN_FLAGS = --timestamp

@@ -1,0 +1,15 @@
+// Shared build settings. Machine- or publisher-specific values go in Config/Local.xcconfig
+// (git-ignored); see DEVELOPMENT.md.
+MARKETING_VERSION = 0.1.0
+CURRENT_PROJECT_VERSION = 1
+
+// Sparkle appcast URL (HTTPS; write https:/$()/host/path in xcconfig) and EdDSA public key.
+// Leave either empty and in-app updates stay disabled: ReleaseDock never starts Sparkle
+// without a feed and signature verification configured.
+SPARKLE_FEED_URL =
+SPARKLE_PUBLIC_ED_KEY =
+
+// GitHub repository checked for new releases, as owner/name. Users can override it in Settings.
+RELEASEDOCK_GITHUB_REPOSITORY =
+
+#include? "Local.xcconfig"

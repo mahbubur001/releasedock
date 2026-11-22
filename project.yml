@@ -1,0 +1,80 @@
+name: ReleaseDock
+options:
+  bundleIdPrefix: com.releasedock
+  deploymentTarget:
+    macOS: "14.0"
+  createIntermediateGroups: true
+  developmentLanguage: en
+configFiles:
+  Debug: Config/Debug.xcconfig
+  Release: Config/Release.xcconfig
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+    MACOSX_DEPLOYMENT_TARGET: "14.0"
+    ENABLE_HARDENED_RUNTIME: YES
+    ENABLE_USER_SCRIPT_SANDBOXING: YES
+    DEAD_CODE_STRIPPING: YES
+packages:
+  ReleaseDockKit:
+    path: Packages/ReleaseDockKit
+  Sparkle:
+    url: https://github.com/sparkle-project/Sparkle
+    majorVersion: 2.10.1
+targets:
+  ReleaseDock:
+    type: application
+    platform: macOS
+    sources:
+      - path: App/Sources
+      - path: App/Resources
+        excludes:
+          - Info.plist
+          - ReleaseDock.entitlements
+    dependencies:
+      - package: ReleaseDockKit
+        product: ReleaseDockCore
+      - package: Sparkle
+        product: Sparkle
+    info:
+      path: App/Resources/Info.plist
+      properties:
+        CFBundleName: ReleaseDock
+        CFBundleDisplayName: ReleaseDock
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        LSApplicationCategoryType: public.app-category.developer-tools
+        LSMinimumSystemVersion: $(MACOSX_DEPLOYMENT_TARGET)
+        NSHumanReadableCopyright: Copyright © 2026 ReleaseDock contributors
+        SUFeedURL: $(SPARKLE_FEED_URL)
+        SUPublicEDKey: $(SPARKLE_PUBLIC_ED_KEY)
+        SUEnableAutomaticChecks: true
+        SUScheduledCheckInterval: 86400
+        SUVerifyUpdateBeforeExtraction: true
+        RDGitHubRepository: $(RELEASEDOCK_GITHUB_REPOSITORY)
+        CFBundleDocumentTypes:
+          - CFBundleTypeName: ZIP archive
+            CFBundleTypeRole: Viewer
+            LSHandlerRank: Alternate
+            LSItemContentTypes: [public.zip-archive]
+    entitlements:
+      path: App/Resources/ReleaseDock.entitlements
+      properties:
+        com.apple.security.app-sandbox: false
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.releasedock.app
+        PRODUCT_NAME: ReleaseDock
+        CODE_SIGN_STYLE: Manual
+        ENABLE_APP_SANDBOX: NO
+        COMBINE_HIDPI_IMAGES: YES
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+schemes:
+  ReleaseDock:
+    build:
+      targets:
+        ReleaseDock: all
+    run:
+      config: Debug
+    archive:
+      config: Release
