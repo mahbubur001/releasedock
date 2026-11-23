@@ -92,7 +92,7 @@ ReleaseDock is a native macOS app that does the whole release for you. It checks
 
 ## Installation
 
-Download the latest `ReleaseDock-<version>.zip` from **[github.com/mahbubur001/releasedock-releases/releases](https://github.com/mahbubur001/releasedock-releases/releases)**, unzip it and move **ReleaseDock.app** to `/Applications`.
+Download the latest `ReleaseDock-<version>.zip` from **[github.com/mahbubur001/releasedock/releases](https://github.com/mahbubur001/releasedock/releases)**, unzip it and move **ReleaseDock.app** to `/Applications`.
 
 - **First launch:** current builds are not yet notarized by Apple, so macOS may say it can't verify the developer. Open **System Settings → Privacy & Security** and click **Open Anyway** next to the ReleaseDock message. You only need to do this once.
 - **Updates:** new versions appear under **GitHub Updates** (and in **ReleaseDock → Check for Updates…**). **Install Update…** downloads the new version, verifies its EdDSA signature against the key built into the app, installs it and relaunches.

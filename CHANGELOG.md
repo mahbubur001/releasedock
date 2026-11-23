@@ -4,6 +4,12 @@ All notable changes to ReleaseDock are documented here. The format follows [Keep
 
 ## [Unreleased]
 
+## [0.1.3] - 2026-11-23
+
+### Changed
+- The source repository is now public, and releases and the update feed are published from it (`mahbubur001/releasedock`). The separate `releasedock-releases` repository has been retired; a saved update repository pointing to it is switched over automatically.
+- The sidebar toggle is ReleaseDock's own button and shows a pointing-hand cursor.
+
 ## [0.1.2] - 2026-11-22
 
 ### Fixed

@@ -77,16 +77,17 @@ WordPress.org reads are anonymous, so credentials can only be proven valid by a 
 
 ### Current channel: GitHub releases without a Developer ID
 
-Until a Developer ID certificate is available, builds are signed ad hoc and published to the
-public repository **mahbubur001/releasedock-releases** (source stays private):
+Until a Developer ID certificate is available, builds are signed ad hoc and published as GitHub
+releases of this repository, **mahbubur001/releasedock**:
 
 ```bash
 scripts/publish-github-release.sh 0.1.1 2 --notes "What changed"
 ```
 
 The script runs the tests, builds with `scripts/build-adhoc.sh`, signs the ZIP with Sparkle's
-EdDSA key from the login Keychain, creates the GitHub release `vX.Y.Z`, regenerates
-`appcast.xml` (served from `raw.githubusercontent.com`) and tags the source. The build number
+EdDSA key from the login Keychain, tags the source `vX.Y.Z`, creates the GitHub release with the
+ZIP attached, then regenerates `updates/appcast.xml` (served from `raw.githubusercontent.com`) and
+pushes it to `main`. Run it from an up-to-date `main`. The build number
 must increase every release. Installed copies show the update in **GitHub Updates** and install
 it with Sparkle after verifying the signature. Because these builds are not notarized, the very
 first download needs **System Settings → Privacy & Security → Open Anyway**; in-app updates do not.

@@ -11,6 +11,8 @@ struct AppSettings: Codable, Equatable {
     var notificationsEnabled: Bool = true
 
     static let key = "app.settings"
+    /// Former release repository (deleted); a saved value equal to it is replaced by the bundled default.
+    static let retiredGitHubRepository = "mahbubur001/releasedock-releases"
 }
 
 enum SidebarItem: String, CaseIterable, Identifiable, Hashable {
@@ -118,6 +120,10 @@ final class AppModel {
             selection = .wizard
         }
         #endif
+        // Releases used to be published from a separate repository; follow the move.
+        if settings.githubRepository.caseInsensitiveCompare(AppSettings.retiredGitHubRepository) == .orderedSame {
+            settings.githubRepository = ""
+        }
         if settings.githubRepository.isEmpty, let bundled = Bundle.main.object(forInfoDictionaryKey: "RDGitHubRepository") as? String, !bundled.isEmpty {
             settings.githubRepository = bundled
         }

@@ -1,12 +1,12 @@
 #!/bin/bash
-# Publishes a ReleaseDock build to the public releases repository so the app can update itself.
+# Publishes a ReleaseDock build as a GitHub release of this repository so the app can update itself.
 #
 # Usage: scripts/publish-github-release.sh <version> <build-number> [--beta] [--notes "text"]
 #   e.g. scripts/publish-github-release.sh 0.1.1 2 --notes "Faster repository reads."
 #
 # Steps: tests → ad-hoc Release build (scripts/build-adhoc.sh) → ZIP → Sparkle EdDSA signature
-# (private key from the login Keychain) → GitHub release vX.Y.Z with the ZIP in
-# mahbubur001/releasedock-releases → appcast.xml regenerated and pushed → source tag pushed.
+# (private key from the login Keychain) → source tag vX.Y.Z pushed → GitHub release with the ZIP in
+# mahbubur001/releasedock → updates/appcast.xml regenerated, committed and pushed to main.
 # The build number must increase with every release: Sparkle compares it.
 set -euo pipefail
 VERSION="${1:?version required}"; BUILD="${2:?build number required}"; shift 2
@@ -18,16 +18,20 @@ while [ $# -gt 0 ]; do
     *) echo "Unknown option $1" >&2; exit 1 ;;
   esac
 done
-RELEASES_REPO="mahbubur001/releasedock-releases"
+RELEASES_REPO="mahbubur001/releasedock"
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 DIST="$ROOT/dist"
-CLONE="$DIST/releases-repo"
+FEED_DIR="$ROOT/updates"
 SPARKLE_BIN="$ROOT/build/DerivedData/SourcePackages/artifacts/sparkle/Sparkle/bin"
 TAG="v$VERSION"
 ZIP="$DIST/ReleaseDock-$VERSION.zip"
 
 cd "$ROOT"
 [ -z "$(git status --porcelain)" ] || { echo "Commit your changes first (the release is tagged from HEAD)." >&2; exit 1; }
+[ "$(git rev-parse --abbrev-ref HEAD)" = "main" ] || { echo "Release from main (the feed is served from main)." >&2; exit 1; }
+git fetch -q origin main
+[ "$(git rev-parse HEAD)" = "$(git rev-parse origin/main)" ] || { echo "main differs from origin/main; pull or push first." >&2; exit 1; }
+git rev-parse -q --verify "refs/tags/$TAG" >/dev/null && { echo "Tag $TAG already exists" >&2; exit 1; }
 gh release view "$TAG" --repo "$RELEASES_REPO" >/dev/null 2>&1 && { echo "$TAG already exists in $RELEASES_REPO" >&2; exit 1; }
 
 echo "==> Tests"
@@ -48,19 +52,22 @@ ditto -c -k --sequesterRsrc --keepParent "$APP" "$ZIP"
 SIGNATURE_ATTRS=$("$SPARKLE_BIN/sign_update" "$ZIP")   # sparkle:edSignature="..." length="..."
 echo "    $SIGNATURE_ATTRS"
 
+echo "==> Tagging source $TAG"
+git tag -a "$TAG" -m "ReleaseDock $VERSION ($BUILD)"
+git push -q origin "$TAG"
+
 echo "==> GitHub release $TAG"
-[ -d "$CLONE/.git" ] || gh repo clone "$RELEASES_REPO" "$CLONE" -- -q
-git -C "$CLONE" pull -q --ff-only
 PRERELEASE=(); [ -n "$CHANNEL" ] && PRERELEASE=(--prerelease)
-gh release create "$TAG" "$ZIP" --repo "$RELEASES_REPO" --title "ReleaseDock $VERSION" --notes "$NOTES" ${PRERELEASE[@]+"${PRERELEASE[@]}"} >/dev/null
+gh release create "$TAG" "$ZIP" --repo "$RELEASES_REPO" --verify-tag --title "ReleaseDock $VERSION" --notes "$NOTES" ${PRERELEASE[@]+"${PRERELEASE[@]}"} >/dev/null
 
 echo "==> Update feed"
-python3 - "$CLONE" "$VERSION" "$BUILD" "$CHANNEL" "$NOTES" "$SIGNATURE_ATTRS" "$RELEASES_REPO" <<'PY'
+mkdir -p "$FEED_DIR"
+python3 - "$FEED_DIR" "$VERSION" "$BUILD" "$CHANNEL" "$NOTES" "$SIGNATURE_ATTRS" "$RELEASES_REPO" <<'PY'
 import email.utils, html, json, os, re, sys, time
-clone, version, build, channel, notes, attrs, repo = sys.argv[1:]
+feed_dir, version, build, channel, notes, attrs, repo = sys.argv[1:]
 signature = re.search(r'sparkle:edSignature="([^"]+)"', attrs).group(1)
 length = re.search(r'length="(\d+)"', attrs).group(1)
-path = os.path.join(clone, "releases.json")
+path = os.path.join(feed_dir, "releases.json")
 releases = json.load(open(path)) if os.path.exists(path) else []
 releases = [r for r in releases if r["version"] != version]
 releases.append({"version": version, "build": build, "channel": channel, "notes": notes,
@@ -91,15 +98,11 @@ xml = f"""<?xml version="1.0" encoding="utf-8"?>
   </channel>
 </rss>
 """
-open(os.path.join(clone, "appcast.xml"), "w").write(xml)
+open(os.path.join(feed_dir, "appcast.xml"), "w").write(xml)
 PY
-git -C "$CLONE" add appcast.xml releases.json
-git -C "$CLONE" commit -q -m "ReleaseDock $VERSION ($BUILD)"
-git -C "$CLONE" push -q
-
-echo "==> Tagging source $TAG"
-git tag -a "$TAG" -m "ReleaseDock $VERSION ($BUILD)"
-git push -q origin "$TAG"
+git add updates/appcast.xml updates/releases.json
+git commit -q -m "Update feed: ReleaseDock $VERSION ($BUILD)"
+git push -q origin main
 
 echo
 echo "Published ReleaseDock $VERSION ($BUILD)"
