@@ -1,0 +1,66 @@
+# Manual release: Actions → Release → Run workflow. Never runs on push, pull request or a schedule.
+# Standard GitHub-hosted runners are free for public repositories.
+#
+# One-time setup: add the Sparkle EdDSA private key as the repository secret SPARKLE_PRIVATE_KEY
+# (export it on your Mac with `generate_keys -x <file>`, paste the file's contents, delete the file).
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version, e.g. 0.1.3"
+        required: true
+      build:
+        description: "Build number; must be greater than the last release's"
+        required: true
+      notes:
+        description: "Release notes shown in the app"
+        required: false
+        default: "See the ReleaseDock changelog for details."
+      beta:
+        description: "Beta (pre-release, beta update channel)"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: macos-latest
+    timeout-minutes: 60
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Select newest stable Xcode
+        run: |
+          XCODE=$(ls -d /Applications/Xcode_*.app | grep -vi beta | sort -V | tail -1)
+          sudo xcode-select -s "$XCODE"
+          xcodebuild -version
+
+      - name: Install tools
+        run: brew install xcodegen subversion
+
+      - name: Publish
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SPARKLE_PRIVATE_KEY: ${{ secrets.SPARKLE_PRIVATE_KEY }}
+          VERSION: ${{ inputs.version }}
+          BUILD: ${{ inputs.build }}
+          NOTES: ${{ inputs.notes }}
+          BETA: ${{ inputs.beta }}
+        run: |
+          [ -n "$SPARKLE_PRIVATE_KEY" ] || { echo "::error::Repository secret SPARKLE_PRIVATE_KEY is not set"; exit 1; }
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          ARGS=("$VERSION" "$BUILD" --notes "$NOTES")
+          [ "$BETA" = "true" ] && ARGS+=(--beta)
+          scripts/publish-github-release.sh "${ARGS[@]}"

@@ -92,6 +92,15 @@ must increase every release. Installed copies show the update in **GitHub Update
 it with Sparkle after verifying the signature. Because these builds are not notarized, the very
 first download needs **System Settings → Privacy & Security → Open Anyway**; in-app updates do not.
 
+#### From GitHub Actions (no Xcode needed locally)
+
+*Actions → Release → Run workflow* on `main` runs the same script on a free GitHub-hosted macOS
+runner. It is manual only (no push, pull-request or scheduled runs). Enter the version, the build
+number, the notes and whether it is a beta. One-time setup: store the Sparkle private key as the
+repository secret `SPARKLE_PRIVATE_KEY` (`generate_keys -x <file>`, `gh secret set
+SPARKLE_PRIVATE_KEY < <file>`, then delete the file). The script passes it to `sign_update` on
+stdin (`--ed-key-file -`), never on the command line.
+
 Back up the Sparkle private key (`generate_keys -x <file>`, then store it in a password manager):
 losing it means existing installs can no longer verify new updates.
 

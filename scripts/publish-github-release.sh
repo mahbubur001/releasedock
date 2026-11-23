@@ -5,9 +5,11 @@
 #   e.g. scripts/publish-github-release.sh 0.1.1 2 --notes "Faster repository reads."
 #
 # Steps: tests → ad-hoc Release build (scripts/build-adhoc.sh) → ZIP → Sparkle EdDSA signature
-# (private key from the login Keychain) → source tag vX.Y.Z pushed → GitHub release with the ZIP in
+# (private key from the login Keychain, or from $SPARKLE_PRIVATE_KEY when set, as in the GitHub
+# Actions release workflow) → source tag vX.Y.Z pushed → GitHub release with the ZIP in
 # mahbubur001/releasedock → updates/appcast.xml regenerated, committed and pushed to main.
 # The build number must increase with every release: Sparkle compares it.
+# Builds 1–3 (0.1.0–0.1.2) were published from the retired releasedock-releases repository.
 set -euo pipefail
 VERSION="${1:?version required}"; BUILD="${2:?build number required}"; shift 2
 CHANNEL=""; NOTES="See the ReleaseDock changelog for details."
@@ -33,9 +35,14 @@ git fetch -q origin main
 [ "$(git rev-parse HEAD)" = "$(git rev-parse origin/main)" ] || { echo "main differs from origin/main; pull or push first." >&2; exit 1; }
 git rev-parse -q --verify "refs/tags/$TAG" >/dev/null && { echo "Tag $TAG already exists" >&2; exit 1; }
 gh release view "$TAG" --repo "$RELEASES_REPO" >/dev/null 2>&1 && { echo "$TAG already exists in $RELEASES_REPO" >&2; exit 1; }
+[[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.]+)?$ ]] || { echo "Version must look like 1.2.3 or 1.2.3-beta1" >&2; exit 1; }
+[[ "$BUILD" =~ ^[1-9][0-9]*$ ]] || { echo "Build number must be a positive integer" >&2; exit 1; }
+LAST_BUILD=$(python3 -c 'import json,sys; print(max([3]+[int(r["build"]) for r in json.load(open(sys.argv[1]))]))' "$FEED_DIR/releases.json" 2>/dev/null || echo 3)
+[ "$BUILD" -gt "$LAST_BUILD" ] || { echo "Build number must be greater than $LAST_BUILD (Sparkle compares it)" >&2; exit 1; }
 
 echo "==> Tests"
-(cd Packages/ReleaseDockKit && swift test --parallel >/dev/null) || { echo "Tests failed" >&2; exit 1; }
+TEST_LOG="$(mktemp)"
+(cd Packages/ReleaseDockKit && swift test --parallel >"$TEST_LOG" 2>&1) || { tail -80 "$TEST_LOG" >&2; echo "Tests failed" >&2; exit 1; }
 
 echo "==> Building $VERSION ($BUILD)"
 APP="$("$ROOT/scripts/build-adhoc.sh" "$VERSION" "$BUILD" | tail -1)"
@@ -49,7 +56,12 @@ echo "==> Packaging"
 mkdir -p "$DIST"
 [ ! -e "$ZIP" ] || mv "$ZIP" "$(mktemp -d /tmp/ReleaseDock-oldzip.XXXX)/"
 ditto -c -k --sequesterRsrc --keepParent "$APP" "$ZIP"
-SIGNATURE_ATTRS=$("$SPARKLE_BIN/sign_update" "$ZIP")   # sparkle:edSignature="..." length="..."
+# sparkle:edSignature="..." length="..."; the key goes through stdin, never the command line.
+if [ -n "${SPARKLE_PRIVATE_KEY:-}" ]; then
+  SIGNATURE_ATTRS=$(printf '%s' "$SPARKLE_PRIVATE_KEY" | "$SPARKLE_BIN/sign_update" --ed-key-file - "$ZIP")
+else
+  SIGNATURE_ATTRS=$("$SPARKLE_BIN/sign_update" "$ZIP")
+fi
 echo "    $SIGNATURE_ATTRS"
 
 echo "==> Tagging source $TAG"

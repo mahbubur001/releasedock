@@ -57,7 +57,7 @@ These are the guarantees users rely on. A pull request that weakens one won't be
 
 ## Releases
 
-Maintainers publish releases. ReleaseDock is distributed through GitHub releases of this repository and updates itself in-app with Sparkle; it is not distributed through the Mac App Store. See [RELEASE_WORKFLOW.md](RELEASE_WORKFLOW.md).
+Maintainers publish releases. ReleaseDock is distributed through GitHub releases of this repository and updates itself in-app with Sparkle; it is not distributed through the Mac App Store. Releases are made with the manual *Release* workflow or `scripts/publish-github-release.sh`; there is no automatic CI, so run `scripts/test.sh` before opening a pull request. See [RELEASE_WORKFLOW.md](RELEASE_WORKFLOW.md).
 
 ## License
 
