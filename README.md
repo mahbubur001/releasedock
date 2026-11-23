@@ -14,6 +14,7 @@
   <img alt="Swift 6" src="https://img.shields.io/badge/Swift-6-orange">
   <img alt="SwiftUI" src="https://img.shields.io/badge/UI-SwiftUI-purple">
   <img alt="Tests" src="https://img.shields.io/badge/tests-121%20passing-brightgreen">
+  <img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-green">
 </p>
 
 ---
@@ -224,4 +225,4 @@ ReleaseDock is an independent tool. It is not affiliated with or endorsed by Wor
 
 ## License
 
-No license has been chosen yet. Until a `LICENSE` file is added, all rights are reserved by the authors.
+ReleaseDock is released under the [MIT License](LICENSE).
