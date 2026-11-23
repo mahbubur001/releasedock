@@ -1,0 +1,31 @@
+name: Feature request
+description: Suggest an improvement to ReleaseDock.
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem are you trying to solve?
+      description: Describe the release situation, e.g. "I ship the same plugin from a monorepo and…"
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What would you like ReleaseDock to do?
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives you've considered
+      description: Other tools, scripts or workarounds you use today.
+  - type: dropdown
+    id: product-type
+    attributes:
+      label: Applies to
+      multiple: true
+      options:
+        - Plugins
+        - Themes
+        - The app itself

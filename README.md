@@ -223,6 +223,10 @@ See [SECURITY.md](SECURITY.md). Please report vulnerabilities privately through 
 
 ReleaseDock is an independent tool. It is not affiliated with or endorsed by WordPress.org or the WordPress Foundation. "WordPress" is a trademark of the WordPress Foundation.
 
+## Contributing
+
+Bug reports, feature requests and pull requests are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md); report security issues privately as described in [SECURITY.md](SECURITY.md).
+
 ## License
 
 ReleaseDock is released under the [MIT License](LICENSE).

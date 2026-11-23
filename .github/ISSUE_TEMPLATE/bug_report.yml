@@ -1,0 +1,87 @@
+name: Bug report
+description: Something in ReleaseDock doesn't work as expected.
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting. **Never paste SVN passwords, GitHub tokens, private keys or `wp-config.php` contents.**
+        Security problems belong in a [private security advisory](https://github.com/mahbubur001/releasedock/security/advisories/new), not here.
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: What you did, what you expected, and what happened instead. Include the exact error text if there is one.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Products → + → Check out from SVN server
+        2. …
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Release Wizard
+        - Products / adding a product
+        - Release History / recovery
+        - GitHub Updates / in-app update
+        - Settings
+        - Other
+    validations:
+      required: true
+  - type: dropdown
+    id: product-type
+    attributes:
+      label: Product type
+      options:
+        - Plugin
+        - Theme
+        - Not related to a product
+  - type: dropdown
+    id: mode
+    attributes:
+      label: Release mode
+      options:
+        - Dry Run
+        - Assisted
+        - Automatic
+        - Not related to a release
+  - type: input
+    id: wizard-step
+    attributes:
+      label: Wizard step where it failed
+      placeholder: e.g. Validate, Preview, Publish, Verify
+  - type: input
+    id: app-version
+    attributes:
+      label: ReleaseDock version
+      description: Dashboard → Installed, or GitHub Updates → Installed version.
+      placeholder: e.g. 0.1.3
+    validations:
+      required: true
+  - type: input
+    id: macos-version
+    attributes:
+      label: macOS version
+      placeholder: e.g. macOS 15.2
+    validations:
+      required: true
+  - type: input
+    id: svn-version
+    attributes:
+      label: Subversion version
+      description: Output of `svn --version --quiet`.
+      placeholder: e.g. 1.14.5
+  - type: textarea
+    id: diagnostics
+    attributes:
+      label: Logs or diagnostics
+      description: Optional. Settings → Export Diagnostics produces a redacted report; review it before attaching.
+      render: text
