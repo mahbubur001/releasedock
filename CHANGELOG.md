@@ -8,6 +8,7 @@ All notable changes to ReleaseDock are documented here. The format follows [Keep
 
 ### Changed
 - The source repository is now public, and releases and the update feed are published from it (`mahbubur001/releasedock`). The separate `releasedock-releases` repository has been retired; a saved update repository pointing to it is switched over automatically.
+- Updates are signed with a new Sparkle EdDSA key. 0.1.0–0.1.2 can't update to 0.1.3 in-app; download it once from GitHub, and later updates install in-app again.
 - The sidebar toggle is ReleaseDock's own button and shows a pointing-hand cursor.
 
 ## [0.1.2] - 2026-11-22

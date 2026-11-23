@@ -9,7 +9,7 @@ CURRENT_PROJECT_VERSION = 1
 // Leave either empty and in-app updates stay disabled: ReleaseDock never starts Sparkle
 // without a feed and signature verification configured.
 SPARKLE_FEED_URL = https:/$()/raw.githubusercontent.com/mahbubur001/releasedock/main/updates/appcast.xml
-SPARKLE_PUBLIC_ED_KEY = BaYANixBOzUz7GSpBtDzecGoRtyDXt4JLUzocyx7tBs=
+SPARKLE_PUBLIC_ED_KEY = IQpqkpmmXFC+4GmForq8pIK2ua4ocBfXeWp5wLem6W8=
 
 // GitHub repository checked for new releases, as owner/name. Users can override it in Settings.
 RELEASEDOCK_GITHUB_REPOSITORY = mahbubur001/releasedock
