@@ -460,6 +460,26 @@ final class PipelineIntegrationTests: XCTestCase {
         XCTAssertTrue(junkOnly.contains { $0.contains("library.a") })
     }
 
+    func testPreviewChangeAfterApprovalKeepsTheGitCheckOfFolderReleases() async throws {
+        var product = try registerPlugin()
+        product.validation.requireCleanGitTree = true
+        try store.save(product)
+        let clean = GitRepositoryState(isRepository: true, headCommit: "abc123", branch: "main", exactTag: nil, uncommittedChanges: [], remoteURL: nil)
+        pipeline = ReleasePipelineService(dependencies: PipelineDependencies(
+            products: store, releases: store, svn: svn, git: StubGit(state: clean), keychain: InMemoryKeychain(),
+            staging: ReleaseStagingService(paths: paths), notifications: notifications, generator: "tests"
+        ))
+        var record = try await pipeline.createRelease(productID: product.id, source: folderSource(version: "1.1.0"))
+        record = try await pipeline.prepare(record.id)
+        XCTAssertEqual(record.state, .previewed, "\(record.validation?.blockingResults ?? [])")
+        record = try await pipeline.approve(record.id, kind: .user)
+        try Data("tampered".utf8).write(to: product.workingCopyURL.appendingPathComponent("trunk/includes/class-sample.php"))
+        await XCTAssertThrowsErrorAsync(try await self.pipeline.publish(record.id))
+        record = try XCTUnwrap(try store.release(id: record.id))
+        XCTAssertEqual(record.state, .previewed, "\(record.validation?.blockingResults ?? [])")
+        XCTAssertTrue(record.validation!.results.contains { $0.check == .gitWorkingTree && $0.status == .passed })
+    }
+
     func testPreviewChangeAfterApprovalIsRevalidated() async throws {
         let product = try registerPlugin()
         var record = try await pipeline.createRelease(productID: product.id, source: try zipSource(version: "1.1.0"))

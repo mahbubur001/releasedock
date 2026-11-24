@@ -31,6 +31,7 @@ All notable changes to ReleaseDock are documented here. The format follows [Keep
 - Commits use their own, longer SVN HTTP timeout (30 minutes by default, adjustable in Settings) while reads keep failing fast after 2 minutes. Large releases no longer hit E175012 while WordPress.org finishes "Committing transaction…".
 
 ### Fixed
+- With "Require a clean Git tree" on, a folder release whose working copy changed after approval failed with "the folder is not a Git repository" instead of asking for approval again. The re-check now reads the Git state like preparation does.
 - readme headers are read like WordPress.org: `*`/`-` around keys and `<>` around values are ignored, and an unknown "header" after a blank line starts the short description.
 
 ## [0.1.3] - 2026-11-23

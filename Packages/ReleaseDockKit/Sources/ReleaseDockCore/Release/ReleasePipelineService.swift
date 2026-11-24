@@ -496,10 +496,14 @@ public actor ReleasePipelineService {
     }
 
     /// Re-runs validation with a new preview so a changed working copy is never approved
-    /// against a stale report.
-    private func revalidate(_ record: inout ReleaseRecord, product: Product, preview: ReleasePreview) {
+    /// against a stale report. Git state is read again, as at preparation.
+    private func revalidate(_ record: inout ReleaseRecord, product: Product, preview: ReleasePreview) async {
         guard let inspection = record.inspection else { return }
-        let context = ValidationContext(product: product, inspection: inspection, detected: record.detected, repository: record.repository, preview: preview, kind: record.kind, codeChecks: record.codeChecks, assets: record.assets, restoresVersion: record.restoresVersion)
+        var git: GitRepositoryState?
+        if case .folder(let path) = record.source, record.restoresVersion == nil, await deps.git.isAvailable() {
+            git = try? await deps.git.state(of: URL(fileURLWithPath: path, isDirectory: true))
+        }
+        let context = ValidationContext(product: product, inspection: inspection, detected: record.detected, repository: record.repository, git: git, preview: preview, kind: record.kind, codeChecks: record.codeChecks, assets: record.assets, restoresVersion: record.restoresVersion)
         record.validation = deps.validator.validate(context)
     }
 
@@ -521,7 +525,7 @@ public actor ReleasePipelineService {
             guard current.fingerprint == approval.previewFingerprint else {
                 record.approval = nil
                 record.preview = current
-                revalidate(&record, product: product, preview: current)
+                await revalidate(&record, product: product, preview: current)
                 if let report = record.validation, report.isBlocking {
                     try await failAndReset(&record, product: product, reason: "The working copy changed after approval and no longer passes validation")
                     throw ReleaseError.validationBlocked(report.blockingResults.count)
