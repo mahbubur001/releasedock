@@ -24,6 +24,7 @@ struct ReleaseDockApp: App {
                 StartupErrorView(error: error)
             }
         }
+        .defaultSize(width: 1240, height: 820)
         .windowToolbarStyle(.unified)
         .commands {
             CommandGroup(after: .appInfo) {

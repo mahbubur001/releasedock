@@ -187,6 +187,12 @@ final class AppModel {
     func start() async {
         reload()
         #if DEBUG
+        // UI verification: select a History entry by index, e.g. RELEASEDOCK_UI_TEST_HISTORY=2.
+        if let index = ProcessInfo.processInfo.environment["RELEASEDOCK_UI_TEST_HISTORY"].flatMap(Int.init), releases.indices.contains(index) {
+            historySelection = releases[index].id
+        }
+        #endif
+        #if DEBUG
         KeySelfTest.scheduleIfRequested(model: self)
         #endif
         do {

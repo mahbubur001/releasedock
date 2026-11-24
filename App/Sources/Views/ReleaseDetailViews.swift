@@ -18,24 +18,40 @@ struct ReleaseHeroCard: View {
     let record: ReleaseRecord
 
     var body: some View {
-        HStack(spacing: 16) {
-            ProductGlyph(type: record.productType, size: 52)
-            VStack(alignment: .leading, spacing: 3) {
-                Text(record.productName).font(.title2.weight(.semibold))
-                Text(subtitle).foregroundStyle(.secondary).lineLimit(1).truncationMode(.middle)
+        ViewThatFits(in: .horizontal) {
+            HStack(spacing: 16) {
+                identity
+                Spacer(minLength: 16)
+                versions
             }
-            Spacer(minLength: 16)
-            if record.kind == .readmeUpdate {
-                versionColumn(record.version ?? "—", caption: "Released version · code unchanged")
-            } else {
-                HStack(spacing: 14) {
-                    versionColumn(record.repository?.currentVersion ?? record.previousVersion ?? "—", caption: record.repository?.currentVersionSource ?? "Current", faded: true)
-                    Image(systemName: "arrow.right").font(.title3.weight(.semibold)).foregroundStyle(.green)
-                    versionColumn(record.version ?? "—", caption: record.productType == .plugin ? "From plugin header" : "From style.css")
-                }
+            VStack(alignment: .leading, spacing: 14) {
+                identity
+                versions
             }
         }
         .card(padding: 20)
+    }
+
+    private var identity: some View {
+        HStack(spacing: 16) {
+            ProductGlyph(type: record.productType, size: 52)
+            VStack(alignment: .leading, spacing: 3) {
+                Text(record.productName).font(.title2.weight(.semibold)).lineLimit(1)
+                Text(subtitle).foregroundStyle(.secondary).lineLimit(1).truncationMode(.middle)
+            }
+        }
+    }
+
+    @ViewBuilder private var versions: some View {
+        if record.kind == .readmeUpdate {
+            versionColumn(record.version ?? "—", caption: "Released version · code unchanged")
+        } else {
+            HStack(spacing: 14) {
+                versionColumn(record.repository?.currentVersion ?? record.previousVersion ?? "—", caption: record.repository?.currentVersionSource ?? "Current", faded: true)
+                Image(systemName: "arrow.right").font(.title3.weight(.semibold)).foregroundStyle(.green)
+                versionColumn(record.version ?? "—", caption: record.productType == .plugin ? "From plugin header" : "From style.css")
+            }
+        }
     }
 
     private var subtitle: String {
@@ -49,7 +65,9 @@ struct ReleaseHeroCard: View {
                 .font(.system(size: 28, weight: .bold).monospacedDigit())
                 .tracking(-0.6)
                 .foregroundStyle(faded ? .tertiary : .primary)
-            Text(caption).font(.caption2).foregroundStyle(.secondary)
+                .lineLimit(1)
+                .fixedSize()
+            Text(caption).font(.caption2).foregroundStyle(.secondary).lineLimit(1).fixedSize()
         }
     }
 }
@@ -59,7 +77,14 @@ struct ReleaseSummaryTiles: View {
     let record: ReleaseRecord
 
     var body: some View {
-        HStack(spacing: 12) {
+        ViewThatFits(in: .horizontal) {
+            HStack(spacing: 12) { tiles }
+            VStack(spacing: 8) { tiles }
+        }
+    }
+
+    @ViewBuilder private var tiles: some View {
+        Group {
             if let report = record.validation {
                 let passed = report.results.filter { $0.status == .passed }
                 let checks = Set(report.results.map(\.check))
@@ -87,8 +112,8 @@ struct ReleaseSummaryTiles: View {
         HStack(spacing: 12) {
             TintedSymbol(systemImage: symbol, color: color)
             VStack(alignment: .leading, spacing: 1) {
-                Text(title).font(.callout.weight(.semibold))
-                Text(detail).font(.caption).foregroundStyle(.secondary)
+                Text(title).font(.callout.weight(.semibold)).lineLimit(1).fixedSize()
+                Text(detail).font(.caption).foregroundStyle(.secondary).lineLimit(1).fixedSize()
             }
             Spacer(minLength: 0)
         }
@@ -571,6 +596,57 @@ struct StepDot: View {
         case .done: .green
         case .waiting, .warning: .orange.opacity(0.18)
         case .pending: .primary.opacity(0.08)
+        }
+    }
+}
+
+/// The product's GitHub release for this version, with a way to create or retry it.
+struct GitHubReleaseRow: View {
+    @Environment(AppModel.self) private var model
+    @Environment(\.openURL) private var openURL
+    let record: ReleaseRecord
+    @State private var latest: GitHubReleaseResult?
+    @State private var working = false
+
+    private var result: GitHubReleaseResult? { latest ?? record.githubRelease }
+
+    var body: some View {
+        HStack(alignment: .firstTextBaseline) {
+            Text("GitHub").foregroundStyle(.secondary).frame(width: 130, alignment: .leading)
+            VStack(alignment: .leading, spacing: 3) {
+                if let result, result.succeeded, let url = result.url {
+                    Button {
+                        openURL(url)
+                    } label: {
+                        Label("Release \(result.tag)\(result.assetName.map { " with \($0)" } ?? "")", systemImage: "arrow.up.right.square")
+                    }
+                    .buttonStyle(InlineLinkButtonStyle())
+                    .linkCursor()
+                } else if let error = result?.error {
+                    Label(error, systemImage: "exclamationmark.triangle.fill").foregroundStyle(.orange).font(.callout)
+                        .fixedSize(horizontal: false, vertical: true)
+                } else {
+                    Text("Not created yet").font(.callout).foregroundStyle(.secondary)
+                }
+                ForEach(result?.notes ?? [], id: \.self) { Text($0).font(.caption).foregroundStyle(.secondary) }
+            }
+            Spacer(minLength: 8)
+            if working {
+                ProgressView().controlSize(.small)
+            } else if result?.succeeded != true {
+                Button(result == nil ? "Create GitHub Release" : "Try Again") {
+                    Task {
+                        working = true
+                        defer { working = false }
+                        do {
+                            latest = try await model.pipeline.publishGitHubRelease(record.id).githubRelease
+                            model.reload()
+                        } catch {
+                            model.show(error, title: "Could not create the GitHub release")
+                        }
+                    }
+                }
+            }
         }
     }
 }

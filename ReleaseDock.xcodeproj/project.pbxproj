@@ -18,7 +18,6 @@
 		53DA40882A325237A87703B3 /* VersionBumpSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0F41A17350358924C21555D /* VersionBumpSheet.swift */; };
 		655CA630A2D51A6D29C3B760 /* ViewHierarchyDump.swift in Sources */ = {isa = PBXBuildFile; fileRef = C39CDD0E5CF4BC7A447FAE7E /* ViewHierarchyDump.swift */; };
 		6E04595F8415E97C15B10566 /* UserNotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 675821BFBD1F4CF960E35EE8 /* UserNotificationService.swift */; };
-		7655E47A1380C79B89041ABE /* ReleaseReportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D079F905954C330217DF65D /* ReleaseReportView.swift */; };
 		7B45DA8AB390FD22C746EA51 /* Components.swift in Sources */ = {isa = PBXBuildFile; fileRef = F053256259338271C9AE9E8C /* Components.swift */; };
 		7C9B283FC017FF7A0DBE86E6 /* GitHubUpdatesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA0382A66D69F0CD0FC38C7B /* GitHubUpdatesView.swift */; };
 		8B4E1F9C78DD3B921760B028 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = AA246EB95A26EEE70176B560 /* Sparkle */; };
@@ -48,7 +47,6 @@
 		67188E8428EB7AF570C07664 /* SparkleUpdateService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SparkleUpdateService.swift; sourceTree = "<group>"; };
 		675821BFBD1F4CF960E35EE8 /* UserNotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserNotificationService.swift; sourceTree = "<group>"; };
 		6E2E64523A782BA688E4480F /* AppUpdateChecker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppUpdateChecker.swift; sourceTree = "<group>"; };
-		7D079F905954C330217DF65D /* ReleaseReportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReleaseReportView.swift; sourceTree = "<group>"; };
 		823C4B4F2D68BBB08C6F8B39 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		8C58D84B9A3A99990ACB5B7C /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
 		9652E6AFFEF679DE8368AFDA /* ReleaseDockKit */ = {isa = PBXFileReference; lastKnownFileType = folder; name = ReleaseDockKit; path = Packages/ReleaseDockKit; sourceTree = SOURCE_ROOT; };
@@ -111,7 +109,6 @@
 				337D4647CE01008B8CC02A25 /* ProductsView.swift */,
 				D83B5EB39E7987D93730C3AE /* ReleaseDetailViews.swift */,
 				9EAAF0334553C90E81D2DFCD /* ReleaseHistoryView.swift */,
-				7D079F905954C330217DF65D /* ReleaseReportView.swift */,
 				AACF8F62816E7AE9AD0BF484 /* ReleaseWizardView.swift */,
 				05A9A10F06D5B7E0C55567D5 /* SettingsView.swift */,
 				B82672979B500FB1A5B7326C /* Sidebar.swift */,
@@ -275,7 +272,6 @@
 				C95F6E3239C13581ED537E1B /* ReleaseDetailViews.swift in Sources */,
 				B3C56405ED9F6D24EAEA9DD8 /* ReleaseDockApp.swift in Sources */,
 				B44D314F5F74C7246F8AAB46 /* ReleaseHistoryView.swift in Sources */,
-				7655E47A1380C79B89041ABE /* ReleaseReportView.swift in Sources */,
 				A00AD7B3E5ED060BB725BB82 /* ReleaseWizardModel.swift in Sources */,
 				5114CB18A1FE2234B9C96F76 /* ReleaseWizardView.swift in Sources */,
 				92F47382E21EE21ED47F43DB /* SettingsView.swift in Sources */,
