@@ -13,7 +13,7 @@
   <img alt="macOS 14+" src="https://img.shields.io/badge/macOS-14%2B-blue">
   <img alt="Swift 6" src="https://img.shields.io/badge/Swift-6-orange">
   <img alt="SwiftUI" src="https://img.shields.io/badge/UI-SwiftUI-purple">
-  <img alt="Tests" src="https://img.shields.io/badge/tests-198%20passing-brightgreen">
+  <img alt="Tests" src="https://img.shields.io/badge/tests-205%20passing-brightgreen">
   <img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-green">
 </p>
 
@@ -33,7 +33,7 @@ ReleaseDock is a native macOS app that does the whole release for you. It checks
 
 **Release from anything**
 - Drop a ZIP, pick a folder, or use *Open With → ReleaseDock* in Finder.
-- The source is only ever read. ReleaseDock builds and publishes a cleaned copy.
+- Releasing only ever reads the source. ReleaseDock builds and publishes a cleaned copy. The one exception is **Bump Version…**, which edits your development folder after you approve each line it changes.
 
 **Safe package inspection**
 - A built-in ZIP reader blocks path traversal, symlinks, duplicate and case-conflicting paths, nested folders, encrypted entries and zip bombs.
@@ -149,7 +149,7 @@ When it finishes, the release report shows the committed revision, the release U
              └──► Manifest · History · Notification
 ```
 
-- All release logic lives in **ReleaseDockCore**, a Swift package with no UI code and 198 tests.
+- All release logic lives in **ReleaseDockCore**, a Swift package with no UI code and 205 tests.
 - Integration tests run the real `svn` binary against local repositories laid out like WordPress.org.
 - The SwiftUI app is a thin layer on top of the package.
 

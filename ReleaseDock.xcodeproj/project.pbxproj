@@ -14,6 +14,7 @@
 		339BA673E3802E22951A0E2C /* AppUpdateChecker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E2E64523A782BA688E4480F /* AppUpdateChecker.swift */; };
 		394A5C6FC10ED6CA2812C400 /* Button.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D0D7BA0C2F70E1783553152 /* Button.swift */; };
 		5114CB18A1FE2234B9C96F76 /* ReleaseWizardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AACF8F62816E7AE9AD0BF484 /* ReleaseWizardView.swift */; };
+		53DA40882A325237A87703B3 /* VersionBumpSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0F41A17350358924C21555D /* VersionBumpSheet.swift */; };
 		5A0F49425046F125980BE816 /* PointingHandCursor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23AFFF1B2C9D61F8F43023F3 /* PointingHandCursor.swift */; };
 		655CA630A2D51A6D29C3B760 /* ViewHierarchyDump.swift in Sources */ = {isa = PBXBuildFile; fileRef = C39CDD0E5CF4BC7A447FAE7E /* ViewHierarchyDump.swift */; };
 		6E04595F8415E97C15B10566 /* UserNotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 675821BFBD1F4CF960E35EE8 /* UserNotificationService.swift */; };
@@ -58,6 +59,7 @@
 		AACF8F62816E7AE9AD0BF484 /* ReleaseWizardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReleaseWizardView.swift; sourceTree = "<group>"; };
 		B82672979B500FB1A5B7326C /* Sidebar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sidebar.swift; sourceTree = "<group>"; };
 		C39CDD0E5CF4BC7A447FAE7E /* ViewHierarchyDump.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewHierarchyDump.swift; sourceTree = "<group>"; };
+		D0F41A17350358924C21555D /* VersionBumpSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VersionBumpSheet.swift; sourceTree = "<group>"; };
 		DA0382A66D69F0CD0FC38C7B /* GitHubUpdatesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GitHubUpdatesView.swift; sourceTree = "<group>"; };
 		F053256259338271C9AE9E8C /* Components.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Components.swift; sourceTree = "<group>"; };
 		F672711661C3EDA8AAD0B526 /* AppModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppModel.swift; sourceTree = "<group>"; };
@@ -114,6 +116,7 @@
 				AACF8F62816E7AE9AD0BF484 /* ReleaseWizardView.swift */,
 				05A9A10F06D5B7E0C55567D5 /* SettingsView.swift */,
 				B82672979B500FB1A5B7326C /* Sidebar.swift */,
+				D0F41A17350358924C21555D /* VersionBumpSheet.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -280,6 +283,7 @@
 				1EBFAFC81FBB72ED3464EF0D /* Sidebar.swift in Sources */,
 				A623318B8D560AC74EB8775B /* SparkleUpdateService.swift in Sources */,
 				6E04595F8415E97C15B10566 /* UserNotificationService.swift in Sources */,
+				53DA40882A325237A87703B3 /* VersionBumpSheet.swift in Sources */,
 				655CA630A2D51A6D29C3B760 /* ViewHierarchyDump.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

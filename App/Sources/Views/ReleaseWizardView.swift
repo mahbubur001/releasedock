@@ -55,6 +55,7 @@ private struct ReleaseWizardContent: View {
     @Bindable var wizard: ReleaseWizardModel
     @State private var confirmPublish = false
     @State private var dropTargeted = false
+    @State private var bumpTarget: VersionBumpTarget?
 
     var body: some View {
         VStack(spacing: 0) {
@@ -75,6 +76,14 @@ private struct ReleaseWizardContent: View {
             Divider()
             actionBar.padding(12)
         }
+        .sheet(item: $bumpTarget) { target in
+            if let product = wizard.product {
+                VersionBumpSheet(product: product, folder: target.folder) { _ in
+                    // Re-select so the wizard reads the new version.
+                    wizard.setSource(url: target.folder)
+                }
+            }
+        }
         .sheet(isPresented: $wizard.needsCredentials) {
             if let product = wizard.product {
                 CredentialsSheet(product: product)
@@ -87,6 +96,12 @@ private struct ReleaseWizardContent: View {
                 Text("This commits \(preview.changes.count) change(s) to \(wizard.record?.svnURL ?? "SVN"). Released versions cannot be overwritten.")
             }
         }
+    }
+
+    /// The folder a bump would edit: the chosen folder source, else the development folder.
+    private var bumpableFolder: URL? {
+        if case .folder(let path)? = wizard.source { return URL(fileURLWithPath: path, isDirectory: true) }
+        return wizard.product?.localDevelopmentURL
     }
 
     private var publishQuestion: String {
@@ -148,6 +163,10 @@ private struct ReleaseWizardContent: View {
                     Button("Choose Folder…") { choose(zip: false) }
                     if let dev = wizard.product?.localDevelopmentURL {
                         Button("Use Development Folder") { wizard.setSource(url: dev) }
+                    }
+                    if let folder = bumpableFolder {
+                        Button("Bump Version…") { bumpTarget = VersionBumpTarget(folder: folder) }
+                            .help("Update the version in the header, Stable tag, constants and package.json of \(folder.lastPathComponent)")
                     }
                 }
                 Text("The source is inspected read-only. Only a cleaned copy is ever published.")

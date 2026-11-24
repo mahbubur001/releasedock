@@ -11,7 +11,7 @@ RELEASEDOCK_LIVE_SLUG=tlp-team RELEASEDOCK_LIVE_WC=~/svn/tlp-team swift test --f
 RELEASEDOCK_LIVE_DRYRUN_SLUG=tlp-team RELEASEDOCK_LIVE_DRYRUN_VERSION=6.0.8 swift test --filter LiveDryRunTests
 ```
 
-Current result: **198 tests, 0 failures** (the keychain, performance and live WordPress.org tests are skipped unless opted in). Integration tests need `svn` and `svnadmin` (Homebrew `subversion`); they are skipped otherwise. Version tests compare against the real `php` binary when installed.
+Current result: **205 tests, 0 failures** (the keychain, performance and live WordPress.org tests are skipped unless opted in). Integration tests need `svn` and `svnadmin` (Homebrew `subversion`); they are skipped otherwise. Version tests compare against the real `php` binary when installed.
 
 **No test uses WordPress.org or any real credentials.** Integration tests create throwaway repositories with `svnadmin create` and talk to them over `file://`.
 
