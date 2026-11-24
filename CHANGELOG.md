@@ -4,6 +4,18 @@ All notable changes to ReleaseDock are documented here. The format follows [Keep
 
 ## [Unreleased]
 
+## [0.2.2] - 2026-11-24
+
+### Added
+- **Working copy** on each product page: its revision and whether it is clean, has local changes or has conflicts, with the list of changes. **Update** runs `svn update` (or the first checkout) and keeps local changes; **Revert…** backs everything up and matches the server.
+- Conflicts after an update open a sheet with one choice per file: the WordPress.org version (your file is backed up first) or yours. Update and resolve are refused while a release is staged.
+- New Release: **Back** returns to Package with the same product, package and mode (a staged release is cancelled and the working copy restored), and **Check Again** runs every check again on the same package.
+- A release that stopped on a dirty working copy shows the changes and **Back Up, Revert & Check Again…**.
+
+### Changed
+- New Release picks the product from a **Change** menu on a single card instead of a grid of cards.
+- Cancelling a staged release no longer writes a backup when the working copy still matches the preview; only hand edits are backed up.
+
 ## [0.2.1] - 2026-11-24
 
 ### Fixed
