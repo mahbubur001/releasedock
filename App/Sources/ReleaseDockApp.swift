@@ -7,10 +7,8 @@ struct ReleaseDockApp: App {
     @State private var updater = SparkleUpdateService()
 
     init() {
-        PointingHandCursor.install()
         #if DEBUG
         ViewHierarchyDump.scheduleIfRequested()
-        CursorSelfTest.scheduleIfRequested()
         #endif
     }
 
@@ -79,7 +77,6 @@ struct RootView: View {
         NavigationSplitView(columnVisibility: $columnVisibility) {
             Sidebar()
                 .navigationSplitViewColumnWidth(min: 210, ideal: 230, max: 280)
-                // Our own toggle (below) replaces the system one so it gets the app's hover cursor.
                 .toolbar(removing: .sidebarToggle)
         } detail: {
             switch model.selection ?? .dashboard {

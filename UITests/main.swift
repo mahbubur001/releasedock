@@ -50,7 +50,7 @@ for (section, prefix) in [("Release History", "Acme Gallery"), ("Products", "Acm
     check("\(section): ↑ selects row 1 again", selectedIndex(list) == 0, "selected=\(String(describing: selectedIndex(list)))")
 }
 
-// Cursor over real controls (real mouse moves).
+// Cursor over real controls (real mouse moves): macOS keeps the arrow on buttons and rows.
 func hover(_ element: Element?, _ name: String, expect: String) {
     guard let element else { check("cursor: \(name) found", false); return }
     let point = CGPoint(x: element.frame.midX, y: element.frame.midY)
@@ -59,13 +59,13 @@ func hover(_ element: Element?, _ name: String, expect: String) {
     let cursor = UI.cursorName()
     check("cursor over \(name) is \(expect)", cursor == expect, "got \(cursor)")
 }
-hover(sidebar("Dashboard"), "sidebar item", expect: "pointingHand")
+hover(sidebar("Dashboard"), "sidebar item", expect: "arrow")
 if let products = sidebar("Products") { UI.click(CGPoint(x: products.frame.midX, y: products.frame.midY)); usleep(800_000) }
 let productRow = rows(prefix: "Acme", minX: sidebar("Products")?.frame.maxX ?? 0).first
-hover(productRow, "product row", expect: "pointingHand")
-hover(all().first { $0.role == "AXButton" && $0.label.contains("New Release") && $0.frame.minX > (sidebar("Products")?.frame.maxX ?? 0) }, "New Release button", expect: "pointingHand")
-hover(all().first { $0.role == "AXButton" && $0.label == "Edit" }, "Edit button", expect: "pointingHand")
-hover(all().first { $0.role == "AXButton" && $0.label == "Hide Sidebar" }, "toolbar sidebar toggle", expect: "pointingHand")
+hover(productRow, "product row", expect: "arrow")
+hover(all().first { $0.role == "AXButton" && $0.label.contains("New Release") && $0.frame.minX > (sidebar("Products")?.frame.maxX ?? 0) }, "New Release button", expect: "arrow")
+hover(all().first { $0.role == "AXButton" && $0.label == "Edit" }, "Edit button", expect: "arrow")
+hover(all().first { $0.role == "AXButton" && $0.label == "Hide Sidebar" }, "toolbar sidebar toggle", expect: "arrow")
 
 // Sidebar toggle hides and shows the sidebar, and stays reachable while hidden.
 if let toggle = all().first(where: { $0.role == "AXButton" && $0.label == "Hide Sidebar" }) {

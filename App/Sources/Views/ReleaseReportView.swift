@@ -279,6 +279,7 @@ private struct GitHubReleaseRow: View {
                         Label("Release \(result.tag)\(result.assetName.map { " with \($0)" } ?? "")", systemImage: "arrow.up.right.square")
                     }
                     .buttonStyle(InlineLinkButtonStyle())
+                    .linkCursor()
                 } else if let error = result?.error {
                     Label(error, systemImage: "exclamationmark.triangle.fill").foregroundStyle(.orange).font(.callout)
                         .fixedSize(horizontal: false, vertical: true)

@@ -12,6 +12,6 @@ UITests/run.sh            # launches an isolated demo instance and runs the chec
 and owns the topmost window under the pointer; otherwise the run stops without sending input.
 Still, don't use the Mac while the tests run (about 30 seconds).
 
-Checks: sidebar navigation, ↑/↓ in Release History and Products, pointing-hand cursor over
+Checks: sidebar navigation, ↑/↓ in Release History and Products, arrow cursor (macOS convention) over
 sidebar items, list rows, detail buttons and the sidebar toggle, arrow over empty areas, and
 hiding/showing the sidebar.
