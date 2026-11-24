@@ -39,6 +39,25 @@ public struct ThemeReleaseStrategy: ReleaseStrategy {
         for header in Self.reviewHeaders where detected.headers[header] == nil {
             results.append(.warn(.metadataValidity, "style.css is missing the \"\(header)\" header required by theme review", file: "style.css"))
         }
+        // Theme review: names must not use WordPress, Theme or Twenty*; spell WordPress correctly.
+        if let name = detected.name {
+            let words = name.lowercased().split(whereSeparator: { !$0.isLetter && !$0.isNumber })
+            if words.contains("wordpress") || words.contains("theme") || words.contains(where: { $0.hasPrefix("twenty") }) {
+                results.append(.warn(.metadataValidity, "Theme names must not use \"WordPress\", \"Theme\" or \"Twenty\" (theme review requirement)", file: "style.css"))
+            }
+        }
+        let publicText = [detected.name, detected.headers["Description"], detected.readme?.shortDescription].compactMap { $0 }
+        if publicText.contains(where: { $0.range(of: #"\bWordpress\b|\bwordpress\b(?!\.)"#, options: .regularExpression) != nil }) {
+            results.append(.warn(.metadataValidity, "Spell \"WordPress\" with a capital W and P in the name, description and readme", file: "style.css"))
+        }
+        if let size = detected.screenshotSize, let file = detected.screenshotFile {
+            if size.width > 1200 || size.height > 900 {
+                results.append(.warn(.metadataValidity, "\(file) is \(size.width)×\(size.height); theme review allows at most 1200×900", file: file, fix: "Export it at 1200×900."))
+            }
+            if size.width * 3 != size.height * 4 {
+                results.append(.warn(.metadataValidity, "\(file) is \(size.width)×\(size.height), not 4:3 as theme review requires", file: file, fix: "Export it at 1200×900."))
+            }
+        }
         if let parent = detected.parentTheme {
             results.append(.init(check: .metadataValidity, status: .passed, severity: .info, message: "Child theme of \"\(parent)\""))
         }
@@ -82,6 +101,13 @@ public struct ThemeReleaseStrategy: ReleaseStrategy {
         } else {
             results.append(.fail(.requiredFiles, "screenshot.png (or .jpg/.jpeg/.gif) is required at the theme root"))
         }
+        let bundled = files.filter { path in
+            let ext = (path as NSString).pathExtension.lowercased()
+            return Self.resourceExtensions.contains(ext) && !path.lowercased().hasPrefix("screenshot.")
+        }
+        if !bundled.isEmpty, detected.readme?.sections["resources"] == nil {
+            results.append(.warn(.requiredFiles, "The theme bundles \(bundled.count) image or font file(s), but readme.txt has no == Resources == section listing their licenses", file: detected.readmeFile, fix: "Add == Resources == with each file, its author, license and source."))
+        }
         if files.contains(where: { $0.lowercased() == "readme.txt" }) {
             results.append(.pass(.requiredFiles, "readme.txt present"))
         } else {
@@ -91,6 +117,7 @@ public struct ThemeReleaseStrategy: ReleaseStrategy {
     }
 
     static let disallowedExtensions: Set<String> = ["sql", "sh", "dat", "wie"]
+    static let resourceExtensions: Set<String> = ["png", "jpg", "jpeg", "gif", "svg", "webp", "woff", "woff2", "ttf", "otf"]
     static let allowedXML: Set<String> = ["wpml-config.xml", "loco.xml", "phpcs.xml"]
 
     public func validateForbiddenFiles(inspection: PackageInspection) -> [ValidationResult] {

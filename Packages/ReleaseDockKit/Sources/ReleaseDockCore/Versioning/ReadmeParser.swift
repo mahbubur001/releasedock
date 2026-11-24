@@ -49,10 +49,16 @@ public struct WordPressReadme: Codable, Hashable, Sendable {
         return changelog.range(of: pattern, options: .regularExpression) != nil
     }
 
-    /// The `== Upgrade Notice ==` entry for `version`: the text under its `= version =`
-    /// heading, up to the next heading.
-    public func upgradeNotice(for version: String) -> String? {
-        guard let section = sections["upgrade notice"] else { return nil }
+    /// The `== Upgrade Notice ==` entry for `version`.
+    public func upgradeNotice(for version: String) -> String? { entry(in: "upgrade notice", version: version) }
+
+    /// The `== Changelog ==` entry for `version`.
+    public func changelogEntry(for version: String) -> String? { entry(in: "changelog", version: version) }
+
+    /// The text under the `= version =` (or `= version - date =`, `### version`) heading of
+    /// a section, up to the next heading.
+    public func entry(in sectionTitle: String, version: String) -> String? {
+        guard let section = sections[sectionTitle] else { return nil }
         var collecting = false
         var lines: [String] = []
         for line in section.components(separatedBy: "\n") {
@@ -60,8 +66,11 @@ public struct WordPressReadme: Codable, Hashable, Sendable {
             let isHeading = (trimmed.hasPrefix("=") && trimmed.hasSuffix("=") && trimmed.count > 2) || trimmed.hasPrefix("#")
             if isHeading {
                 if collecting { break }
-                let title = trimmed.trimmingCharacters(in: CharacterSet(charactersIn: "=# \t"))
-                collecting = title == version || title == "v" + version
+                var title = trimmed.trimmingCharacters(in: CharacterSet(charactersIn: "=#*[] \t"))
+                if title.hasPrefix("v") { title.removeFirst() }
+                // "1.2.3 - 2026-11-24", "1.2.3 (2026-11-24)": the version is the first word.
+                let first = title.split(whereSeparator: { $0 == " " || $0 == "\t" || $0 == "(" }).first.map(String.init) ?? title
+                collecting = first == version
                 continue
             }
             if collecting { lines.append(line) }

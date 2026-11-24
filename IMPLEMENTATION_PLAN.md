@@ -48,7 +48,7 @@ GitHub release checks (stable/beta, ETag cache, rate limits, private-repo token)
 
 ## Phase 8 — Testing, signing, notarization, distribution 🟡
 
-177 tests (unit + real-svn integration) pass as of 2026-11-24; app builds without warnings; UI verified manually through *Previewed* and restart reconciliation against a local repository. `scripts/release.sh` implements archive → Developer ID export → notarize → staple → zip → Sparkle appcast. **Not executed**: no Developer ID certificate or notarization credentials were available.
+183 tests (unit + real-svn integration) pass as of 2026-11-24; app builds without warnings; UI verified manually through *Previewed* and restart reconciliation against a local repository. `scripts/release.sh` implements archive → Developer ID export → notarize → staple → zip → Sparkle appcast. **Not executed**: no Developer ID certificate or notarization credentials were available.
 
 ## Remaining work
 

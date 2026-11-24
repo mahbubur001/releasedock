@@ -28,6 +28,16 @@ struct ReleaseReportView: View {
                 inspectionCard(inspection)
             }
             versionCard
+            if let version = record.version, let readme = record.detected?.readme,
+               let changelog = readme.changelogEntry(for: version) {
+                SectionCard(title: "What's new in \(version)", systemImage: "text.badge.star") {
+                    Text(changelog).font(.callout).textSelection(.enabled).fixedSize(horizontal: false, vertical: true)
+                    if let notice = readme.upgradeNotice(for: version) {
+                        Divider()
+                        Label(notice, systemImage: "exclamationmark.bubble").font(.callout).fixedSize(horizontal: false, vertical: true)
+                    }
+                }
+            }
             if let report = record.validation {
                 SectionCard(title: "Validation", systemImage: "checklist") {
                     if report.isBlocking {

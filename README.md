@@ -13,7 +13,7 @@
   <img alt="macOS 14+" src="https://img.shields.io/badge/macOS-14%2B-blue">
   <img alt="Swift 6" src="https://img.shields.io/badge/Swift-6-orange">
   <img alt="SwiftUI" src="https://img.shields.io/badge/UI-SwiftUI-purple">
-  <img alt="Tests" src="https://img.shields.io/badge/tests-177%20passing-brightgreen">
+  <img alt="Tests" src="https://img.shields.io/badge/tests-183%20passing-brightgreen">
   <img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-green">
 </p>
 
@@ -149,7 +149,7 @@ When it finishes, the release report shows the committed revision, the release U
              └──► Manifest · History · Notification
 ```
 
-- All release logic lives in **ReleaseDockCore**, a Swift package with no UI code and 177 tests.
+- All release logic lives in **ReleaseDockCore**, a Swift package with no UI code and 183 tests.
 - Integration tests run the real `svn` binary against local repositories laid out like WordPress.org.
 - The SwiftUI app is a thin layer on top of the package.
 

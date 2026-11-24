@@ -105,3 +105,31 @@ final class ReadmeRulesTests: XCTestCase {
         XCTAssertFalse(report.warnings.contains { $0.message.contains("short description") }, "the fixture readme has one")
     }
 }
+
+final class ChangelogEntryTests: XCTestCase {
+    func testExtractsEntriesInCommonHeadingStyles() {
+        let readme = ReadmeParser.parse("""
+        === P ===
+        Stable tag: 1.2.0
+
+        Short.
+
+        == Changelog ==
+
+        = 1.2.0 - 2026-11-24 =
+        * New: Lightbox.
+        * Fix: RTL.
+
+        = 1.1.0 =
+        * Older.
+
+        ### v1.0.0 (2026-01-01)
+        * First.
+        """)
+        XCTAssertEqual(readme.changelogEntry(for: "1.2.0"), "* New: Lightbox.\n* Fix: RTL.")
+        XCTAssertEqual(readme.changelogEntry(for: "1.1.0"), "* Older.")
+        XCTAssertEqual(readme.changelogEntry(for: "1.0.0"), "* First.")
+        XCTAssertNil(readme.changelogEntry(for: "1.2"), "no prefix matches")
+        XCTAssertNil(readme.changelogEntry(for: "9.9.9"))
+    }
+}

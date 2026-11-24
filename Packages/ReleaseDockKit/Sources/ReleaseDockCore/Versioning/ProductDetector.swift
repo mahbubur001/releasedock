@@ -1,4 +1,25 @@
 import Foundation
+import ImageIO
+
+public struct PixelSize: Codable, Hashable, Sendable {
+    public var width: Int
+    public var height: Int
+
+    public init(width: Int, height: Int) {
+        self.width = width
+        self.height = height
+    }
+
+    /// Pixel size of a PNG, JPEG or GIF, or nil when it cannot be read.
+    public static func of(imageAt url: URL) -> PixelSize? {
+        guard let source = CGImageSourceCreateWithURL(url as CFURL, nil),
+              let properties = CGImageSourceCopyPropertiesAtIndex(source, 0, nil) as? [CFString: Any],
+              let width = properties[kCGImagePropertyPixelWidth] as? Int,
+              let height = properties[kCGImagePropertyPixelHeight] as? Int
+        else { return nil }
+        return PixelSize(width: width, height: height)
+    }
+}
 
 /// What a package root says about itself. The version always comes from file
 /// headers inside the package, never from a ZIP or folder name.
@@ -15,6 +36,9 @@ public struct DetectedProduct: Codable, Hashable, Sendable {
     public var readmeFile: String?
     /// Problems encountered while detecting (ambiguous main file, unreadable headers…).
     public var problems: [String]
+    /// Themes: the root screenshot and its pixel size, when readable.
+    public var screenshotFile: String?
+    public var screenshotSize: PixelSize?
 
     public init(
         type: ProductType,
@@ -25,7 +49,9 @@ public struct DetectedProduct: Codable, Hashable, Sendable {
         headers: [String: String] = [:],
         readme: WordPressReadme? = nil,
         readmeFile: String? = nil,
-        problems: [String] = []
+        problems: [String] = [],
+        screenshotFile: String? = nil,
+        screenshotSize: PixelSize? = nil
     ) {
         self.type = type
         self.name = name
@@ -35,6 +61,8 @@ public struct DetectedProduct: Codable, Hashable, Sendable {
         self.headers = headers
         self.readme = readme
         self.readmeFile = readmeFile
+        self.screenshotFile = screenshotFile
+        self.screenshotSize = screenshotSize
         self.problems = problems
     }
 
@@ -152,6 +180,8 @@ public struct ProductDetector: Sendable {
             readme = try ReadmeParser.parse(fileAt: url)
             readmeFile = url.lastPathComponent
         }
+        let screenshot = ["screenshot.png", "screenshot.jpg", "screenshot.jpeg", "screenshot.gif"]
+            .first { FileManager.default.fileExists(atPath: root.appendingPathComponent($0).path) }
         return DetectedProduct(
             type: .theme,
             name: headers["Theme Name"],
@@ -160,7 +190,9 @@ public struct ProductDetector: Sendable {
             mainFile: "style.css",
             headers: headers,
             readme: readme,
-            readmeFile: readmeFile
+            readmeFile: readmeFile,
+            screenshotFile: screenshot,
+            screenshotSize: screenshot.flatMap { PixelSize.of(imageAt: root.appendingPathComponent($0)) }
         )
     }
 
