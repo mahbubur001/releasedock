@@ -29,6 +29,7 @@ final class ReleaseWizardModel {
     var productID: UUID?
     var source: ReleaseSource?
     var modeOverride: ReleaseMode?
+    var kind: ReleaseKind = .version
     private(set) var record: ReleaseRecord?
     private(set) var isRunning = false
     private(set) var activity: String?
@@ -44,6 +45,8 @@ final class ReleaseWizardModel {
 
     var product: Product? { model.product(productID) }
     var effectiveMode: ReleaseMode { modeOverride ?? product?.releaseMode ?? .assisted }
+    /// Readme updates exist only for plugins; themes always publish a new version.
+    var effectiveKind: ReleaseKind { product?.type == .plugin ? kind : .version }
 
     var currentStep: Step {
         guard let record else { return .select }
@@ -93,6 +96,7 @@ final class ReleaseWizardModel {
         activity = nil
         errorMessage = nil
         modeOverride = nil
+        kind = .version
     }
 
     private func observeEvents() {
@@ -137,7 +141,7 @@ final class ReleaseWizardModel {
         guard let product, let source else { return }
         observeEvents()
         await run {
-            let created = try await model.pipeline.createRelease(productID: product.id, source: source, mode: effectiveMode)
+            let created = try await model.pipeline.createRelease(productID: product.id, source: source, mode: effectiveMode, kind: effectiveKind)
             record = created
             return try await model.pipeline.prepare(created.id)
         }

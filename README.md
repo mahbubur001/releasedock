@@ -45,13 +45,14 @@ ReleaseDock is a native macOS app that does the whole release for you. It checks
 - Versions are compared with a port of PHP's `version_compare()`, tested against real PHP on 1,024 version pairs.
 - Same, older or ambiguous versions are blocked. So is a tag that already exists.
 
-**19 validation checks**
-- 14 required checks: product identity, version, `Stable tag`, readme, required and forbidden files, SVN connectivity, working-copy cleanliness and freshness, existing tag, credentials, and the release diff.
-- 5 optional checks: changelog entry, *Tested up to*, package size, clean Git tree and portable file names.
+**20 validation checks**
+- 15 required checks: product identity, version, `Stable tag`, readme, required and forbidden files, SVN connectivity, working-copy cleanliness and freshness, existing tag, released version (readme updates), credentials, and the release diff.
+- 5 optional checks: changelog entry, *Tested up to* (compared with the current WordPress release), package size, clean Git tree and portable file names.
 - Each check reports a severity, the file involved and a suggested fix.
 
 **Exact preview, single commit, verified result**
 - **Plugins:** `trunk` is updated and `svn cp trunk tags/<version>` is added. The `/assets` folder (banners, icons, screenshots) can be synced, with correct MIME types.
+- **Readme & Assets Update (plugins):** raise *Tested up to* or fix the readme without a new version. The readme is updated in `trunk` and in the released tag in one commit; a package whose code differs from the released tag is refused.
 - **Themes:** the previous version directory is copied to `/<version>/`, as the Themes handbook describes.
 - **Preview:** you see every SVN change and the full diff before anything is committed. Your approval covers exactly that preview; if the working copy changes, you have to approve again.
 - **Verification:** after the commit, ReleaseDock checks the server copy file by file (SHA-256) and records the revision in a release manifest.

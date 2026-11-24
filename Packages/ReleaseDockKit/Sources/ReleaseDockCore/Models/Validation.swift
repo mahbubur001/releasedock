@@ -15,6 +15,7 @@ public enum ValidationCheckID: String, Codable, CaseIterable, Sendable, Identifi
     case remoteFreshness
     case releaseDiff
     case authentication
+    case releasedVersion
     // Optional checks
     case changelogEntry
     case testedUpTo
@@ -48,6 +49,7 @@ public enum ValidationCheckID: String, Codable, CaseIterable, Sendable, Identifi
         case .remoteFreshness: "Remote repository freshness"
         case .releaseDiff: "Release diff"
         case .authentication: "Authentication"
+        case .releasedVersion: "Released version"
         case .changelogEntry: "Changelog entry"
         case .testedUpTo: "Tested up to"
         case .packageSize: "Package size"

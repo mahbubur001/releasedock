@@ -152,7 +152,9 @@ private struct ReleaseRow: View {
                     }
                     HStack(spacing: 6) {
                         Text(release.version ?? "—").font(.callout.monospacedDigit())
-                        if let previous = release.previousVersion, release.version != nil {
+                        if release.kind == .readmeUpdate {
+                            Text("readme update").font(.caption).foregroundStyle(.secondary)
+                        } else if let previous = release.previousVersion, release.version != nil {
                             Text("from \(previous)").font(.caption).foregroundStyle(.secondary)
                         }
                         Spacer(minLength: 4)

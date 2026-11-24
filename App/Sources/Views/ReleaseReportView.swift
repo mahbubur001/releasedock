@@ -58,7 +58,7 @@ struct ReleaseReportView: View {
             ProductTypeIcon(type: record.productType).font(.title)
             VStack(alignment: .leading) {
                 Text("\(record.productName) \(record.version ?? "")").font(.title2.bold())
-                Text("\(record.mode.displayName) · started \(record.createdAt.formatted(date: .abbreviated, time: .shortened))").foregroundStyle(.secondary)
+                Text("\(record.kind == .readmeUpdate ? "\(record.kind.displayName) · " : "")\(record.mode.displayName) · started \(record.createdAt.formatted(date: .abbreviated, time: .shortened))").foregroundStyle(.secondary)
             }
             Spacer()
             StateBadge(state: record.state)
@@ -138,7 +138,7 @@ struct ReleaseReportView: View {
                 }
                 Spacer(minLength: 0)
             }
-            if let result = record.validation?.results.first(where: { $0.check == .versionIncrease }) {
+            if let result = record.validation?.results.first(where: { $0.check == (record.kind == .readmeUpdate ? .releasedVersion : .versionIncrease) }) {
                 Label(result.message, systemImage: result.status == .passed ? "checkmark.circle.fill" : "xmark.octagon.fill")
                     .foregroundStyle(result.status == .passed ? .green : .red)
                     .font(.callout)

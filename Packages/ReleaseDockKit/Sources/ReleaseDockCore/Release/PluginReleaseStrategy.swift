@@ -285,6 +285,72 @@ public struct PluginReleaseStrategy: ReleaseStrategy {
         )
     }
 
+    // MARK: Readme updates
+
+    public func applyReadmeUpdate(candidate: StagedCandidate, readmeFile: String, version: String, product: Product, svn: SVNServicing) async throws {
+        let wc = product.workingCopyURL
+        let tag = wc.appendingPathComponent("tags").appendingPathComponent(version)
+        guard FileManager.default.fileExists(atPath: tag.path) else {
+            throw ReleaseError.invalidState("tags/\(version) is not in the working copy.")
+        }
+        // Tags are checked out empty (sparse); the released one is needed in full to compare.
+        try await svn.update(tag, setDepth: .infinity)
+        let differences = try WorkingCopyOperations.differences(candidate: candidate, releasedTree: tag, ignoring: [readmeFile])
+        guard differences.isEmpty else { throw ReleaseError.readmeUpdateChangesCode(tag: "tags/\(version)", paths: differences) }
+
+        let readme = candidate.rootURL.appendingPathComponent(readmeFile)
+        try await WorkingCopyOperations.replaceFile(at: wc.appendingPathComponent("trunk").appendingPathComponent(readmeFile), with: readme, svn: svn)
+        try await WorkingCopyOperations.replaceFile(at: tag.appendingPathComponent(readmeFile), with: readme, svn: svn)
+        if let assetsPath = product.assetsPath {
+            try await syncAssets(from: URL(fileURLWithPath: assetsPath, isDirectory: true), into: wc.appendingPathComponent("assets"), svn: svn)
+        }
+    }
+
+    public func verifyReadmeUpdate(candidate: StagedCandidate, readmeFile: String, version: String, product: Product, svn: SVNServicing) async throws -> VerificationReport {
+        let base = product.svnRepositoryURL.absoluteString.trimmingTrailingSlash
+        let tagURL = "\(base)/tags/\(version)"
+        guard try await svn.exists(tagURL) else {
+            return VerificationReport(committedRevision: nil, tagExists: false, tagURL: tagURL, notes: ["The tag does not exist on the server."])
+        }
+        let expected = candidate.entries.first { $0.path == readmeFile }?.sha256
+        var missing: [String] = []
+        var mismatched: [String] = []
+        var revision: Int?
+        var stableMatches: Bool?
+        for path in ["trunk/\(readmeFile)", "tags/\(version)/\(readmeFile)"] {
+            guard let data = try await WorkingCopyOperations.catIfExists("\(base)/\(path)", svn: svn) else {
+                missing.append(path)
+                continue
+            }
+            if Hashing.sha256(data) != expected { mismatched.append(path) }
+            if path.hasPrefix("trunk/") {
+                stableMatches = ReadmeParser.parse(String(decoding: data, as: UTF8.self)).stableTag == version
+            }
+            revision = max(revision ?? 0, try await svn.info("\(base)/\(path)").lastChangedRevision ?? 0)
+        }
+        var notes: [String] = []
+        if stableMatches == false { notes.append("trunk readme Stable tag is not \(version).") }
+        if !mismatched.isEmpty {
+            notes.append("Checksum differences can come from svn:eol-style or keyword properties applied by the repository.")
+        }
+        return VerificationReport(
+            committedRevision: revision,
+            tagExists: true,
+            tagURL: tagURL,
+            missingFiles: missing,
+            checksumMismatches: mismatched,
+            stableTagMatches: stableMatches,
+            notes: notes
+        )
+    }
+
+    public func postReadmeUpdateGuidance(product: Product, version: String) -> [String] {
+        [
+            "WordPress.org refreshes the plugin page within minutes. Banner, icon and screenshot changes can take up to 6 hours to appear because of caching.",
+            "If Release Confirmation is enabled for \(product.name), changing tags/\(version) may need confirming again at https://wordpress.org/plugins/developers/releases/.",
+        ]
+    }
+
     public func postReleaseGuidance(product: Product, version: String) -> [String] {
         [
             "WordPress.org rebuilds the download and updates the plugin page within minutes (up to several hours under load).",

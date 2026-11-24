@@ -34,6 +34,8 @@ public struct RepositorySnapshot: Codable, Hashable, Sendable {
     public var notes: [String]
     /// Title line of the server's trunk readme (plugins), used to name new products.
     public var readmeTitle: String?
+    /// Latest stable WordPress release when WordPress.org could be reached.
+    public var latestWordPressVersion: String?
 
     public init(
         svnVersion: String? = nil,

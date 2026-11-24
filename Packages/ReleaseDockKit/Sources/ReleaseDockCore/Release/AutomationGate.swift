@@ -22,7 +22,12 @@ public enum AutomationGate {
         }
 
         if !allPassed(.versionValidity) { reasons.append("The version is not a valid, final release version") }
-        if !allPassed(.versionIncrease) { reasons.append("The version is not confirmed to be newer than the current release") }
+        switch record.kind {
+        case .version:
+            if !allPassed(.versionIncrease) { reasons.append("The version is not confirmed to be newer than the current release") }
+        case .readmeUpdate:
+            if !allPassed(.releasedVersion) { reasons.append("The package is not confirmed to be the released version") }
+        }
         if !allPassed(.productIdentity) { reasons.append("Product identity is not fully confirmed") }
         if report.isBlocking { reasons.append("\(report.blockingResults.count) required check(s) did not pass") }
         let skippedRequired = report.results.filter { $0.status == .skipped && $0.check.isRequired }
@@ -33,7 +38,12 @@ public enum AutomationGate {
         if let repo = record.repository {
             if !repo.workingCopyChanges.isEmpty { reasons.append("The working copy had local changes") }
             if !repo.outOfDatePaths.isEmpty { reasons.append("The working copy is not current with the repository") }
-            if repo.releasePathExists != false { reasons.append("The release tag is not confirmed absent") }
+            switch record.kind {
+            case .version:
+                if repo.releasePathExists != false { reasons.append("The release tag is not confirmed absent") }
+            case .readmeUpdate:
+                if repo.releasePathExists != true { reasons.append("The released tag is not confirmed to exist") }
+            }
             if repo.authentication != .keychain && repo.authentication != .cachedBySVN { reasons.append("No valid authentication is available") }
         } else {
             reasons.append("Repository state is unknown")

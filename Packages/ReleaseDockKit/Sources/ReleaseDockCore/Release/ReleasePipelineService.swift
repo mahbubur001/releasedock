@@ -20,6 +20,8 @@ public struct PipelineDependencies: Sendable {
     public var staging: ReleaseStaging
     public var strategies: StrategyProvider
     public var notifications: NotificationServicing
+    /// WordPress.org API lookups; nil disables them (tests, offline use).
+    public var wordpressOrg: WordPressOrgServicing?
     /// Recorded in manifests, e.g. "ReleaseDock 1.0.0 (42)".
     public var generator: String
 
@@ -36,6 +38,7 @@ public struct PipelineDependencies: Sendable {
         staging: ReleaseStaging,
         strategies: StrategyProvider = StrategyProvider(),
         notifications: NotificationServicing = NoopNotificationService(),
+        wordpressOrg: WordPressOrgServicing? = nil,
         generator: String = "ReleaseDock"
     ) {
         self.products = products
@@ -50,6 +53,7 @@ public struct PipelineDependencies: Sendable {
         self.staging = staging
         self.strategies = strategies
         self.notifications = notifications
+        self.wordpressOrg = wordpressOrg
         self.generator = generator
     }
 }
@@ -138,9 +142,12 @@ public actor ReleasePipelineService {
     // MARK: Create
 
     /// Registers a new release attempt for a ZIP or folder source.
-    public func createRelease(productID: UUID, source: ReleaseSource, mode: ReleaseMode? = nil) throws -> ReleaseRecord {
+    public func createRelease(productID: UUID, source: ReleaseSource, mode: ReleaseMode? = nil, kind: ReleaseKind = .version) throws -> ReleaseRecord {
         let product = try product(productID)
-        let record = ReleaseRecord(product: product, source: source, mode: mode ?? product.releaseMode)
+        if kind == .readmeUpdate, product.type != .plugin {
+            throw ReleaseError.invalidState("Readme updates without a new version are only available for plugins.")
+        }
+        let record = ReleaseRecord(product: product, source: source, mode: mode ?? product.releaseMode, kind: kind)
         try deps.releases.save(record)
         emit(record, "Release detected from \(source.kind == .zip ? "ZIP" : "folder") \(URL(fileURLWithPath: source.path).lastPathComponent)")
         return record
@@ -216,7 +223,7 @@ public actor ReleasePipelineService {
         let snapshot = await gatherSnapshot(product: product, version: record.version, strategy: strategy)
         record.repository = snapshot
         record.previousVersion = snapshot.currentVersion ?? product.currentVersion
-        let context = ValidationContext(product: product, inspection: inspection, detected: record.detected, detectionError: detectionError, repository: snapshot, git: gitState)
+        let context = ValidationContext(product: product, inspection: inspection, detected: record.detected, detectionError: detectionError, repository: snapshot, git: gitState, kind: record.kind)
         let report = deps.validator.validate(context)
         record.validation = report
         if report.isBlocking {
@@ -238,9 +245,17 @@ public actor ReleasePipelineService {
         emit(record, "Applying the candidate to the SVN working copy")
         record.workingCopyModified = true
         try deps.releases.save(record)
-        try await strategy.apply(candidate: candidate, version: version, currentVersion: snapshot.currentVersion, product: product, svn: deps.svn)
-        try writeManifest(&record, strategy: strategy)
-        try move(&record, to: .staged, "Staged \(candidate.files.count) files into \(strategy.releasePath(version: version))")
+        switch record.kind {
+        case .version:
+            try await strategy.apply(candidate: candidate, version: version, currentVersion: snapshot.currentVersion, product: product, svn: deps.svn)
+            try writeManifest(&record, strategy: strategy)
+            try move(&record, to: .staged, "Staged \(candidate.files.count) files into \(strategy.releasePath(version: version))")
+        case .readmeUpdate:
+            guard let readmeFile = record.detected?.readmeFile else { throw ReleaseError.missingData("readme") }
+            try await strategy.applyReadmeUpdate(candidate: candidate, readmeFile: readmeFile, version: version, product: product, svn: deps.svn)
+            try writeManifest(&record, strategy: strategy)
+            try move(&record, to: .staged, "Staged the readme\(product.assetsPath == nil ? "" : " and assets") for trunk and \(strategy.releasePath(version: version))")
+        }
 
         // 4. Preview.
         let preview = try await buildPreview(record: record, product: product, strategy: strategy)
@@ -259,14 +274,24 @@ public actor ReleasePipelineService {
             record.workingCopyModified = false
             try move(&record, to: .completed, "Dry run complete; nothing was committed")
             try writeManifest(&record, strategy: strategy)
-            await deps.notifications.notify(title: "Dry run complete", body: "\(product.name) \(version) is ready to publish.", identifier: record.id.uuidString)
+            let body = record.kind == .readmeUpdate ? "The \(product.name) \(version) readme update is ready to publish." : "\(product.name) \(version) is ready to publish."
+            await deps.notifications.notify(title: "Dry run complete", body: body, identifier: record.id.uuidString)
         }
         return record
     }
 
     /// Collects repository facts; failures become part of the snapshot instead of throwing,
-    /// so validation can report them precisely.
+    /// so validation can report them precisely. The WordPress.org lookup runs alongside the
+    /// SVN round trips and is best effort: without it, "Tested up to" is only format-checked.
     func gatherSnapshot(product: Product, version: String?, strategy: ReleaseStrategy) async -> RepositorySnapshot {
+        let wordpressOrg = deps.wordpressOrg
+        async let latestWordPress = try? wordpressOrg?.latestWordPressVersion()
+        var snapshot = await gatherRepositorySnapshot(product: product, version: version, strategy: strategy)
+        snapshot.latestWordPressVersion = await latestWordPress
+        return snapshot
+    }
+
+    private func gatherRepositorySnapshot(product: Product, version: String?, strategy: ReleaseStrategy) async -> RepositorySnapshot {
         var snapshot: RepositorySnapshot
         do {
             let installation = try await deps.svn.detectInstallation()
@@ -302,7 +327,8 @@ public actor ReleasePipelineService {
     }
 
     func commitMessage(record: ReleaseRecord) -> String {
-        "Release \(record.productName) \(record.version ?? "")\n\n\(record.commitMarker)\n"
+        let summary = record.kind == .readmeUpdate ? "Update readme for \(record.productName) \(record.version ?? "")" : "Release \(record.productName) \(record.version ?? "")"
+        return "\(summary)\n\n\(record.commitMarker)\n"
     }
 
     /// Lists the working-copy changes and fingerprints them together with the content
@@ -378,7 +404,7 @@ public actor ReleasePipelineService {
     /// against a stale report.
     private func revalidate(_ record: inout ReleaseRecord, product: Product, preview: ReleasePreview) {
         guard let inspection = record.inspection else { return }
-        let context = ValidationContext(product: product, inspection: inspection, detected: record.detected, repository: record.repository, preview: preview)
+        let context = ValidationContext(product: product, inspection: inspection, detected: record.detected, repository: record.repository, preview: preview, kind: record.kind)
         record.validation = deps.validator.validate(context)
     }
 
@@ -412,7 +438,18 @@ public actor ReleasePipelineService {
             let releaseURL = "\(base)/\(strategy.releasePath(version: version))"
             // Check for an earlier landed attempt first: once it landed, the working copy is
             // necessarily out of date, and that must lead to recovery, not failure.
-            let releaseExists = try await deps.svn.exists(releaseURL)
+            // A readme update edits an existing tag, so only its commit marker can tell.
+            let releaseExists: Bool
+            switch record.kind {
+            case .version:
+                releaseExists = try await deps.svn.exists(releaseURL)
+            case .readmeUpdate:
+                if try await findCommittedRevision(record: record, product: product) != nil {
+                    try move(&record, to: .publishing, "Readme update already present on the server")
+                    return try await recoverAfterUncertainCommit(&record, product: product, strategy: strategy)
+                }
+                releaseExists = false
+            }
             if !releaseExists {
                 let status = try await deps.svn.status(product.workingCopyURL, showUpdates: true)
                 let outOfDate = status.filter(\.isOutOfDate)
@@ -475,8 +512,14 @@ public actor ReleasePipelineService {
         emit(record, "Verifying the release on the server")
         let report: VerificationReport
         do {
-            let scratch = try deps.staging.workspace(for: record.id)
-            report = try await strategy.verify(candidate: candidate, version: version, product: product, svn: deps.svn, scratch: scratch)
+            switch record.kind {
+            case .version:
+                let scratch = try deps.staging.workspace(for: record.id)
+                report = try await strategy.verify(candidate: candidate, version: version, product: product, svn: deps.svn, scratch: scratch)
+            case .readmeUpdate:
+                guard let readmeFile = record.detected?.readmeFile else { throw ReleaseError.missingData("readme") }
+                report = try await strategy.verifyReadmeUpdate(candidate: candidate, readmeFile: readmeFile, version: version, product: product, svn: deps.svn)
+            }
         } catch {
             // Leave the release recoverable ("Inspect Repository") rather than stuck in Verifying.
             record.errors.append("Verification failed: \(SecretRedactor.redact(error.localizedDescription))")
@@ -497,19 +540,23 @@ public actor ReleasePipelineService {
             record.verification?.notes.append("Working copy update after commit failed: \(error.localizedDescription)")
         }
         record.workingCopyModified = false
-        record.guidance = strategy.postReleaseGuidance(product: product, version: version)
+        record.guidance = record.kind == .readmeUpdate
+            ? strategy.postReadmeUpdateGuidance(product: product, version: version)
+            : strategy.postReleaseGuidance(product: product, version: version)
         let summary = report.isClean ? "Verified" : "Verified with \(report.missingFiles.count + report.unexpectedFiles.count + report.checksumMismatches.count) difference(s)"
         try move(&record, to: .completed, "\(summary); revision \(record.committedRevision.map(String.init) ?? "?")")
 
         var updated = (try? deps.products.product(id: product.id)) ?? product
-        updated.currentVersion = version
-        updated.lastSuccessfulRelease = ReleaseSummary(releaseID: record.id, version: version, revision: record.committedRevision, date: Date())
+        if record.kind == .version {
+            updated.currentVersion = version
+            updated.lastSuccessfulRelease = ReleaseSummary(releaseID: record.id, version: version, revision: record.committedRevision, date: Date())
+        }
         updated.updatedAt = Date()
         try deps.products.save(updated)
         try writeManifest(&record, strategy: strategy)
         deps.staging.removeWorkspace(for: record.id)
         await deps.notifications.notify(
-            title: "\(product.name) \(version) released",
+            title: record.kind == .readmeUpdate ? "\(product.name) \(version) readme updated" : "\(product.name) \(version) released",
             body: "Committed revision \(record.committedRevision.map(String.init) ?? "?")." + (report.isClean ? "" : " Verification found differences; review the report."),
             identifier: record.id.uuidString
         )
@@ -552,7 +599,8 @@ public actor ReleasePipelineService {
         }
 
         let releaseURL = "\(product.svnRepositoryURL.absoluteString.trimmingTrailingSlash)/\(strategy.releasePath(version: version))"
-        if try await deps.svn.exists(releaseURL) {
+        // A readme update's tag existed before; only a missing new tag says anything here.
+        if record.kind == .version, try await deps.svn.exists(releaseURL) {
             record.errors.append("\(releaseURL) exists but was not created by this release")
             if record.state == .publishing { try move(&record, to: .recoveryRequired, "Release path exists without this release's marker") }
             try await failAndReset(&record, product: product, reason: "\(strategy.releasePath(version: version)) exists but was not created by this release")

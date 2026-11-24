@@ -80,13 +80,20 @@ private struct ReleaseWizardContent: View {
                 CredentialsSheet(product: product)
             }
         }
-        .confirmationDialog("Publish \(wizard.product?.name ?? "") \(wizard.record?.version ?? "") to WordPress.org?", isPresented: $confirmPublish) {
+        .confirmationDialog(publishQuestion, isPresented: $confirmPublish) {
             SwiftUI.Button("Publish") { Task { await wizard.approveAndPublish(automatic: false) } }
         } message: {
             if let preview = wizard.record?.preview {
                 Text("This commits \(preview.changes.count) change(s) to \(wizard.record?.svnURL ?? "SVN"). Released versions cannot be overwritten.")
             }
         }
+    }
+
+    private var publishQuestion: String {
+        let name = "\(wizard.product?.name ?? "") \(wizard.record?.version ?? "")"
+        return wizard.record?.kind == .readmeUpdate
+            ? "Update the readme of \(name) on WordPress.org?"
+            : "Publish \(name) to WordPress.org?"
     }
 
     // MARK: Selection
@@ -108,6 +115,19 @@ private struct ReleaseWizardContent: View {
                 Picker("Product", selection: $wizard.productID) {
                     ForEach(model.products) { product in
                         Text("\(product.name) (\(product.type.displayName.lowercased()), \(product.currentVersion ?? "no release"))").tag(Optional(product.id))
+                    }
+                }
+                if wizard.product?.type == .plugin {
+                    Picker("Publish", selection: $wizard.kind) {
+                        ForEach(ReleaseKind.allCases) { kind in
+                            Text(kind.displayName).tag(kind)
+                        }
+                    }
+                    .pickerStyle(.segmented)
+                    if wizard.kind == .readmeUpdate {
+                        Label("Updates readme.txt\(wizard.product?.assetsPath == nil ? "" : " and /assets") of the released \(wizard.product?.currentVersion ?? "version") in trunk and its tag, e.g. to raise \"Tested up to\". Use the released package: any code change is refused.", systemImage: "info.circle")
+                            .font(.caption).foregroundStyle(.secondary)
+                            .fixedSize(horizontal: false, vertical: true)
                     }
                 }
                 Picker("Mode", selection: Binding(get: { wizard.effectiveMode }, set: { wizard.modeOverride = $0 })) {

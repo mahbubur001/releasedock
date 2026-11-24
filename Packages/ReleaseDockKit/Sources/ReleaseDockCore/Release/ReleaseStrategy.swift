@@ -30,6 +30,27 @@ public protocol ReleaseStrategy: Sendable {
     func verify(candidate: StagedCandidate, version: String, product: Product, svn: SVNServicing, scratch: URL) async throws -> VerificationReport
     /// Message lines shown after a successful release (e.g. Release Confirmation guidance).
     func postReleaseGuidance(product: Product, version: String) -> [String]
+
+    // Readme updates (no new version)
+    /// Writes the candidate's readme into trunk and the released version's tag, and syncs
+    /// assets. Throws `ReleaseError.readmeUpdateChangesCode` when anything else in the
+    /// candidate differs from the released tag.
+    func applyReadmeUpdate(candidate: StagedCandidate, readmeFile: String, version: String, product: Product, svn: SVNServicing) async throws
+    /// Verifies that the server's trunk and tag readmes match the candidate's.
+    func verifyReadmeUpdate(candidate: StagedCandidate, readmeFile: String, version: String, product: Product, svn: SVNServicing) async throws -> VerificationReport
+    func postReadmeUpdateGuidance(product: Product, version: String) -> [String]
+}
+
+extension ReleaseStrategy {
+    public func applyReadmeUpdate(candidate: StagedCandidate, readmeFile: String, version: String, product: Product, svn: SVNServicing) async throws {
+        throw ReleaseError.invalidState("Readme updates without a new version are only available for plugins.")
+    }
+
+    public func verifyReadmeUpdate(candidate: StagedCandidate, readmeFile: String, version: String, product: Product, svn: SVNServicing) async throws -> VerificationReport {
+        throw ReleaseError.invalidState("Readme updates without a new version are only available for plugins.")
+    }
+
+    public func postReadmeUpdateGuidance(product: Product, version: String) -> [String] { [] }
 }
 
 public struct StrategyProvider: Sendable {
@@ -117,6 +138,44 @@ enum WorkingCopyOperations {
             return "Working copy at \(path.path) is a checkout of \(info.url), not \(expected.absoluteString)"
         }
         return nil
+    }
+
+    /// Candidate files (other than `ignoring`) that are missing from, or differ from, the
+    /// checked-out `releasedTree`, plus released files the candidate no longer has.
+    static func differences(candidate: StagedCandidate, releasedTree: URL, ignoring: Set<String>) throws -> [String] {
+        let fm = FileManager.default
+        let root = releasedTree.standardizedFileURL.path + "/"
+        var released: Set<String> = []
+        if let enumerator = fm.enumerator(at: releasedTree, includingPropertiesForKeys: [.isRegularFileKey]) {
+            while let url = enumerator.nextObject() as? URL {
+                if url.lastPathComponent == ".svn" { enumerator.skipDescendants(); continue }
+                guard try url.resourceValues(forKeys: [.isRegularFileKey]).isRegularFile == true else { continue }
+                let full = url.standardizedFileURL.path
+                if full.hasPrefix(root) { released.insert(String(full.dropFirst(root.count))) }
+            }
+        }
+        var differences: [String] = []
+        let files = candidate.entries.filter { $0.kind == .file && !ignoring.contains($0.path) }
+        for entry in files {
+            let file = releasedTree.appendingPathComponent(entry.path)
+            if !released.contains(entry.path) || (try? Hashing.sha256(ofFile: file)) != entry.sha256 {
+                differences.append(entry.path)
+            }
+        }
+        differences += released.subtracting(files.map(\.path)).subtracting(ignoring)
+        return differences.sorted()
+    }
+
+    /// Replaces `destination` with `source`, scheduling it for addition when it is new.
+    static func replaceFile(at destination: URL, with source: URL, svn: SVNServicing) async throws {
+        let fm = FileManager.default
+        let existed = fm.fileExists(atPath: destination.path)
+        if existed {
+            if (try? Hashing.sha256(ofFile: destination)) == (try? Hashing.sha256(ofFile: source)) { return }
+            try fm.removeItem(at: destination)
+        }
+        try fm.copyItem(at: source, to: destination)
+        if !existed { try await svn.add([destination]) }
     }
 
     static func localChanges(at path: URL, svn: SVNServicing) async throws -> [String] {

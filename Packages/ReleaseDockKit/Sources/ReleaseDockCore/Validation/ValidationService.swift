@@ -11,8 +11,9 @@ public struct ValidationContext: Sendable {
     public var git: GitRepositoryState?
     /// Present once the release has been staged and previewed.
     public var preview: ReleasePreview?
+    public var kind: ReleaseKind
 
-    public init(product: Product, inspection: PackageInspection, detected: DetectedProduct?, detectionError: String? = nil, repository: RepositorySnapshot?, git: GitRepositoryState? = nil, preview: ReleasePreview? = nil) {
+    public init(product: Product, inspection: PackageInspection, detected: DetectedProduct?, detectionError: String? = nil, repository: RepositorySnapshot?, git: GitRepositoryState? = nil, preview: ReleasePreview? = nil, kind: ReleaseKind = .version) {
         self.product = product
         self.inspection = inspection
         self.detected = detected
@@ -20,6 +21,7 @@ public struct ValidationContext: Sendable {
         self.repository = repository
         self.git = git
         self.preview = preview
+        self.kind = kind
     }
 }
 
@@ -54,6 +56,12 @@ public struct ValidationService: ValidationServicing {
         results += repository(context)
         results += releaseDiff(context, strategy: strategy)
         results += optional(context)
+        let freshness = testedUpToFreshness(context)
+        if !freshness.isEmpty {
+            // The freshness result supersedes the strategy's format-only pass.
+            results.removeAll { $0.check == .testedUpTo && $0.status == .passed }
+        }
+        results += freshness
 
         let disabled = context.product.validation.disabledChecks
         let filtered = results.filter { $0.check.isRequired || !disabled.contains($0.check) }
@@ -181,6 +189,7 @@ public struct ValidationService: ValidationServicing {
             }
         }
         results += strategy.validateVersionFormat(version)
+        if c.kind == .readmeUpdate { return results + releasedVersion(c, version: version, strategy: strategy) }
 
         if let repo = c.repository, repo.connectivityError == nil {
             switch versions.compare(candidate: version, current: repo.currentVersion) {
@@ -206,6 +215,33 @@ public struct ValidationService: ValidationServicing {
         } else {
             results.append(.skip(.versionIncrease, "Repository unavailable; version could not be compared"))
             results.append(.skip(.existingTag, "Repository unavailable"))
+        }
+        return results
+    }
+
+    /// A readme update edits the released version in place: the package must carry exactly
+    /// that version, and its tag must exist.
+    func releasedVersion(_ c: ValidationContext, version: String, strategy: ReleaseStrategy) -> [ValidationResult] {
+        let releasePath = strategy.releasePath(version: version)
+        guard c.product.type == .plugin else {
+            return [.fail(.releasedVersion, "Readme updates without a new version are only available for plugins", fix: "Publish a new theme version instead.")]
+        }
+        guard let repo = c.repository, repo.connectivityError == nil else {
+            return [.skip(.releasedVersion, "Repository unavailable; the released version could not be checked")]
+        }
+        guard let current = repo.currentVersion else {
+            return [.fail(.releasedVersion, "\(c.product.name) has no released version to update", fix: "Publish a version first.")]
+        }
+        var results: [ValidationResult] = []
+        if PHPVersion.compare(version, current) == 0 {
+            results.append(.pass(.releasedVersion, "Updates the readme of the released version \(current)"))
+        } else {
+            results.append(.fail(.releasedVersion, "The package is version \(version), but the released version is \(current)", fix: "Use the package of \(current), or publish \(version) as a new version."))
+        }
+        switch repo.releasePathExists {
+        case true?: results.append(.pass(.existingTag, "\(releasePath) exists and will be updated"))
+        case false?: results.append(.fail(.existingTag, "\(releasePath) does not exist in SVN", fix: "Publish \(version) as a new version."))
+        case nil: results.append(.skip(.existingTag, "Could not determine whether \(releasePath) exists"))
         }
         return results
     }
@@ -267,7 +303,22 @@ public struct ValidationService: ValidationServicing {
         guard let version = c.detected?.version else { return [.fail(.releaseDiff, "No version")] }
         var results: [ValidationResult] = []
         if preview.changes.isEmpty {
-            results.append(.fail(.releaseDiff, "The release produces no SVN changes"))
+            results.append(.fail(.releaseDiff, c.kind == .readmeUpdate ? "The readme and assets already match the server; there is nothing to update" : "The release produces no SVN changes"))
+        }
+        if c.kind == .readmeUpdate {
+            let releasePath = strategy.releasePath(version: version)
+            let readme = c.detected?.readmeFile ?? "readme.txt"
+            let allowed = ["trunk/\(readme)", "\(releasePath)/\(readme)"]
+            let unexpected = preview.changes.filter { change in
+                !(allowed.contains(change.path) || change.path == "assets" || change.path.hasPrefix("assets/"))
+            }
+            for change in unexpected.prefix(10) {
+                results.append(.fail(.releaseDiff, "A readme update may only change the readme and /assets", file: change.path))
+            }
+            if results.isEmpty {
+                results.append(.pass(.releaseDiff, "\(preview.changes.count) change(s) to the readme and assets of \(releasePath)"))
+            }
+            return results
         }
         let releasePath = strategy.releasePath(version: version)
         if !preview.changes.contains(where: { $0.path == releasePath && $0.kind == .added }) {
@@ -280,6 +331,47 @@ public struct ValidationService: ValidationServicing {
         }
         if results.isEmpty {
             results.append(.pass(.releaseDiff, "\(preview.added) added, \(preview.modified) modified, \(preview.deleted) deleted; creates \(releasePath)"))
+        }
+        return results
+    }
+
+    // MARK: Tested up to
+
+    /// Compares "Tested up to" with the current WordPress branch (Plugin Check's
+    /// `outdated_tested_upto_header`) and, for plugins, with the main file's own
+    /// "Tested up to" header (`mismatched_tested_up_to_header`). Format problems are
+    /// reported by the strategies; values that are not version numbers are ignored here.
+    func testedUpToFreshness(_ c: ValidationContext) -> [ValidationResult] {
+        guard let detected = c.detected else { return [] }
+        var results: [ValidationResult] = []
+        let readmeValue = detected.readme?.testedUpTo
+        let tested: String?
+        let file: String?
+        switch detected.type {
+        case .plugin:
+            tested = readmeValue
+            file = detected.readmeFile
+            if let header = detected.headers["Tested up to"], let readmeValue,
+               let order = WordPressBranch.compare(header, readmeValue), order != 0 {
+                results.append(.warn(.testedUpTo, "Tested up to is \(header) in \(detected.mainFile ?? "the plugin file") but \(readmeValue) in the readme", file: detected.mainFile, fix: "Use the same value in both files, or remove it from the plugin header."))
+            }
+        case .theme:
+            tested = detected.headers["Tested up to"] ?? readmeValue
+            file = detected.mainFile
+        }
+        guard let tested, let latest = c.repository?.latestWordPressVersion,
+              let latestBranch = WordPressBranch.of(latest),
+              let order = WordPressBranch.compare(tested, latest)
+        else { return results }
+        if order < 0 {
+            results.append(.warn(
+                .testedUpTo,
+                "Tested up to \(tested) is behind the current WordPress release \(latest); WordPress.org's Plugin Check reports it as outdated",
+                file: file,
+                fix: "Test with WordPress \(latestBranch), then set \"Tested up to: \(latestBranch)\"."
+            ))
+        } else if results.isEmpty {
+            results.append(.pass(.testedUpTo, "Tested up to \(tested) covers the current WordPress release \(latest)"))
         }
         return results
     }

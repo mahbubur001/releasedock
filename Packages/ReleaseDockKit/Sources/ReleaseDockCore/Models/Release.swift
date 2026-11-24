@@ -69,6 +69,25 @@ public struct StateTransition: Codable, Hashable, Sendable {
     }
 }
 
+/// What a release publishes.
+public enum ReleaseKind: String, Codable, CaseIterable, Sendable, Identifiable {
+    /// A new version: trunk is updated and a new tag (or theme version directory) is created.
+    case version
+    /// Plugins only: the readme (and `/assets`) of the released version are updated in trunk
+    /// and in its tag without a new version, e.g. to raise "Tested up to". The code must be
+    /// identical to the released tag.
+    case readmeUpdate
+
+    public var id: String { rawValue }
+
+    public var displayName: String {
+        switch self {
+        case .version: "New Version"
+        case .readmeUpdate: "Readme & Assets Update"
+        }
+    }
+}
+
 public enum ApprovalKind: String, Codable, Sendable {
     case user
     case automatic
@@ -174,6 +193,8 @@ public struct ReleaseRecord: Codable, Hashable, Sendable, Identifiable {
     public var productType: ProductType
     public var source: ReleaseSource
     public var mode: ReleaseMode
+    /// Nil in records created before readme updates existed; read through `kind`.
+    public var releaseKind: ReleaseKind?
     public var state: ReleaseState
     public var version: String?
     public var previousVersion: String?
@@ -208,9 +229,11 @@ public struct ReleaseRecord: Codable, Hashable, Sendable, Identifiable {
         product: Product,
         source: ReleaseSource,
         mode: ReleaseMode,
+        kind: ReleaseKind = .version,
         createdAt: Date = Date()
     ) {
         self.id = id
+        releaseKind = kind
         productID = product.id
         productName = product.name
         productSlug = product.slug
@@ -232,4 +255,6 @@ public struct ReleaseRecord: Codable, Hashable, Sendable, Identifiable {
     /// Marker embedded in the commit message so a release can be recognised on the
     /// server after an uncertain commit (timeout, crash, cancelled process).
     public var commitMarker: String { "ReleaseDock-Release-ID: \(id.uuidString)" }
+
+    public var kind: ReleaseKind { releaseKind ?? .version }
 }

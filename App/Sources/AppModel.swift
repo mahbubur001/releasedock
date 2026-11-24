@@ -106,6 +106,7 @@ final class AppModel {
             keychain: keychain,
             staging: ReleaseStagingService(paths: paths),
             notifications: notifications,
+            wordpressOrg: WordPressOrgService(),
             generator: "ReleaseDock \(Self.appVersion) (\(Self.appBuild))"
         ))
         updateChecker = AppUpdateChecker(github: github, store: store, keychain: keychain, notifications: notifications)

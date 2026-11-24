@@ -17,6 +17,7 @@ public struct ReleaseManifest: Codable, Hashable, Sendable {
     public var version: String
     public var previousVersion: String?
     public var mode: ReleaseMode
+    public var kind: ReleaseKind?
     public var sourceKind: SourceKind
     public var sourcePath: String
     public var sourceSHA256: String
@@ -42,6 +43,7 @@ public struct ReleaseManifest: Codable, Hashable, Sendable {
             version: record.version ?? "",
             previousVersion: record.previousVersion,
             mode: record.mode,
+            kind: record.kind,
             sourceKind: record.source.kind,
             sourcePath: record.source.path,
             sourceSHA256: record.sourceSHA256 ?? "",

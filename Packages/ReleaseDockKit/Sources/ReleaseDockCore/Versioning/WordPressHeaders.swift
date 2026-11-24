@@ -10,7 +10,7 @@ public enum WordPressHeaders {
     public static let pluginHeaders = [
         "Plugin Name", "Plugin URI", "Version", "Description", "Author", "Author URI",
         "Text Domain", "Domain Path", "Network", "Requires at least", "Requires PHP",
-        "Update URI", "Requires Plugins", "License", "License URI",
+        "Update URI", "Requires Plugins", "License", "License URI", "Tested up to",
     ]
 
     public static let themeHeaders = [

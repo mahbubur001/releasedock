@@ -4,6 +4,10 @@ All notable changes to ReleaseDock are documented here. The format follows [Keep
 
 ## [Unreleased]
 
+### Added
+- Readme & Assets Update for plugins: update `readme.txt` (and `/assets`) of the released version in trunk and its tag without publishing a new version, e.g. to raise "Tested up to". The package must be the released version; any code difference from the released tag is refused. Dry run, preview, approval, single commit, verification and uncertain-commit recovery work as for version releases.
+- "Tested up to" is compared with the current WordPress release from api.wordpress.org and warns when it is behind, as WordPress.org's Plugin Check does. A plugin header "Tested up to" that differs from the readme also warns. Without a connection, only the format is checked.
+
 ## [0.1.3] - 2026-11-23
 
 ### Changed
