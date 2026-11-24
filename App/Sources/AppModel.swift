@@ -9,6 +9,8 @@ struct AppSettings: Codable, Equatable {
     var checkGitHubOnLaunch: Bool = true
     var svnExecutablePath: String = ""
     var notificationsEnabled: Bool = true
+    /// Local WordPress install with Plugin Check active; nil or empty turns Plugin Check off.
+    var pluginCheckWordPressPath: String?
 
     static let key = "app.settings"
     /// Former release repository (deleted); a saved value equal to it is replaced by the bundled default.
@@ -60,6 +62,7 @@ final class AppModel {
     let diagnostics: DiagnosticsService
     let updateChecker: AppUpdateChecker
     @ObservationIgnored private var directoryMonitor: Task<Void, Never>?
+    @ObservationIgnored let codeCheckConfiguration = CodeCheckConfigurationStore()
 
     var products: [Product] = []
     var releases: [ReleaseRecord] = []
@@ -93,6 +96,7 @@ final class AppModel {
         keychain = KeychainService()
         let loadedSettings = (try? store.setting(AppSettings.self, forKey: AppSettings.key)) ?? AppSettings()
         settings = loadedSettings
+        codeCheckConfiguration.value = CodeCheckConfiguration(pluginCheckWordPressPath: loadedSettings.pluginCheckWordPressPath)
         svn = SVNService(executable: loadedSettings.svnExecutablePath.isEmpty ? nil : URL(fileURLWithPath: loadedSettings.svnExecutablePath))
         productService = ProductService(repository: store, paths: paths)
         repositorySetup = RepositorySetupService(svn: svn)
@@ -108,6 +112,7 @@ final class AppModel {
             staging: ReleaseStagingService(paths: paths),
             notifications: notifications,
             wordpressOrg: WordPressOrgService(),
+            codeChecker: CodeCheckService(configuration: codeCheckConfiguration),
             generator: "ReleaseDock \(Self.appVersion) (\(Self.appBuild))"
         ))
         updateChecker = AppUpdateChecker(github: github, store: store, keychain: keychain, notifications: notifications)
@@ -214,6 +219,7 @@ final class AppModel {
 
     func saveSettings(_ newValue: AppSettings) {
         settings = newValue
+        codeCheckConfiguration.value = CodeCheckConfiguration(pluginCheckWordPressPath: newValue.pluginCheckWordPressPath)
         do {
             try store.setSetting(newValue, forKey: AppSettings.key)
         } catch {

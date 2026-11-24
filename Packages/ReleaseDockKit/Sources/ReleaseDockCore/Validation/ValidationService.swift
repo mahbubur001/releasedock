@@ -12,8 +12,10 @@ public struct ValidationContext: Sendable {
     /// Present once the release has been staged and previewed.
     public var preview: ReleasePreview?
     public var kind: ReleaseKind
+    /// Present once the staged candidate has been linted / checked.
+    public var codeChecks: CodeCheckReport?
 
-    public init(product: Product, inspection: PackageInspection, detected: DetectedProduct?, detectionError: String? = nil, repository: RepositorySnapshot?, git: GitRepositoryState? = nil, preview: ReleasePreview? = nil, kind: ReleaseKind = .version) {
+    public init(product: Product, inspection: PackageInspection, detected: DetectedProduct?, detectionError: String? = nil, repository: RepositorySnapshot?, git: GitRepositoryState? = nil, preview: ReleasePreview? = nil, kind: ReleaseKind = .version, codeChecks: CodeCheckReport? = nil) {
         self.product = product
         self.inspection = inspection
         self.detected = detected
@@ -22,6 +24,7 @@ public struct ValidationContext: Sendable {
         self.git = git
         self.preview = preview
         self.kind = kind
+        self.codeChecks = codeChecks
     }
 }
 
@@ -62,6 +65,7 @@ public struct ValidationService: ValidationServicing {
             results.removeAll { $0.check == .testedUpTo && $0.status == .passed }
         }
         results += freshness
+        results += codeChecks(context)
 
         let disabled = context.product.validation.disabledChecks
         let filtered = results.filter { $0.check.isRequired || !disabled.contains($0.check) }
@@ -372,6 +376,52 @@ public struct ValidationService: ValidationServicing {
             ))
         } else if results.isEmpty {
             results.append(.pass(.testedUpTo, "Tested up to \(tested) covers the current WordPress release \(latest)"))
+        }
+        return results
+    }
+
+    // MARK: Code checks
+
+    static let listedFindings = 15
+
+    func codeChecks(_ c: ValidationContext) -> [ValidationResult] {
+        guard let report = c.codeChecks else { return [] }
+        var results: [ValidationResult] = []
+        func location(_ f: CodeCheckFinding) -> String { f.line.map { "Line \($0): " } ?? "" }
+
+        if let reason = report.phpLintSkipped {
+            results.append(.skip(.phpSyntax, reason))
+        } else {
+            let lint = report.findings(.phpLint)
+            let errors = lint.filter { $0.severity == .error }
+            for finding in errors.prefix(Self.listedFindings) {
+                results.append(.fail(.phpSyntax, location(finding) + finding.message, file: finding.file, fix: "Fix the syntax error. WordPress cannot load a file that does not parse."))
+            }
+            if errors.count > Self.listedFindings {
+                results.append(.fail(.phpSyntax, "\(errors.count - Self.listedFindings) more syntax error(s)"))
+            }
+            for finding in lint.filter({ $0.severity != .error }).prefix(Self.listedFindings) {
+                results.append(.warn(.phpSyntax, location(finding) + finding.message, file: finding.file))
+            }
+            if lint.isEmpty {
+                results.append(.pass(.phpSyntax, "\(report.lintedFiles) PHP file(s) parse with PHP \(report.phpVersion ?? "?")"))
+            }
+        }
+
+        if let reason = report.pluginCheckSkipped {
+            results.append(.skip(.pluginCheck, reason))
+        } else if report.pluginCheckRan {
+            let findings = report.findings(.pluginCheck)
+            if findings.isEmpty {
+                results.append(.pass(.pluginCheck, "Plugin Check found no issues"))
+            } else {
+                let errors = findings.filter { $0.severity == .error }.count
+                results.append(.warn(.pluginCheck, "Plugin Check: \(errors) error(s), \(findings.count - errors) warning(s). WordPress.org runs these checks on every release.", fix: "Review the findings; fix real issues before publishing."))
+                for finding in findings.sorted(by: { $0.severity > $1.severity }).prefix(Self.listedFindings) {
+                    let code = finding.code.map { "[\($0)] " } ?? ""
+                    results.append(.warn(.pluginCheck, location(finding) + code + finding.message, file: finding.file))
+                }
+            }
         }
         return results
     }

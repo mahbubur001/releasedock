@@ -21,6 +21,18 @@ struct SettingsView: View {
                 Text("Install Subversion with `brew install subversion` if it is missing. Changing the path takes effect after restarting ReleaseDock.")
                     .font(.caption).foregroundStyle(.secondary)
             }
+            Section("Code checks") {
+                LabeledContent("PHP lint") {
+                    Text(phpPath.map { "Uses \($0)" } ?? "PHP not found. Install it with `brew install php`.")
+                        .textSelection(.enabled)
+                }
+                HStack {
+                    TextField("WordPress for Plugin Check", text: Binding(get: { draft.pluginCheckWordPressPath ?? "" }, set: { draft.pluginCheckWordPressPath = $0.isEmpty ? nil : $0 }), prompt: Text("Off"))
+                    Button("Choose…") { chooseWordPress() }
+                }
+                Text("Plugin Check runs `wp plugin check` in a local WordPress install that has the Plugin Check plugin active (WP-CLI: `brew install wp-cli`). Findings are shown as warnings; WordPress.org runs the same checks on every release.")
+                    .font(.caption).foregroundStyle(.secondary)
+            }
             Section("App updates") {
                 TextField("GitHub repository", text: $draft.githubRepository, prompt: Text("owner/name"))
                 Picker("Channel", selection: $draft.updateChannel) {
@@ -75,6 +87,17 @@ struct SettingsView: View {
         }
     }
 
+    private var phpPath: String? { CodeCheckService.phpCandidates.first(where: FileManager.default.isExecutableFile(atPath:)) }
+
+    private func chooseWordPress() {
+        let panel = NSOpenPanel()
+        panel.canChooseFiles = false
+        panel.canChooseDirectories = true
+        panel.prompt = "Use WordPress"
+        panel.message = "Choose the folder that contains wp-config.php"
+        if panel.runModal() == .OK, let url = panel.url { draft.pluginCheckWordPressPath = url.path }
+    }
+
     private func save() {
         if !draft.githubRepository.isEmpty, GitHubRepository(string: draft.githubRepository) == nil {
             message = "Enter the repository as owner/name."
@@ -91,6 +114,15 @@ struct SettingsView: View {
                 githubToken = ""
             } catch {
                 message = error.localizedDescription
+                return
+            }
+        }
+        if let wordpress = draft.pluginCheckWordPressPath, !wordpress.isEmpty {
+            let fm = FileManager.default
+            let hasConfig = fm.fileExists(atPath: (wordpress as NSString).appendingPathComponent("wp-config.php"))
+                || fm.fileExists(atPath: ((wordpress as NSString).deletingLastPathComponent as NSString).appendingPathComponent("wp-config.php"))
+            guard hasConfig, fm.fileExists(atPath: (wordpress as NSString).appendingPathComponent("wp-load.php")) else {
+                message = "\(wordpress) is not a WordPress install (no wp-load.php / wp-config.php)."
                 return
             }
         }

@@ -22,6 +22,8 @@ public struct PipelineDependencies: Sendable {
     public var notifications: NotificationServicing
     /// WordPress.org API lookups; nil disables them (tests, offline use).
     public var wordpressOrg: WordPressOrgServicing?
+    /// PHP lint / Plugin Check on the staged candidate; nil disables them.
+    public var codeChecker: CodeChecking?
     /// Recorded in manifests, e.g. "ReleaseDock 1.0.0 (42)".
     public var generator: String
 
@@ -39,6 +41,7 @@ public struct PipelineDependencies: Sendable {
         strategies: StrategyProvider = StrategyProvider(),
         notifications: NotificationServicing = NoopNotificationService(),
         wordpressOrg: WordPressOrgServicing? = nil,
+        codeChecker: CodeChecking? = nil,
         generator: String = "ReleaseDock"
     ) {
         self.products = products
@@ -54,6 +57,7 @@ public struct PipelineDependencies: Sendable {
         self.strategies = strategies
         self.notifications = notifications
         self.wordpressOrg = wordpressOrg
+        self.codeChecker = codeChecker
         self.generator = generator
     }
 }
@@ -242,6 +246,23 @@ public actor ReleasePipelineService {
             throw ReleaseError.candidateChanged("version or name differs in the staged copy")
         }
         record.candidate = candidate
+
+        // 3b. Code checks on exactly what ships, before the working copy is touched.
+        if let codeChecker = deps.codeChecker {
+            emit(record, "Checking PHP syntax\(product.type == .plugin ? " and running Plugin Check" : "")")
+            let phpFiles = candidate.files.map(\.path).filter { $0.lowercased().hasSuffix(".php") }
+            let requiresPHP = record.detected?.headers["Requires PHP"] ?? record.detected?.readme?.requiresPHP
+            record.codeChecks = await codeChecker.check(root: candidate.rootURL, phpFiles: phpFiles, product: product, requiresPHP: requiresPHP)
+            var checked = context
+            checked.codeChecks = record.codeChecks
+            let checkedReport = deps.validator.validate(checked)
+            record.validation = checkedReport
+            if checkedReport.isBlocking {
+                try move(&record, to: .failed, "Code checks failed: \(checkedReport.blockingResults.count) blocking result(s)")
+                deps.staging.removeWorkspace(for: record.id)
+                return record
+            }
+        }
         emit(record, "Applying the candidate to the SVN working copy")
         record.workingCopyModified = true
         try deps.releases.save(record)
@@ -262,6 +283,7 @@ public actor ReleasePipelineService {
         record.preview = preview
         var withPreview = context
         withPreview.preview = preview
+        withPreview.codeChecks = record.codeChecks
         let finalReport = deps.validator.validate(withPreview)
         record.validation = finalReport
         if finalReport.isBlocking {
@@ -404,7 +426,7 @@ public actor ReleasePipelineService {
     /// against a stale report.
     private func revalidate(_ record: inout ReleaseRecord, product: Product, preview: ReleasePreview) {
         guard let inspection = record.inspection else { return }
-        let context = ValidationContext(product: product, inspection: inspection, detected: record.detected, repository: record.repository, preview: preview, kind: record.kind)
+        let context = ValidationContext(product: product, inspection: inspection, detected: record.detected, repository: record.repository, preview: preview, kind: record.kind, codeChecks: record.codeChecks)
         record.validation = deps.validator.validate(context)
     }
 
