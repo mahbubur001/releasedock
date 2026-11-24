@@ -28,7 +28,7 @@ func selectedIndex(_ list: [Element]) -> Int? {
 activate()
 
 // Arrow keys in both list columns.
-for (section, prefix) in [("Release History", "Acme Gallery"), ("Products", "Acme")] {
+for (section, prefix) in [("History", "Acme Gallery"), ("Products", "Acme")] {
     guard let item = sidebar(section) else { check("\(section): sidebar item found", false); continue }
     UI.click(CGPoint(x: item.frame.midX, y: item.frame.midY))
     usleep(800_000)
@@ -59,7 +59,7 @@ func hover(_ element: Element?, _ name: String, expect: String) {
     let cursor = UI.cursorName()
     check("cursor over \(name) is \(expect)", cursor == expect, "got \(cursor)")
 }
-hover(sidebar("Dashboard"), "sidebar item", expect: "arrow")
+hover(sidebar("Overview"), "sidebar item", expect: "arrow")
 if let products = sidebar("Products") { UI.click(CGPoint(x: products.frame.midX, y: products.frame.midY)); usleep(800_000) }
 let productRow = rows(prefix: "Acme", minX: sidebar("Products")?.frame.maxX ?? 0).first
 hover(productRow, "product row", expect: "arrow")
@@ -70,10 +70,10 @@ hover(all().first { $0.role == "AXButton" && $0.label == "Hide Sidebar" }, "tool
 // Sidebar toggle hides and shows the sidebar, and stays reachable while hidden.
 if let toggle = all().first(where: { $0.role == "AXButton" && $0.label == "Hide Sidebar" }) {
     UI.click(CGPoint(x: toggle.frame.midX, y: toggle.frame.midY)); usleep(900_000)
-    check("sidebar hides", sidebar("Dashboard") == nil || (sidebar("Dashboard")?.frame.width ?? 0) == 0)
+    check("sidebar hides", sidebar("Overview") == nil || (sidebar("Overview")?.frame.width ?? 0) == 0)
     if let show = all().first(where: { $0.role == "AXButton" && $0.label == "Show Sidebar" }) {
         UI.click(CGPoint(x: show.frame.midX, y: show.frame.midY)); usleep(900_000)
-        check("sidebar shows again", sidebar("Dashboard") != nil)
+        check("sidebar shows again", sidebar("Overview") != nil)
     } else {
         check("Show Sidebar button available while hidden", false)
     }
