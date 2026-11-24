@@ -4,6 +4,11 @@ All notable changes to ReleaseDock are documented here. The format follows [Keep
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-11-24
+
+### Fixed
+- 0.2.0 could not be installed from inside the app ("The update is improperly signed"): it was signed with an old Sparkle key instead of the app's key. 0.2.1 contains the same changes, correctly signed. The release script now refuses to publish an update whose signature does not verify with the public key built into the app.
+
 ## [0.2.0] - 2026-11-24
 
 ### Added

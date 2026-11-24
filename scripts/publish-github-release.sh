@@ -63,6 +63,14 @@ else
   SIGNATURE_ATTRS=$("$SPARKLE_BIN/sign_update" "$ZIP")
 fi
 echo "    $SIGNATURE_ATTRS"
+# Installed copies accept the update only if it verifies with the public key built into the app.
+PUBLIC_KEY=$(/usr/libexec/PlistBuddy -c "Print :SUPublicEDKey" "$APP/Contents/Info.plist")
+SIGNATURE=$(printf '%s' "$SIGNATURE_ATTRS" | sed -E 's/.*sparkle:edSignature="([^"]+)".*/\1/')
+swift "$ROOT/scripts/verify-ed-signature.swift" "$ZIP" "$SIGNATURE" "$PUBLIC_KEY" || {
+  echo "The signature does not verify with SUPublicEDKey $PUBLIC_KEY: the signing key is not the app's key." >&2
+  echo "Release from GitHub Actions (SPARKLE_PRIVATE_KEY secret) or import the matching key into the Keychain." >&2
+  exit 1
+}
 
 echo "==> Tagging source $TAG"
 git tag -a "$TAG" -m "ReleaseDock $VERSION ($BUILD)"

@@ -1,14 +1,5 @@
 [
   {
-    "version": "0.2.0",
-    "build": "5",
-    "channel": "",
-    "notes": "New native macOS design (Overview, 4-stage New Release, History, Products). Readme & Assets Update without a new version, Restore Older Version, Bump Version, build command per product, optional GitHub release per product, PHP lint and Plugin Check, deeper readme/asset/theme checks, Tested up to compared with the current WordPress, directory status after release, longer commit timeout. See CHANGELOG.md for details.",
-    "signature": "3yPhrETWZgYWcN93woGgaK/QTA79vyRkl8sZ3Z+UM4V0ejh5G3l4rwa2SYc0jnLhOLMUAcrxI4vyON2kuq2YAQ==",
-    "length": "6611468",
-    "date": "Tue, 24 Nov 2026 07:14:35 GMT"
-  },
-  {
     "version": "0.1.3",
     "build": "4",
     "channel": "",
