@@ -80,6 +80,7 @@ final class ProductEditorModel: Identifiable {
         let github = githubText.trimmingCharacters(in: .whitespaces)
         product.githubRepositoryURL = github.isEmpty ? nil : URL(string: github.contains("://") ? github : "https://github.com/\(github)")
         product.validation.excludePatterns = excludePatternsText.components(separatedBy: .newlines).map { $0.trimmingCharacters(in: .whitespaces) }.filter { !$0.isEmpty }
+        product.buildCommand = product.effectiveBuildCommand
         for keyPath in [\Product.localDevelopmentPath, \Product.assetsPath, \Product.mainPluginFile, \Product.svnUsername] {
             if product[keyPath: keyPath]?.isEmpty == true { product[keyPath: keyPath] = nil }
         }
@@ -154,6 +155,13 @@ struct ProductEditorView: View {
                         }
                     }
                     TextField("GitHub repository", text: $editor.githubText, prompt: Text("Optional, owner/name"))
+                }
+                Section("Build") {
+                    TextField("Build command", text: optional(\.buildCommand), prompt: Text("Optional, e.g. composer install --no-dev && npm run build"), axis: .vertical)
+                        .font(.body.monospaced())
+                        .lineLimit(1...3)
+                    Text("Runs in a login shell (zsh) on a copy of the folder before a folder release is inspected, so build output ships and your folder stays untouched. ZIP releases are used as they are.")
+                        .font(.caption).foregroundStyle(.secondary)
                 }
                 Section("Release") {
                     Picker("Mode", selection: $editor.product.releaseMode) {

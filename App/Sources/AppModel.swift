@@ -122,6 +122,7 @@ final class AppModel {
             notifications: notifications,
             wordpressOrg: WordPressOrgService(),
             codeChecker: CodeCheckService(configuration: codeCheckConfiguration),
+            builder: BuildService(),
             generator: "ReleaseDock \(Self.appVersion) (\(Self.appBuild))"
         ))
         updateChecker = AppUpdateChecker(github: github, store: store, keychain: keychain, notifications: notifications)

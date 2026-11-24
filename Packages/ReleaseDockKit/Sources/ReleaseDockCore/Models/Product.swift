@@ -117,6 +117,9 @@ public struct Product: Codable, Identifiable, Hashable, Sendable {
     public var mainPluginFile: String?
     /// Optional local folder mirrored to the plugin SVN `/assets` directory.
     public var assetsPath: String?
+    /// Shell command run on a copy of a folder source before inspection, e.g.
+    /// `composer install --no-dev && npm run build`. Not used for ZIP sources.
+    public var buildCommand: String?
     public var svnUsername: String?
     public var createdAt: Date
     public var updatedAt: Date
@@ -138,6 +141,7 @@ public struct Product: Codable, Identifiable, Hashable, Sendable {
         githubRepositoryURL: URL? = nil,
         mainPluginFile: String? = nil,
         assetsPath: String? = nil,
+        buildCommand: String? = nil,
         svnUsername: String? = nil,
         createdAt: Date = Date(),
         updatedAt: Date = Date()
@@ -158,9 +162,16 @@ public struct Product: Codable, Identifiable, Hashable, Sendable {
         self.githubRepositoryURL = githubRepositoryURL
         self.mainPluginFile = mainPluginFile
         self.assetsPath = assetsPath
+        self.buildCommand = buildCommand
         self.svnUsername = svnUsername
         self.createdAt = createdAt
         self.updatedAt = updatedAt
+    }
+
+    /// The trimmed build command, or nil when none is set.
+    public var effectiveBuildCommand: String? {
+        let command = buildCommand?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        return command.isEmpty ? nil : command
     }
 
     public var workingCopyURL: URL { URL(fileURLWithPath: workingCopyPath, isDirectory: true) }

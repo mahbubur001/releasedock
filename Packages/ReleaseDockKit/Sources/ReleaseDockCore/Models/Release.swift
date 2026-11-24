@@ -256,6 +256,8 @@ public struct ReleaseRecord: Codable, Hashable, Sendable, Identifiable {
     public var verifiedNotCommitted: Bool
     /// Post-release instructions for the user (e.g. Release Confirmation).
     public var guidance: [String]
+    /// The build command's result when the product has one and the source is a folder.
+    public var build: BuildResult?
     /// The plugin's directory-assets folder as inspected for this release.
     public var assets: AssetsReport?
     /// PHP lint and Plugin Check results for the staged candidate.

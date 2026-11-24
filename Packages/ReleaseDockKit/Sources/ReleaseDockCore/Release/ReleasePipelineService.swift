@@ -24,6 +24,8 @@ public struct PipelineDependencies: Sendable {
     public var wordpressOrg: WordPressOrgServicing?
     /// PHP lint / Plugin Check on the staged candidate; nil disables them.
     public var codeChecker: CodeChecking?
+    /// Runs products' build commands; nil disables builds.
+    public var builder: Building?
     /// Recorded in manifests, e.g. "ReleaseDock 1.0.0 (42)".
     public var generator: String
 
@@ -42,6 +44,7 @@ public struct PipelineDependencies: Sendable {
         notifications: NotificationServicing = NoopNotificationService(),
         wordpressOrg: WordPressOrgServicing? = nil,
         codeChecker: CodeChecking? = nil,
+        builder: Building? = nil,
         generator: String = "ReleaseDock"
     ) {
         self.products = products
@@ -58,6 +61,7 @@ public struct PipelineDependencies: Sendable {
         self.notifications = notifications
         self.wordpressOrg = wordpressOrg
         self.codeChecker = codeChecker
+        self.builder = builder
         self.generator = generator
     }
 }
@@ -196,8 +200,16 @@ public actor ReleasePipelineService {
             }
         case .folder(let path):
             let url = URL(fileURLWithPath: path, isDirectory: true)
-            inspection = try deps.folderInspector.inspect(folderAt: url, options: options)
-            packageRoot = url
+            // A build runs on a clone; the development folder itself is never modified.
+            var root = url
+            if let command = product.effectiveBuildCommand, let builder = deps.builder {
+                emit(record, "Running the build command")
+                let build = try await builder.build(source: url, command: command, workspace: try deps.staging.workspace(for: record.id))
+                record.build = build
+                root = URL(fileURLWithPath: build.builtPath, isDirectory: true)
+            }
+            inspection = try deps.folderInspector.inspect(folderAt: root, options: options)
+            packageRoot = root
             entries = inspection.includedEntries
             if await deps.git.isAvailable() {
                 let git = try? await deps.git.state(of: url)

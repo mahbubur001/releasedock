@@ -13,6 +13,8 @@ All notable changes to ReleaseDock are documented here. The format follows [Keep
 - Directory assets check (plugins with an assets folder): names, lowercase, pixel dimensions matching the name, size limits (banners 4 MB, icons 1 MB, screenshots 10 MB), a 1544×500 banner without its 772×250 partner, `icon.svg` without a PNG/JPG fallback, and a `blueprints/blueprint.json` that Live Preview cannot read. All warnings; the check can be turned off per product.
 - Theme review checks: screenshot larger than 1200×900 or not 4:3, theme names using "WordPress", "Theme" or "Twenty", "Wordpress" misspelled in public text, and bundled images or fonts without a readme `== Resources ==` section.
 - The release report shows "What's new": the changelog entry and upgrade notice for the version being released.
+- Build command per product (e.g. `composer install --no-dev && npm run build`). For folder releases it runs in a login shell on an APFS clone of the folder, and the built copy is what gets inspected and published; the development folder is never modified. The output appears in the report, and a failing build stops the release. ZIP releases are used as they are.
+- Folder releases honour `export-ignore` in `.gitattributes` when there is no `.distignore`, like `git archive` and 10up's deploy action.
 
 ### Changed
 - Commits use their own, longer SVN HTTP timeout (30 minutes by default, adjustable in Settings) while reads keep failing fast after 2 minutes. Large releases no longer hit E175012 while WordPress.org finishes "Committing transaction…".

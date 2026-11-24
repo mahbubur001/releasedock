@@ -8,6 +8,17 @@ public protocol FolderInspecting: Sendable {
 public struct FolderInspectionService: FolderInspecting {
     public init() {}
 
+    /// Patterns marked `export-ignore` in a .gitattributes file (`/tests export-ignore`).
+    static func exportIgnorePatterns(_ text: String) -> [String] {
+        text.components(separatedBy: .newlines).compactMap { line in
+            let trimmed = line.trimmingCharacters(in: .whitespaces)
+            guard !trimmed.isEmpty, !trimmed.hasPrefix("#") else { return nil }
+            let parts = trimmed.split(whereSeparator: { $0 == " " || $0 == "\t" })
+            guard parts.count >= 2, parts.dropFirst().contains("export-ignore") else { return nil }
+            return String(parts[0])
+        }
+    }
+
     public func inspect(folderAt url: URL, options: InspectionOptions) throws -> PackageInspection {
         let fm = FileManager.default
         let root = url.standardizedFileURL
@@ -25,6 +36,14 @@ public struct FolderInspectionService: FolderInspecting {
             preIssues.append(.init(kind: .developmentArtifact, severity: .info, path: ".distignore", message: "Applied \(parsed.count) exclusion pattern(s) from .distignore"))
             if text.components(separatedBy: .newlines).contains(where: { $0.trimmingCharacters(in: .whitespaces).hasPrefix("!") }) {
                 preIssues.append(.init(kind: .developmentArtifact, severity: .warning, path: ".distignore", message: "Negated patterns (!) in .distignore are not supported and were ignored"))
+            }
+        } else if let text = try? String(contentsOf: root.appendingPathComponent(".gitattributes"), encoding: .utf8) {
+            // Without a .distignore, `export-ignore` attributes decide (as `git archive` and
+            // 10up's deploy action do).
+            let parsed = Self.exportIgnorePatterns(text).compactMap(GlobPattern.init)
+            if !parsed.isEmpty {
+                patterns += parsed
+                preIssues.append(.init(kind: .developmentArtifact, severity: .info, path: ".gitattributes", message: "Applied \(parsed.count) export-ignore pattern(s) from .gitattributes"))
             }
         }
 

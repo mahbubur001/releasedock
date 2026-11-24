@@ -24,6 +24,18 @@ struct ReleaseReportView: View {
                     ForEach(record.errors, id: \.self) { Text($0).font(.caption).foregroundStyle(.secondary) }
                 }
             }
+            if let build = record.build {
+                SectionCard(title: "Build", systemImage: "hammer") {
+                    KeyValueRow(key: "Command", value: build.command, monospaced: true)
+                    KeyValueRow(key: "Result", value: "Exit code \(build.exitCode) in \(build.durationSeconds.formatted(.number.precision(.fractionLength(1)))) s")
+                    if !build.outputTail.isEmpty {
+                        DisclosureGroup("Output") {
+                            Text(build.outputTail).font(.caption.monospaced()).textSelection(.enabled)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                        }
+                    }
+                }
+            }
             if let inspection = record.inspection {
                 inspectionCard(inspection)
             }
