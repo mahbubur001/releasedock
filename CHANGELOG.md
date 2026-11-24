@@ -4,13 +4,7 @@ All notable changes to ReleaseDock are documented here. The format follows [Keep
 
 ## [Unreleased]
 
-### Changed
-- New native macOS design (from the approved HTML preview):
-  - **Sidebar** is a native source list: Overview, Products, New Release, History, Updates, Settings, with badges, svn status and the app version at the bottom.
-  - **Overview** leads with what needs you: a summary line, a drop area to start a release, releases waiting for approval, releases going live, recent outcomes and a card per product.
-  - **New Release** has four stages (Package → Checks → Review → Publish) instead of nine steps: product, publish kind and mode as cards; a live checklist while preparing; a review with the version change, summary tiles, What's new, problems first with their fixes, the SVN changes beside each file's diff, and what was excluded; a publish confirmation that lists exactly what happens; and a result page with Committed → Verified → Waiting to go live → Live.
-  - A prepared release now survives switching sections, and Overview's **Review & Publish** reopens it.
-- The cursor follows the macOS convention: buttons, switches, pop-up menus and list rows keep the arrow; only links to web pages show the pointing hand. The app-wide `NSButton` cursor override is gone.
+## [0.2.0] - 2026-11-24
 
 ### Added
 - Readme & Assets Update for plugins: update `readme.txt` (and `/assets`) of the released version in trunk and its tag without publishing a new version, e.g. to raise "Tested up to". The package must be the released version; any code difference from the released tag is refused. Dry run, preview, approval, single commit, verification and uncertain-commit recovery work as for version releases.
@@ -28,6 +22,12 @@ All notable changes to ReleaseDock are documented here. The format follows [Keep
 - **Restore Older Version…** in Products: re-releases an older version's code as a new, higher version (e.g. the 2.3.0 code as 2.4.1 after a broken 2.4.0), so sites update to it. The version is exported from SVN, the version references are bumped, a changelog entry is added, and the release goes through every check, the review and approval like any other; the build step is skipped because tags already hold built files. The commit message names the restored version, and released tags are never changed.
 
 ### Changed
+- New native macOS design (from the approved HTML preview):
+  - **Sidebar** is a native source list: Overview, Products, New Release, History, Updates, Settings, with badges, svn status and the app version at the bottom.
+  - **Overview** leads with what needs you: a summary line, a drop area to start a release, releases waiting for approval, releases going live, recent outcomes and a card per product.
+  - **New Release** has four stages (Package → Checks → Review → Publish) instead of nine steps: product, publish kind and mode as cards; a live checklist while preparing; a review with the version change, summary tiles, What's new, problems first with their fixes, the SVN changes beside each file's diff, and what was excluded; a publish confirmation that lists exactly what happens; and a result page with Committed → Verified → Waiting to go live → Live.
+  - A prepared release now survives switching sections, and Overview's **Review & Publish** reopens it.
+- The cursor follows the macOS convention: buttons, switches, pop-up menus and list rows keep the arrow; only links to web pages show the pointing hand. The app-wide `NSButton` cursor override is gone.
 - Commits use their own, longer SVN HTTP timeout (30 minutes by default, adjustable in Settings) while reads keep failing fast after 2 minutes. Large releases no longer hit E175012 while WordPress.org finishes "Committing transaction…".
 
 ### Fixed
