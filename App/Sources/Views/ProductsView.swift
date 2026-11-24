@@ -20,12 +20,12 @@ struct ProductsView: View {
         MasterDetailLayout {
             VStack(spacing: 0) {
                 HStack(spacing: 8) {
-                    SearchField(text: $search, prompt: "Search products")
+                    SearchField(text: $search, prompt: "Filter")
                     Button { model.showAddProduct = true } label: { Image(systemName: "plus") }
-                        .help("Add Product")
+                        .buttonStyle(.borderless)
+                        .help("Add Product (⇧⌘N)")
                 }
                 .padding(12)
-                Divider()
                 if model.products.isEmpty {
                     ContentUnavailableView {
                         Label("No products", systemImage: "shippingbox")
@@ -54,7 +54,11 @@ struct ProductsView: View {
             }
         } detail: {
             if let product = model.product(selection) {
-                ProductDetailView(product: product) { editing = ProductEditorModel(model: model, product: product) }
+                ProductDetailView(product: product) {
+                    editing = ProductEditorModel(model: model, product: product)
+                } onDelete: {
+                    confirmDelete = product
+                }
             } else {
                 ContentUnavailableView("Select a product", systemImage: "shippingbox", description: Text("Choose a product on the left."))
             }
@@ -90,17 +94,14 @@ private struct ProductRow: View {
     var body: some View {
         SelectableRow(isSelected: isSelected, action: action) {
             HStack(spacing: 10) {
-                ProductTypeIcon(type: product.type)
-                    .font(.title3)
-                    .frame(width: 32, height: 32)
-                    .background((product.type == .plugin ? Color.accentColor : Color.purple).opacity(0.14), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+                ProductGlyph(type: product.type, size: 28)
                 VStack(alignment: .leading, spacing: 2) {
                     Text(product.name).font(.callout.weight(.semibold)).lineLimit(1)
                     Text("\(product.type.displayName) · \(product.slug)").font(.caption).foregroundStyle(.secondary).lineLimit(1)
                 }
                 Spacer(minLength: 4)
                 VStack(alignment: .trailing, spacing: 2) {
-                    Text(product.currentVersion ?? "—").font(.callout.monospacedDigit())
+                    Text(product.currentVersion ?? "—").font(.callout.weight(.semibold).monospacedDigit())
                     if model.releases.contains(where: { $0.productID == product.id && $0.state == .recoveryRequired }) {
                         Text("Recovery").font(.caption2.weight(.semibold)).foregroundStyle(.orange)
                     }
@@ -110,78 +111,222 @@ private struct ProductRow: View {
     }
 }
 
+/// One product: identity and actions, then grouped settings and recent releases.
 struct ProductDetailView: View {
     @Environment(AppModel.self) private var model
+    @Environment(\.openURL) private var openURL
     let product: Product
     let onEdit: () -> Void
+    let onDelete: () -> Void
     @State private var confirmRevert = false
     @State private var reverting = false
+    @State private var bumpTarget: VersionBumpTarget?
+
+    private var hasWorkingCopy: Bool { FileManager.default.fileExists(atPath: product.workingCopyURL.appendingPathComponent(".svn").path) }
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 16) {
-                HStack(alignment: .top, spacing: 14) {
-                    ProductTypeIcon(type: product.type)
-                        .font(.title)
-                        .frame(width: 52, height: 52)
-                        .background((product.type == .plugin ? Color.accentColor : Color.purple).opacity(0.14), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(product.name).font(.title2.bold()).lineLimit(2).fixedSize(horizontal: false, vertical: true)
-                        Text("\(product.type.displayName) · \(product.slug) · \(product.currentVersion.map { "v\($0)" } ?? "no release")")
-                            .foregroundStyle(.secondary)
-                        HStack(spacing: 8) {
-                            Button {
-                                model.wizardProductID = product.id
-                                model.selection = .wizard
-                            } label: { Label("New Release", systemImage: "paperplane.fill") }
-                            .buttonStyle(.borderedProminent)
-                            Button { onEdit() } label: { Label("Edit", systemImage: "pencil") }
-                        }
-                        .padding(.top, 6)
+            VStack(alignment: .leading, spacing: 12) {
+                header
+                SectionHeading("Repository")
+                GroupedRows {
+                    GroupedRow(isFirst: true) {
+                        label("SVN URL")
+                        mono(product.svnRepositoryURL.absoluteString)
+                        CopyButton(text: product.svnRepositoryURL.absoluteString)
                     }
-                    Spacer(minLength: 0)
-                }
-                SectionCard(title: "Repository") {
-                    KeyValueRow(key: "SVN URL", value: product.svnRepositoryURL.absoluteString, monospaced: true)
-                    KeyValueRow(key: "Working copy", value: product.workingCopyPath, monospaced: true)
-                    KeyValueRow(key: "Development folder", value: product.localDevelopmentPath ?? "—", monospaced: true)
-                    KeyValueRow(key: "SVN username", value: product.svnUsername ?? "Not set")
-                    KeyValueRow(key: "SVN password", value: model.hasStoredPassword(for: product) ? "Stored in Keychain" : "Not stored")
-                    if let github = product.githubRepositoryURL { KeyValueRow(key: "GitHub", value: github.absoluteString) }
-                    HStack {
-                        Button("Show Working Copy in Finder") { NSWorkspace.shared.open(product.workingCopyURL) }
+                    GroupedRow {
+                        label("Working copy")
+                        mono((product.workingCopyPath as NSString).abbreviatingWithTildeInPath)
+                        Button("Show in Finder") { NSWorkspace.shared.open(product.workingCopyURL) }
+                            .fixedSize()
                             .disabled(!FileManager.default.fileExists(atPath: product.workingCopyPath))
-                        Button(reverting ? "Reverting…" : "Revert Working Copy…", role: .destructive) { confirmRevert = true }
-                            .disabled(reverting || !FileManager.default.fileExists(atPath: product.workingCopyURL.appendingPathComponent(".svn").path))
+                    }
+                    GroupedRow {
+                        label("Development folder")
+                        if let dev = product.localDevelopmentURL {
+                            mono((dev.path as NSString).abbreviatingWithTildeInPath)
+                            Button("Bump Version…") { bumpTarget = VersionBumpTarget(folder: dev) }.fixedSize()
+                        } else {
+                            Text("Not set").foregroundStyle(.tertiary).frame(maxWidth: .infinity, alignment: .leading)
+                        }
+                    }
+                    GroupedRow {
+                        label("Credentials")
+                        HStack(spacing: 6) {
+                            Text(product.svnUsername ?? "No username")
+                            if model.hasStoredPassword(for: product) {
+                                Label("Saved in Keychain", systemImage: "key.fill").foregroundStyle(.green)
+                            } else {
+                                Text("· password not stored").foregroundStyle(.secondary)
+                            }
+                        }
+                        .font(.callout)
+                        .frame(maxWidth: .infinity, alignment: .leading)
                     }
                 }
-                SectionCard(title: "Releases") {
-                    KeyValueRow(key: "Current version", value: product.currentVersion ?? "Unknown")
-                    KeyValueRow(key: "Last release", value: product.lastSuccessfulRelease.map { "\($0.version) (r\($0.revision.map(String.init) ?? "?")) on \($0.date.formatted(date: .abbreviated, time: .shortened))" } ?? "—")
-                    KeyValueRow(key: "Release mode", value: product.releaseMode.displayName)
-                    KeyValueRow(key: "Automation", value: product.isAutomaticPublishingAuthorized ? "Enabled" : "Off")
-                }
-                SectionCard(title: "History") {
-                    let history = model.releases(for: product.id)
-                    if history.isEmpty { Text("No releases yet.").foregroundStyle(.secondary) }
-                    ForEach(history.prefix(10)) { release in
-                        HStack {
-                            Text(release.version ?? "—").monospacedDigit()
-                            Text(release.createdAt.formatted(date: .abbreviated, time: .shortened)).foregroundStyle(.secondary)
-                            Spacer()
-                            if let r = release.committedRevision { Text("r\(r)").foregroundStyle(.secondary) }
-                            StateBadge(state: release.state)
+                SectionHeading("Release")
+                GroupedRows {
+                    GroupedRow(isFirst: true) {
+                        label("Mode")
+                        value(product.releaseMode.displayName + (product.releaseMode == .automatic ? (product.automationEnabled ? " · allowed" : " · not allowed yet") : ""))
+                    }
+                    GroupedRow {
+                        label("Build command")
+                        if let build = product.effectiveBuildCommand { mono(build) } else { value("None — folders are released as they are", faded: true) }
+                    }
+                    if product.type == .plugin {
+                        GroupedRow {
+                            label("Assets folder")
+                            if let assets = product.assetsPath { mono((assets as NSString).abbreviatingWithTildeInPath) } else { value("Not synced", faded: true) }
                         }
+                    }
+                    GroupedRow {
+                        label("GitHub")
+                        if let github = product.githubRepositoryURL {
+                            Button {
+                                openURL(github)
+                            } label: {
+                                Label(github.path.trimmingCharacters(in: CharacterSet(charactersIn: "/")), systemImage: "arrow.up.right.square")
+                            }
+                            .buttonStyle(InlineLinkButtonStyle())
+                            .linkCursor()
+                            Spacer()
+                            if product.githubRelease?.enabled == true {
+                                StatusPill(text: "Releases \(product.githubRelease?.tagPrefix ?? "")<version>", color: .green)
+                            }
+                        } else {
+                            value("Not linked", faded: true)
+                        }
+                    }
+                }
+                history
+                SectionHeading("Working Copy")
+                GroupedRows {
+                    GroupedRow(isFirst: true) {
+                        value("Discard local changes in the working copy and match the server. Everything changed is backed up first.")
+                        Button(reverting ? "Reverting…" : "Revert Working Copy…", role: .destructive) { confirmRevert = true }
+                            .fixedSize()
+                            .disabled(reverting || !hasWorkingCopy)
                     }
                 }
             }
-            .padding(20)
+            .padding(.horizontal, 24)
+            .padding(.vertical, 20)
+            .frame(maxWidth: 860, alignment: .leading)
         }
         .confirmationDialog("Revert all local changes in the working copy?", isPresented: $confirmRevert) {
             SwiftUI.Button("Back Up and Revert", role: .destructive) { revert() }
         } message: {
             Text("ReleaseDock first copies every changed, added and unversioned file plus the svn diff into the Backups folder, then reverts and updates the working copy. If any backup step fails, nothing is reverted.")
         }
+        .sheet(item: $bumpTarget) { target in
+            VersionBumpSheet(product: product, folder: target.folder)
+        }
+    }
+
+    private var header: some View {
+        ViewThatFits(in: .horizontal) {
+            HStack(spacing: 14) {
+                identity
+                Spacer(minLength: 12)
+                actions
+            }
+            VStack(alignment: .leading, spacing: 12) {
+                identity
+                HStack(spacing: 8) { actions }
+            }
+        }
+    }
+
+    private var identity: some View {
+        HStack(spacing: 14) {
+            ProductGlyph(type: product.type, size: 52)
+            VStack(alignment: .leading, spacing: 4) {
+                Text(product.name).font(.title2.weight(.bold)).lineLimit(1)
+                HStack(spacing: 6) {
+                    Text("\(product.type.displayName) · \(product.slug)").foregroundStyle(.secondary).lineLimit(1)
+                    if let version = product.currentVersion { StatusPill(text: "Live \(version)", color: .green).fixedSize() }
+                }
+            }
+        }
+        .fixedSize()
+    }
+
+    @ViewBuilder private var actions: some View {
+            Menu {
+                SwiftUI.Button("Show Working Copy in Finder") { NSWorkspace.shared.open(product.workingCopyURL) }
+                SwiftUI.Button("Revert Working Copy…") { confirmRevert = true }.disabled(!hasWorkingCopy)
+                Divider()
+                SwiftUI.Button("Delete Product…", role: .destructive, action: onDelete)
+            } label: {
+                Image(systemName: "ellipsis.circle")
+            }
+            .menuStyle(.borderlessButton)
+            .menuIndicator(.hidden)
+            .fixedSize()
+            .help("More")
+            Button("Edit…", action: onEdit).fixedSize()
+            Button("New Release…") {
+                model.wizard.reset()
+                model.wizardProductID = product.id
+                model.selection = .wizard
+            }
+            .buttonStyle(.borderedProminent)
+            .fixedSize()
+    }
+
+    @ViewBuilder private var history: some View {
+        let releases = model.releases(for: product.id)
+        SectionHeading("History") {
+            if !releases.isEmpty {
+                Button("Show All") {
+                    model.historySelection = releases.first?.id
+                    model.selection = .history
+                }
+                .buttonStyle(.link)
+            }
+        }
+        GroupedRows {
+            if releases.isEmpty {
+                GroupedRow(isFirst: true) { value("No releases yet.", faded: true) }
+            }
+            ForEach(Array(releases.prefix(6).enumerated()), id: \.element.id) { index, release in
+                GroupedRow(isFirst: index == 0) {
+                    Button { model.open(release) } label: {
+                        HStack(spacing: 10) {
+                            Text(release.version ?? "—").font(.callout.weight(.semibold).monospacedDigit())
+                            if release.kind == .readmeUpdate { Text("readme").font(.caption).foregroundStyle(.secondary) }
+                            Text(release.createdAt.formatted(date: .abbreviated, time: .shortened)).font(.callout).foregroundStyle(.secondary)
+                            Spacer()
+                            if let revision = release.committedRevision { Text("r\(revision)").font(.caption.monospaced()).foregroundStyle(.secondary) }
+                            StatusPill(text: release.state.displayName, color: release.state.tint)
+                            Image(systemName: "chevron.right").font(.caption.weight(.semibold)).foregroundStyle(.tertiary)
+                        }
+                        .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+        }
+    }
+
+    private func label(_ text: String) -> some View {
+        Text(text).lineLimit(1).frame(width: 130, alignment: .leading)
+    }
+
+    private func value(_ text: String, faded: Bool = false) -> some View {
+        Text(text).font(.callout).foregroundStyle(faded ? .tertiary : .secondary).frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private func mono(_ text: String) -> some View {
+        Text(text)
+            .font(.callout.monospaced())
+            .foregroundStyle(.secondary)
+            .textSelection(.enabled)
+            .lineLimit(1)
+            .truncationMode(.middle)
+            .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     private func revert() {
@@ -196,5 +341,20 @@ struct ProductDetailView: View {
                 model.show(error, title: "Could not revert the working copy")
             }
         }
+    }
+}
+
+struct CopyButton: View {
+    let text: String
+
+    var body: some View {
+        Button {
+            NSPasteboard.general.clearContents()
+            NSPasteboard.general.setString(text, forType: .string)
+        } label: {
+            Image(systemName: "doc.on.doc")
+        }
+        .buttonStyle(.borderless)
+        .help("Copy")
     }
 }
