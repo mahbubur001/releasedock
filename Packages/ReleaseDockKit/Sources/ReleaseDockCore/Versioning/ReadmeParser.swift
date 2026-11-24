@@ -7,11 +7,21 @@ public struct WordPressReadme: Codable, Hashable, Sendable {
     public var fields: [String: String]
     /// Section bodies keyed by lowercased section title (e.g. `changelog`).
     public var sections: [String: String]
+    /// Text between the header block and the first section, whitespace-collapsed.
+    public var shortDescription: String?
+    /// Size of the file in bytes.
+    public var byteCount: Int?
+    /// Lines in the header block with an unknown key. A short description containing
+    /// ":" lands here, because WordPress.org reads it as a header too.
+    public var unknownHeaderLines: [String]?
 
-    public init(name: String?, fields: [String: String], sections: [String: String]) {
+    public init(name: String?, fields: [String: String], sections: [String: String], shortDescription: String? = nil, byteCount: Int? = nil, unknownHeaderLines: [String]? = nil) {
         self.name = name
         self.fields = fields
         self.sections = sections
+        self.shortDescription = shortDescription
+        self.byteCount = byteCount
+        self.unknownHeaderLines = unknownHeaderLines
     }
 
     /// Stable tag as WordPress.org sanitizes it.
@@ -38,15 +48,38 @@ public struct WordPressReadme: Codable, Hashable, Sendable {
         let pattern = #"(?m)^[ \t]*(?:=+|#+|\*+)?[ \t]*v?"# + escaped + #"(?![0-9A-Za-z.\-+])"#
         return changelog.range(of: pattern, options: .regularExpression) != nil
     }
+
+    /// The `== Upgrade Notice ==` entry for `version`: the text under its `= version =`
+    /// heading, up to the next heading.
+    public func upgradeNotice(for version: String) -> String? {
+        guard let section = sections["upgrade notice"] else { return nil }
+        var collecting = false
+        var lines: [String] = []
+        for line in section.components(separatedBy: "\n") {
+            let trimmed = line.trimmingCharacters(in: .whitespaces)
+            let isHeading = (trimmed.hasPrefix("=") && trimmed.hasSuffix("=") && trimmed.count > 2) || trimmed.hasPrefix("#")
+            if isHeading {
+                if collecting { break }
+                let title = trimmed.trimmingCharacters(in: CharacterSet(charactersIn: "=# \t"))
+                collecting = title == version || title == "v" + version
+                continue
+            }
+            if collecting { lines.append(line) }
+        }
+        let text = lines.joined(separator: "\n").trimmingCharacters(in: .whitespacesAndNewlines)
+        return text.isEmpty ? nil : text
+    }
 }
 
 /// Parser for WordPress readme files following the WordPress.org plugin directory
 /// parser (`plugin-directory/readme/class-parser.php`) where it matters for releases:
 ///
 /// - The name is the first non-blank line trimmed of `#`, `=` and whitespace.
-/// - Header lines follow; keys are case-insensitive and split on the first `:`.
-///   Parsing stops at the first non-blank line that has no `:` or starts with `#`/`=`.
-///   Aliases: `tested` → `tested up to`, `requires` → `requires at least`.
+/// - Header lines follow; keys are case-insensitive and split on the first `:`, with
+///   ` \t*-` trimmed from keys and values. Parsing stops at the first non-blank line that
+///   has no `:` or starts with `#`/`=`, and at an unknown key that follows a blank line
+///   (that line starts the short description). Aliases: `tested` → `tested up to`,
+///   `requires` → `requires at least`.
 /// - Sections start with `== Title ==` or a Markdown `## Title`.
 ///
 /// It does not reproduce every rule of the official readme validator; ReleaseDock checks
@@ -79,25 +112,43 @@ public enum ReadmeParser {
 
         // Header block.
         var fields: [String: String] = [:]
+        var unknownHeaderLines: [String] = []
+        var lastLineWasBlank = false
+        let keyTrim = CharacterSet(charactersIn: " \t*-\r\n")
+        let valueTrim = CharacterSet(charactersIn: " \t*-\r\n<>")
         while index < lines.count {
             let line = lines[index]
             let trimmed = line.trimmingCharacters(in: .whitespaces)
-            if trimmed.isEmpty { index += 1; continue }
-            guard let colon = trimmed.firstIndex(of: ":"), !trimmed.hasPrefix("#"), !trimmed.hasPrefix("=") else { break }
-            var key = trimmed[..<colon].trimmingCharacters(in: .whitespaces).lowercased()
+            guard let colon = line.firstIndex(of: ":"), !line.hasPrefix("#"), !line.hasPrefix("=") else {
+                if trimmed.isEmpty { lastLineWasBlank = true; index += 1; continue }
+                break
+            }
+            var key = line[..<colon].trimmingCharacters(in: keyTrim).lowercased()
             key = headerAliases[key] ?? key
-            let value = trimmed[trimmed.index(after: colon)...].trimmingCharacters(in: .whitespaces)
-            if knownHeaders.contains(key), fields[key] == nil { fields[key] = value }
+            let value = line[line.index(after: colon)...].trimmingCharacters(in: valueTrim)
+            if knownHeaders.contains(key) {
+                if fields[key] == nil { fields[key] = value }
+            } else if lastLineWasBlank {
+                break // The short description, as on WordPress.org.
+            } else {
+                unknownHeaderLines.append(trimmed)
+            }
+            lastLineWasBlank = false
             index += 1
         }
 
-        // Sections.
+        // Sections. Text before the first section is the short description.
         var sections: [String: String] = [:]
         var currentSection: String?
         var body: [String] = []
+        var intro: [String] = []
         func flush() {
-            if let currentSection, sections[currentSection] == nil {
-                sections[currentSection] = body.joined(separator: "\n").trimmingCharacters(in: .whitespacesAndNewlines)
+            if let currentSection {
+                if sections[currentSection] == nil {
+                    sections[currentSection] = body.joined(separator: "\n").trimmingCharacters(in: .whitespacesAndNewlines)
+                }
+            } else {
+                intro = body
             }
             body = []
         }
@@ -113,7 +164,9 @@ public enum ReadmeParser {
             body.append(line)
         }
         flush()
-        return WordPressReadme(name: name, fields: fields, sections: sections)
+        let short = intro.joined(separator: " ")
+            .components(separatedBy: .whitespacesAndNewlines).filter { !$0.isEmpty }.joined(separator: " ")
+        return WordPressReadme(name: name, fields: fields, sections: sections, shortDescription: short.isEmpty ? nil : short, byteCount: contents.utf8.count, unknownHeaderLines: unknownHeaderLines.isEmpty ? nil : unknownHeaderLines)
     }
 
     public static func parse(fileAt url: URL) throws -> WordPressReadme {

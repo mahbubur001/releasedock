@@ -49,6 +49,7 @@ public struct ThemeReleaseStrategy: ReleaseStrategy {
             for field in ["contributors", "requires at least", "tested up to", "requires php", "license", "license uri"] where readme.fields[field] == nil {
                 results.append(.warn(.metadataValidity, "readme.txt is missing \"\(field.capitalized)\"", file: detected.readmeFile))
             }
+            results += ReadmeRules.check(readme, file: detected.readmeFile, version: detected.version, type: .theme)
             if product.validation.requireChangelogEntry, let version = detected.version, !readme.changelogMentions(version: version) {
                 results.append(.warn(.changelogEntry, "readme.txt changelog has no entry for \(version)", file: detected.readmeFile))
             }

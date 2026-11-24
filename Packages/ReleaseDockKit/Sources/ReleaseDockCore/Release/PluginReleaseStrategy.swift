@@ -97,6 +97,8 @@ public struct PluginReleaseStrategy: ReleaseStrategy {
         if readme.contributors.isEmpty {
             results.append(.warn(.metadataValidity, "readme has no Contributors", file: readmeFile))
         }
+        results += ReadmeRules.check(readme, file: readmeFile, version: detected.version)
+        results += ReadmeRules.checkRequiresPlugins(detected.headers["Requires Plugins"], slug: product.slug, file: mainFile)
         let tags = readme.tags.filter { !["plugin", "wordpress"].contains($0.lowercased()) }
         if tags.count > 5 {
             results.append(.warn(.metadataValidity, "readme has \(tags.count) tags; WordPress.org keeps only the first 5", file: readmeFile))

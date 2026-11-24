@@ -9,6 +9,10 @@ All notable changes to ReleaseDock are documented here. The format follows [Keep
 - "Tested up to" is compared with the current WordPress release from api.wordpress.org and warns when it is behind, as WordPress.org's Plugin Check does. A plugin header "Tested up to" that differs from the readme also warns. Without a connection, only the format is checked.
 - After a release is committed, ReleaseDock follows the WordPress.org directory until it offers the new version (every 10 minutes for 3 days, or **Check Now** in the report) and notifies you when it is live. The report shows Waiting, Live, Not listed or a newer version, and the guidance mentions the security review period WordPress.org applies before distributing releases.
 - Code checks on the staged release candidate, before the SVN working copy is touched: PHP syntax (`php -l`, blocks on parse errors) and, with a local WordPress install set in Settings, WordPress.org's Plugin Check (`wp plugin check`, reported as warnings). Both are optional checks that can be turned off per product; lint is skipped when the local PHP is older than the plugin's Requires PHP.
+- Deeper readme checks, matching the WordPress.org directory parser: short description over 150 characters, missing short description (including one swallowed as a header because it contains ":" directly under the headers), missing Description section, sections longer than WordPress.org keeps (2,500 words; 5,000 for Changelog and FAQ), readmes over 10 KB, theme upgrade notices over 300 characters, and `Requires Plugins` entries that are not directory slugs.
+
+### Fixed
+- readme headers are read like WordPress.org: `*`/`-` around keys and `<>` around values are ignored, and an unknown "header" after a blank line starts the short description.
 
 ## [0.1.3] - 2026-11-23
 
