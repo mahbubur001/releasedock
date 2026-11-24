@@ -183,6 +183,41 @@ public struct VerificationReport: Codable, Hashable, Sendable {
     }
 }
 
+/// Whether WordPress.org offers a committed release to sites yet. A commit is not
+/// distributed immediately: the directory holds releases for a security cooldown,
+/// and Release Confirmation (when enabled) waits for a committer.
+public struct DirectoryStatus: Codable, Hashable, Sendable {
+    public enum State: String, Codable, Sendable {
+        /// The directory still offers an older version.
+        case pending
+        /// The directory offers this release.
+        case live
+        /// The directory already offers a newer version.
+        case superseded
+        /// The directory has no listing for the slug.
+        case notListed
+    }
+
+    public var state: State
+    public var listedVersion: String?
+    public var checkedAt: Date
+    public var liveSince: Date?
+
+    public init(state: State, listedVersion: String?, checkedAt: Date = Date(), liveSince: Date? = nil) {
+        self.state = state
+        self.listedVersion = listedVersion
+        self.checkedAt = checkedAt
+        self.liveSince = liveSince
+    }
+
+    public static func state(released: String, listing: DirectoryListing?) -> State {
+        guard let listing else { return .notListed }
+        guard let listed = listing.version else { return .pending }
+        let order = PHPVersion.compare(listed, released)
+        return order == 0 ? .live : order > 0 ? .superseded : .pending
+    }
+}
+
 /// Persisted record of one release attempt. Everything needed to resume, recover or
 /// report the release lives here; credentials never do.
 public struct ReleaseRecord: Codable, Hashable, Sendable, Identifiable {
@@ -221,6 +256,8 @@ public struct ReleaseRecord: Codable, Hashable, Sendable, Identifiable {
     public var verifiedNotCommitted: Bool
     /// Post-release instructions for the user (e.g. Release Confirmation).
     public var guidance: [String]
+    /// Last WordPress.org directory check after the commit.
+    public var directoryStatus: DirectoryStatus?
     public var createdAt: Date
     public var updatedAt: Date
 
@@ -257,4 +294,22 @@ public struct ReleaseRecord: Codable, Hashable, Sendable, Identifiable {
     public var commitMarker: String { "ReleaseDock-Release-ID: \(id.uuidString)" }
 
     public var kind: ReleaseKind { releaseKind ?? .version }
+
+    public var completedAt: Date? { transitions.last { $0.to == .completed }?.at }
+
+    /// Version releases committed to WordPress.org can be followed until the directory
+    /// offers them. Readme updates keep the version, so there is nothing to wait for.
+    public var isDirectoryTracked: Bool {
+        guard state == .completed, mode != .dryRun, kind == .version, let host = URL(string: svnURL)?.host?.lowercased() else { return false }
+        return host == "plugins.svn.wordpress.org" || host == "themes.svn.wordpress.org"
+    }
+
+    /// Still worth checking: tracked, not live or superseded yet, and recent.
+    public func awaitsDirectory(now: Date = Date(), window: TimeInterval = 72 * 3600) -> Bool {
+        guard isDirectoryTracked, let completedAt, now.timeIntervalSince(completedAt) < window else { return false }
+        switch directoryStatus?.state {
+        case .live?, .superseded?: return false
+        case .pending?, .notListed?, nil: return true
+        }
+    }
 }

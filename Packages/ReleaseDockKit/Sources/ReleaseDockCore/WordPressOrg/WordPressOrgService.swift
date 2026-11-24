@@ -12,11 +12,27 @@ public enum WordPressOrgError: Error, LocalizedError, Equatable {
     }
 }
 
+/// What the plugin or theme directory currently offers to sites.
+public struct DirectoryListing: Codable, Hashable, Sendable {
+    public var version: String?
+    public var tested: String?
+    public var lastUpdated: String?
+
+    public init(version: String?, tested: String? = nil, lastUpdated: String? = nil) {
+        self.version = version
+        self.tested = tested
+        self.lastUpdated = lastUpdated
+    }
+}
+
 /// Read-only WordPress.org API lookups. Used for facts that only the directory knows,
 /// such as the current WordPress release that "Tested up to" is measured against.
 public protocol WordPressOrgServicing: Sendable {
     /// The latest stable WordPress release, e.g. `7.1.5`.
     func latestWordPressVersion() async throws -> String
+    /// The directory's listing for `slug`, or nil when the directory has no such product
+    /// (not approved yet, or closed).
+    func directoryListing(slug: String, type: ProductType) async throws -> DirectoryListing?
 }
 
 public struct WordPressOrgService: WordPressOrgServicing {
@@ -36,6 +52,35 @@ public struct WordPressOrgService: WordPressOrgServicing {
         guard let http = response as? HTTPURLResponse else { throw WordPressOrgError.invalidResponse }
         guard http.statusCode == 200 else { throw WordPressOrgError.http(http.statusCode) }
         return try Self.parseLatestVersion(data)
+    }
+
+    public func directoryListing(slug: String, type: ProductType) async throws -> DirectoryListing? {
+        let action = type == .plugin ? "plugins/info/1.2/?action=plugin_information" : "themes/info/1.2/?action=theme_information"
+        let allowed = CharacterSet(charactersIn: "abcdefghijklmnopqrstuvwxyz0123456789-_")
+        guard let encoded = slug.lowercased().addingPercentEncoding(withAllowedCharacters: allowed),
+              let url = URL(string: "\(action)&request%5Bslug%5D=\(encoded)&request%5Bfields%5D%5Bsections%5D=0&request%5Bfields%5D%5Bversions%5D=0", relativeTo: baseURL)
+        else { throw WordPressOrgError.invalidResponse }
+        var request = URLRequest(url: url, cachePolicy: .reloadIgnoringLocalCacheData, timeoutInterval: 20)
+        request.setValue("ReleaseDock", forHTTPHeaderField: "User-Agent")
+        let (data, response) = try await session.data(for: request)
+        guard let http = response as? HTTPURLResponse else { throw WordPressOrgError.invalidResponse }
+        switch http.statusCode {
+        case 200: return try Self.parseListing(data)
+        case 404: return nil
+        default: throw WordPressOrgError.http(http.statusCode)
+        }
+    }
+
+    static func parseListing(_ data: Data) throws -> DirectoryListing {
+        struct Payload: Decodable {
+            var version: String?
+            var tested: String?
+            var last_updated: String?
+            var error: String?
+        }
+        let payload = try JSONDecoder().decode(Payload.self, from: data)
+        guard payload.error == nil else { throw WordPressOrgError.invalidResponse }
+        return DirectoryListing(version: payload.version, tested: payload.tested, lastUpdated: payload.last_updated)
     }
 
     /// The first offer is the newest release; older branches follow as `autoupdate` offers.

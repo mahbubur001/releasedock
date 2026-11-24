@@ -155,6 +155,12 @@ final class ReleaseWizardModel {
             }
             return try await model.pipeline.publish(id)
         }
+        // Record the directory's starting point right away; the monitor follows up.
+        // Silent: a failed check must not read like a failed release.
+        if let record, record.isDirectoryTracked, let updated = try? await model.pipeline.refreshDirectoryStatus(record.id) {
+            self.record = updated
+            model.reload()
+        }
     }
 
     func cancelRelease() async {

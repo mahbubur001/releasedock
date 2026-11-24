@@ -59,6 +59,7 @@ final class AppModel {
     let notifications: NotificationServicing
     let diagnostics: DiagnosticsService
     let updateChecker: AppUpdateChecker
+    @ObservationIgnored private var directoryMonitor: Task<Void, Never>?
 
     var products: [Product] = []
     var releases: [ReleaseRecord] = []
@@ -157,7 +158,37 @@ final class AppModel {
         reload()
         await detectSVN()
         if settings.notificationsEnabled { _ = await notifications.requestAuthorization() }
+        startDirectoryMonitor()
         if settings.checkGitHubOnLaunch { await updateChecker.check(settings: settings, manual: false) }
+    }
+
+    // MARK: WordPress.org directory
+
+    /// Every 10 minutes, asks WordPress.org whether recent releases are offered to sites
+    /// yet; the pipeline notifies when one goes live.
+    func startDirectoryMonitor() {
+        directoryMonitor?.cancel()
+        directoryMonitor = Task { [weak self] in
+            while !Task.isCancelled {
+                guard let pipeline = self?.pipeline else { return }
+                let refreshed = await pipeline.refreshAwaitingDirectoryReleases()
+                if !refreshed.isEmpty { self?.reload() }
+                try? await Task.sleep(for: .seconds(600))
+            }
+        }
+    }
+
+    /// Checks one release now. Returns the updated record, or nil after showing the error.
+    @discardableResult
+    func refreshDirectoryStatus(_ id: UUID) async -> ReleaseRecord? {
+        do {
+            let updated = try await pipeline.refreshDirectoryStatus(id)
+            reload()
+            return updated
+        } catch {
+            show(error, title: "Could not check WordPress.org")
+            return nil
+        }
     }
 
     func reload() {

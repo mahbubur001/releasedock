@@ -563,6 +563,48 @@ public actor ReleasePipelineService {
         return record
     }
 
+    // MARK: Directory status
+
+    /// Asks WordPress.org whether it offers a completed release yet, records the answer,
+    /// and notifies once it goes live.
+    public func refreshDirectoryStatus(_ id: UUID) async throws -> ReleaseRecord {
+        let record = try load(id)
+        guard record.isDirectoryTracked, let version = record.version, let wordpressOrg = deps.wordpressOrg else { return record }
+        let listing = try await wordpressOrg.directoryListing(slug: record.productSlug, type: record.productType)
+        // Reload: the record may have changed while the request ran.
+        var latest = try load(id)
+        let wasLive = latest.directoryStatus?.state == .live
+        let state = DirectoryStatus.state(released: version, listing: listing)
+        let now = Date()
+        latest.directoryStatus = DirectoryStatus(
+            state: state,
+            listedVersion: listing?.version,
+            checkedAt: now,
+            liveSince: state == .live ? (latest.directoryStatus?.liveSince ?? now) : nil
+        )
+        try deps.releases.save(latest)
+        if state == .live, !wasLive {
+            emit(latest, "\(latest.productName) \(version) is live on WordPress.org")
+            await deps.notifications.notify(
+                title: "\(latest.productName) \(version) is live",
+                body: "WordPress.org now offers \(version) to sites.",
+                identifier: "\(latest.id.uuidString)-live"
+            )
+        }
+        return latest
+    }
+
+    /// Refreshes every recent release that WordPress.org does not offer yet. Errors are
+    /// skipped; the next round tries again.
+    public func refreshAwaitingDirectoryReleases(now: Date = Date()) async -> [ReleaseRecord] {
+        guard deps.wordpressOrg != nil, let releases = try? deps.releases.releases(productID: nil) else { return [] }
+        var refreshed: [ReleaseRecord] = []
+        for release in releases where release.awaitsDirectory(now: now) {
+            if let updated = try? await refreshDirectoryStatus(release.id) { refreshed.append(updated) }
+        }
+        return refreshed
+    }
+
     // MARK: Recovery
 
     /// Searches the product's recent history for this release's commit marker.

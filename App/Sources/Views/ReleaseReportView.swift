@@ -80,6 +80,10 @@ struct ReleaseReportView: View {
                     ForEach(verification.checksumMismatches, id: \.self) { Label("Checksum differs: \($0)", systemImage: "number").font(.caption) }
                     ForEach(verification.notes, id: \.self) { Text($0).font(.caption).foregroundStyle(.secondary) }
                 }
+                if record.isDirectoryTracked {
+                    Divider()
+                    DirectoryStatusRow(record: record)
+                }
                 if !record.guidance.isEmpty {
                     Divider()
                     ForEach(record.guidance, id: \.self) { Label($0, systemImage: "info.circle").font(.callout) }
@@ -145,6 +149,85 @@ struct ReleaseReportView: View {
                     .fixedSize(horizontal: false, vertical: true)
             }
             ForEach(record.repository?.notes ?? [], id: \.self) { Text($0).font(.caption).foregroundStyle(.orange) }
+        }
+    }
+}
+
+/// Whether WordPress.org offers the committed release to sites yet.
+private struct DirectoryStatusRow: View {
+    @Environment(AppModel.self) private var model
+    let record: ReleaseRecord
+    @State private var latest: DirectoryStatus?
+    @State private var checking = false
+
+    private var status: DirectoryStatus? { latest ?? record.directoryStatus }
+
+    var body: some View {
+        HStack(alignment: .firstTextBaseline) {
+            Text("WordPress.org").foregroundStyle(.secondary).frame(width: 130, alignment: .leading)
+            VStack(alignment: .leading, spacing: 3) {
+                Label(headline, systemImage: symbol)
+                    .foregroundStyle(color)
+                    .font(.callout)
+                if let detail {
+                    Text(detail).font(.caption).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
+                }
+                if let checkedAt = status?.checkedAt {
+                    Text("Checked \(checkedAt.formatted(.relative(presentation: .named)))").font(.caption2).foregroundStyle(.tertiary)
+                }
+            }
+            Spacer(minLength: 8)
+            if checking {
+                ProgressView().controlSize(.small)
+            } else {
+                Button("Check Now") {
+                    Task {
+                        checking = true
+                        defer { checking = false }
+                        if let updated = await model.refreshDirectoryStatus(record.id) { latest = updated.directoryStatus }
+                    }
+                }
+            }
+        }
+    }
+
+    private var version: String { record.version ?? "" }
+
+    private var headline: String {
+        switch status?.state {
+        case nil: "Not checked yet"
+        case .pending?: "Waiting to go live"
+        case .live?: "Live" + (status?.liveSince.map { " since \($0.formatted(date: .abbreviated, time: .shortened))" } ?? "")
+        case .superseded?: "A newer version is live"
+        case .notListed?: "Not listed in the directory"
+        }
+    }
+
+    private var detail: String? {
+        switch status?.state {
+        case nil: "ReleaseDock checks every 10 minutes for 3 days and notifies you when \(version) is live."
+        case .pending?: "The directory still offers \(status?.listedVersion ?? "the previous version"). New releases pass a security review period (currently about 6 hours) and Release Confirmation, if it is enabled."
+        case .live?: "Sites are offered \(version)."
+        case .superseded?: "The directory offers \(status?.listedVersion ?? "a newer version")."
+        case .notListed?: "New plugins and themes appear after approval; closed ones are no longer listed."
+        }
+    }
+
+    private var symbol: String {
+        switch status?.state {
+        case nil: "clock"
+        case .pending?: "hourglass"
+        case .live?: "checkmark.circle.fill"
+        case .superseded?: "arrow.up.circle"
+        case .notListed?: "questionmark.circle"
+        }
+    }
+
+    private var color: Color {
+        switch status?.state {
+        case .live?: .green
+        case .pending?: .orange
+        default: .secondary
         }
     }
 }

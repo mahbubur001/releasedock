@@ -86,3 +86,21 @@ final class LiveDryRunTests: XCTestCase {
         XCTAssertNil(record.committedRevision, "a dry run never commits")
     }
 }
+
+/// Opt-in, read-only WordPress.org API checks:
+/// RELEASEDOCK_LIVE_API=1 swift test --filter LiveWordPressOrgAPITests
+final class LiveWordPressOrgAPITests: XCTestCase {
+    func testRealEndpoints() async throws {
+        guard ProcessInfo.processInfo.environment["RELEASEDOCK_LIVE_API"] == "1" else { throw XCTSkip("Set RELEASEDOCK_LIVE_API=1") }
+        let service = WordPressOrgService()
+        let latest = try await service.latestWordPressVersion()
+        XCTAssertNotNil(WordPressBranch.of(latest))
+        let plugin = try await service.directoryListing(slug: "akismet", type: .plugin)
+        XCTAssertNotNil(plugin?.version)
+        let theme = try await service.directoryListing(slug: "twentytwentyfive", type: .theme)
+        XCTAssertNotNil(theme?.version)
+        let missing = try await service.directoryListing(slug: "releasedock-no-such-plugin-zz9", type: .plugin)
+        XCTAssertNil(missing)
+        print("LIVE API: WordPress \(latest), akismet \(plugin?.version ?? "nil"), twentytwentyfive \(theme?.version ?? "nil")")
+    }
+}

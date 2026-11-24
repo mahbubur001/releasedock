@@ -206,6 +206,7 @@ public struct ThemeReleaseStrategy: ReleaseStrategy {
         [
             "WordPress.org now imports \(version) and runs Theme Check. Success is confirmed by email; a failure arrives as \"Theme Import Failure\" and the version does not go live.",
             "A committed version directory cannot be overwritten. Fixes require a new, higher version.",
+            "After the import, WordPress.org holds the release for a security review period (currently about 6 hours). ReleaseDock checks the directory and notifies you when \(version) is live.",
         ]
     }
 }

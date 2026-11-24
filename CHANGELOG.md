@@ -7,6 +7,7 @@ All notable changes to ReleaseDock are documented here. The format follows [Keep
 ### Added
 - Readme & Assets Update for plugins: update `readme.txt` (and `/assets`) of the released version in trunk and its tag without publishing a new version, e.g. to raise "Tested up to". The package must be the released version; any code difference from the released tag is refused. Dry run, preview, approval, single commit, verification and uncertain-commit recovery work as for version releases.
 - "Tested up to" is compared with the current WordPress release from api.wordpress.org and warns when it is behind, as WordPress.org's Plugin Check does. A plugin header "Tested up to" that differs from the readme also warns. Without a connection, only the format is checked.
+- After a release is committed, ReleaseDock follows the WordPress.org directory until it offers the new version (every 10 minutes for 3 days, or **Check Now** in the report) and notifies you when it is live. The report shows Waiting, Live, Not listed or a newer version, and the guidance mentions the security review period WordPress.org applies before distributing releases.
 
 ## [0.1.3] - 2026-11-23
 

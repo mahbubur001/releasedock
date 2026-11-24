@@ -353,7 +353,7 @@ public struct PluginReleaseStrategy: ReleaseStrategy {
 
     public func postReleaseGuidance(product: Product, version: String) -> [String] {
         [
-            "WordPress.org rebuilds the download and updates the plugin page within minutes (up to several hours under load).",
+            "WordPress.org holds new releases for a security review period (currently about 6 hours) before offering the update to sites. ReleaseDock checks the directory and notifies you when \(version) is live.",
             "If Release Confirmation is enabled for \(product.name), every committer receives a \"Pending release\" email. Confirm version \(version) at https://wordpress.org/plugins/developers/releases/ — users stay on the previous version until it is confirmed.",
             "Do not modify tags/\(version) after it is confirmed; changes require confirming again.",
         ]
