@@ -122,6 +122,11 @@ struct ProductDetailView: View {
     @State private var reverting = false
     @State private var bumpTarget: VersionBumpTarget?
     @State private var restoring = false
+    @State private var workingCopy: WorkingCopyState?
+    @State private var workingCopyError: String?
+    @State private var updating = false
+    @State private var showChanges = false
+    @State private var resolvingConflicts = false
 
     private var hasWorkingCopy: Bool { FileManager.default.fileExists(atPath: product.workingCopyURL.appendingPathComponent(".svn").path) }
 
@@ -211,15 +216,7 @@ struct ProductDetailView: View {
                     }
                 }
                 history
-                SectionHeading("Working Copy")
-                GroupedRows {
-                    GroupedRow(isFirst: true) {
-                        value("Discard local changes in the working copy and match the server. Everything changed is backed up first.")
-                        Button(reverting ? "Reverting…" : "Revert Working Copy…", role: .destructive) { confirmRevert = true }
-                            .fixedSize()
-                            .disabled(reverting || !hasWorkingCopy)
-                    }
-                }
+                workingCopySection
             }
             .padding(.horizontal, 24)
             .padding(.vertical, 20)
@@ -236,6 +233,12 @@ struct ProductDetailView: View {
         .sheet(isPresented: $restoring) {
             RestoreVersionSheet(product: product)
         }
+        .sheet(isPresented: $resolvingConflicts) {
+            ConflictResolutionSheet(product: product, conflicts: workingCopy?.conflicts ?? []) { state in
+                workingCopy = state
+            }
+        }
+        .task(id: product.id) { await loadWorkingCopy() }
         #if DEBUG
         // UI verification: RELEASEDOCK_UI_TEST_RESTORE=1 opens the restore sheet; =auto also prepares it.
         .onAppear { if ProcessInfo.processInfo.environment["RELEASEDOCK_UI_TEST_RESTORE"] != nil, product.currentVersion != nil { restoring = true } }
@@ -273,6 +276,7 @@ struct ProductDetailView: View {
     @ViewBuilder private var actions: some View {
             Menu {
                 SwiftUI.Button("Show Working Copy in Finder") { NSWorkspace.shared.open(product.workingCopyURL) }
+                SwiftUI.Button(hasWorkingCopy ? "Update Working Copy" : "Check Out Working Copy") { update() }.disabled(updating || reverting)
                 SwiftUI.Button("Revert Working Copy…") { confirmRevert = true }.disabled(!hasWorkingCopy)
                 SwiftUI.Button("Restore Older Version…") { restoring = true }.disabled(product.currentVersion == nil || model.wizard.isRunning)
                 Divider()
@@ -357,6 +361,224 @@ struct ProductDetailView: View {
                 }
             } catch {
                 model.show(error, title: "Could not revert the working copy")
+            }
+            await loadWorkingCopy()
+        }
+    }
+
+    // MARK: Working copy
+
+    @ViewBuilder private var workingCopySection: some View {
+        SectionHeading("Working Copy") {
+            Button {
+                Task { await loadWorkingCopy() }
+            } label: {
+                Image(systemName: "arrow.clockwise")
+            }
+            .buttonStyle(.borderless)
+            .help("Refresh the status")
+            .disabled(updating || reverting)
+        }
+        GroupedRows {
+            GroupedRow(isFirst: true) {
+                label("Status")
+                workingCopyStatus
+                Button(updating ? "Updating…" : (hasWorkingCopy ? "Update" : "Check Out")) { update() }
+                    .fixedSize()
+                    .disabled(updating || reverting)
+                    .help("svn update: bring the working copy to the latest WordPress.org revision. Local changes are kept; collisions become conflicts.")
+                Button(reverting ? "Reverting…" : "Revert…", role: .destructive) { confirmRevert = true }
+                    .fixedSize()
+                    .disabled(reverting || updating || !hasWorkingCopy || workingCopy?.isClean == true)
+                    .help("Discard local changes and match the server. Everything changed is backed up first.")
+            }
+            if let conflicts = workingCopy?.conflicts, !conflicts.isEmpty {
+                GroupedRow {
+                    label("Conflicts")
+                    value("\(conflicts.count) file(s) changed both here and on WordPress.org. Choose which version to keep.")
+                    Button("Resolve…") { resolvingConflicts = true }
+                        .buttonStyle(.borderedProminent)
+                        .fixedSize()
+                        .disabled(updating || reverting)
+                }
+            }
+            if let changes = workingCopy?.changes, !changes.isEmpty {
+                GroupedRow {
+                    Button {
+                        withAnimation(.snappy(duration: 0.2)) { showChanges.toggle() }
+                    } label: {
+                        HStack {
+                            Image(systemName: "chevron.right")
+                                .font(.caption.weight(.bold))
+                                .rotationEffect(.degrees(showChanges ? 90 : 0))
+                            Text(showChanges ? "Hide changes" : "Show \(changes.count) change(s)")
+                            Spacer()
+                        }
+                        .foregroundStyle(.secondary)
+                        .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                }
+                if showChanges {
+                    VStack(alignment: .leading, spacing: 4) {
+                        ForEach(changes.prefix(200)) { change in
+                            HStack(spacing: 8) {
+                                StatusPill(text: change.isConflict ? "conflict" : change.status.rawValue, color: change.isConflict ? .red : .secondary)
+                                    .frame(width: 92, alignment: .leading)
+                                Text(change.path).font(.caption.monospaced()).foregroundStyle(.secondary)
+                                    .lineLimit(1).truncationMode(.middle).textSelection(.enabled)
+                            }
+                        }
+                        if changes.count > 200 { Text("… and \(changes.count - 200) more").font(.caption).foregroundStyle(.tertiary) }
+                    }
+                    .padding(.horizontal, 14)
+                    .padding(.bottom, 12)
+                }
+            }
+        }
+    }
+
+    @ViewBuilder private var workingCopyStatus: some View {
+        Group {
+            if let workingCopyError {
+                Label(workingCopyError, systemImage: "exclamationmark.triangle.fill").foregroundStyle(.red).lineLimit(2)
+            } else if let state = workingCopy {
+                if !state.exists {
+                    Text("Not checked out yet").foregroundStyle(.secondary)
+                } else {
+                    HStack(spacing: 6) {
+                        if let revision = state.revision { Text("r\(revision)").font(.callout.monospaced()).foregroundStyle(.secondary) }
+                        if !state.conflicts.isEmpty {
+                            StatusPill(text: "\(state.conflicts.count) conflict(s)", color: .red)
+                        } else if state.isClean {
+                            StatusPill(text: "Clean", color: .green)
+                        } else {
+                            StatusPill(text: "\(state.changes.count) local change(s)", color: .orange)
+                        }
+                    }
+                }
+            } else {
+                ProgressView().controlSize(.small)
+            }
+        }
+        .font(.callout)
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private func loadWorkingCopy() async {
+        do {
+            workingCopy = try await model.pipeline.workingCopyState(productID: product.id)
+            workingCopyError = nil
+        } catch {
+            workingCopyError = error.localizedDescription
+        }
+    }
+
+    private func update() {
+        updating = true
+        Task {
+            defer { updating = false }
+            do {
+                let state = try await model.pipeline.updateWorkingCopy(productID: product.id)
+                workingCopy = state
+                workingCopyError = nil
+                if !state.conflicts.isEmpty { resolvingConflicts = true }
+            } catch {
+                model.show(error, title: "Could not update the working copy")
+                await loadWorkingCopy()
+            }
+        }
+    }
+}
+
+/// One choice per conflicted file: the WordPress.org version (default, backed up first)
+/// or the local one.
+private struct ConflictResolutionSheet: View {
+    @Environment(AppModel.self) private var model
+    @Environment(\.dismiss) private var dismiss
+    let product: Product
+    let conflicts: [WorkingCopyChange]
+    let onResolved: (WorkingCopyState) -> Void
+    @State private var choices: [String: ConflictResolution] = [:]
+    @State private var working = false
+    @State private var error: String?
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            Text("Resolve conflicts in \(product.name)").font(.headline)
+            Text("These files changed both in your working copy and on WordPress.org. Releases are built from the server version, so taking it is usually right. Your local files are copied into the Backups folder first.")
+                .font(.callout).foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+            HStack {
+                Text("\(conflicts.count) conflict(s)").font(.callout.weight(.medium))
+                Spacer()
+                Button("Use Server for All") { setAll(.server) }.buttonStyle(.link)
+                Text("·").foregroundStyle(.tertiary)
+                Button("Keep Mine for All") { setAll(.mine) }.buttonStyle(.link)
+            }
+            ScrollView {
+                GroupedRows {
+                    ForEach(Array(conflicts.enumerated()), id: \.element.id) { index, conflict in
+                        GroupedRow(isFirst: index == 0) {
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(conflict.path).font(.callout.monospaced()).lineLimit(1).truncationMode(.middle).help(conflict.path)
+                                Text(conflict.isTreeConflict ? "Added, moved or deleted on one side" : "Edited on both sides").font(.caption).foregroundStyle(.secondary)
+                            }
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            Picker("", selection: binding(for: conflict.path)) {
+                                Text("WordPress.org").tag(ConflictResolution.server)
+                                Text("Mine").tag(ConflictResolution.mine)
+                            }
+                            .pickerStyle(.segmented)
+                            .labelsHidden()
+                            .fixedSize()
+                        }
+                    }
+                }
+            }
+            .frame(maxHeight: 320)
+            if let error { Text(error).foregroundStyle(.red).font(.caption).textSelection(.enabled) }
+            HStack {
+                Spacer()
+                Button("Cancel", role: .cancel) { dismiss() }
+                    .keyboardShortcut(.cancelAction)
+                Button(working ? "Resolving…" : "Resolve") { resolve() }
+                    .buttonStyle(.borderedProminent)
+                    .keyboardShortcut(.defaultAction)
+                    .disabled(working || conflicts.isEmpty)
+            }
+        }
+        .padding(22)
+        .frame(width: 600)
+    }
+
+    private func binding(for path: String) -> Binding<ConflictResolution> {
+        Binding(get: { choices[path] ?? .server }, set: { choices[path] = $0 })
+    }
+
+    private func setAll(_ side: ConflictResolution) {
+        for conflict in conflicts { choices[conflict.path] = side }
+    }
+
+    private func resolve() {
+        working = true
+        error = nil
+        Task {
+            defer { working = false }
+            var backup: URL?
+            do {
+                for side in ConflictResolution.allCases {
+                    let paths = conflicts.map(\.path).filter { (choices[$0] ?? .server) == side }
+                    guard !paths.isEmpty else { continue }
+                    let result = try await model.pipeline.resolveConflicts(productID: product.id, paths: paths, keeping: side)
+                    backup = result.backup ?? backup
+                    onResolved(result.state)
+                }
+                if let backup { NSWorkspace.shared.activateFileViewerSelecting([backup]) }
+                dismiss()
+            } catch {
+                self.error = error.localizedDescription
+                if let state = try? await model.pipeline.workingCopyState(productID: product.id) { onResolved(state) }
             }
         }
     }

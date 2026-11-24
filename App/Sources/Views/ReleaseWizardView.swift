@@ -140,19 +140,7 @@ private struct ReleaseWizardContent: View {
         } else {
             VStack(alignment: .leading, spacing: 10) {
                 SectionHeading("Product")
-                LazyVGrid(columns: [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)], spacing: 12) {
-                    ForEach(model.products) { product in
-                        ChoiceCard(isSelected: wizard.productID == product.id) {
-                            wizard.productID = product.id
-                        } content: {
-                            ProductGlyph(type: product.type)
-                            VStack(alignment: .leading, spacing: 1) {
-                                Text(product.name).font(.headline)
-                                Text("\(product.type.displayName) · \(product.currentVersion.map { "live \($0)" } ?? "not released yet")").font(.caption).foregroundStyle(.secondary)
-                            }
-                        }
-                    }
-                }
+                ProductPickerCard(products: model.products, selection: $wizard.productID)
                 if wizard.product?.type == .plugin {
                     SectionHeading("Publish")
                     HStack(spacing: 10) {
@@ -271,6 +259,11 @@ private struct ReleaseWizardContent: View {
                     }
                 }
                 .card()
+                if record.repository?.workingCopyChanges.isEmpty == false {
+                    DirtyWorkingCopyCard(changes: record.repository?.workingCopyChanges ?? [], isRunning: wizard.isRunning) {
+                        Task { await wizard.revertWorkingCopyAndCheckAgain() }
+                    }
+                }
                 if record.detected != nil { ReleaseHeroCard(record: record) }
                 if let build = record.build { BuildCard(build: build) }
                 if let report = record.validation { ChecksSection(report: report) }
@@ -335,7 +328,19 @@ private struct ReleaseWizardContent: View {
 
     @ViewBuilder private var actions: some View {
         if let record = wizard.record {
-            if !record.state.isTerminal, !record.state.mayHaveCommitted, !wizard.isRunning {
+            if wizard.canGoBack {
+                Button { Task { await wizard.backToPackage() } } label: { Label("Back", systemImage: "chevron.left") }
+                    .help("Return to Package with the same product and package\(record.state.isTerminal ? "" : "; the staged working copy is restored")")
+                if record.state.isTerminal {
+                    Button { Task { await wizard.checkAgain() } } label: { Label("Check Again", systemImage: "arrow.clockwise") }
+                        .buttonStyle(.borderedProminent)
+                        .keyboardShortcut(.defaultAction)
+                        .help("Run every check again on the same package, e.g. after fixing the working copy")
+                } else {
+                    Button { Task { await wizard.checkAgain() } } label: { Label("Check Again", systemImage: "arrow.clockwise") }
+                        .help("Run every check again on the same package, e.g. after fixing the working copy")
+                }
+            } else if !record.state.isTerminal, !record.state.mayHaveCommitted, !wizard.isRunning {
                 Button("Cancel Release", role: .destructive) { Task { await wizard.cancelRelease() } }
             }
             if record.state == .recoveryRequired, !wizard.isRunning {
@@ -346,9 +351,11 @@ private struct ReleaseWizardContent: View {
                 if record.state == .completed, record.mode != .dryRun {
                     Button("View in History") { model.open(record) }
                 }
-                Button(record.state == .completed ? "New Release" : "Start Over") { wizard.reset() }
-                    .buttonStyle(.borderedProminent)
-                    .keyboardShortcut(.defaultAction)
+                if record.state == .completed || !wizard.canGoBack {
+                    Button(record.state == .completed ? "New Release" : "Start Over") { wizard.reset() }
+                        .buttonStyle(.borderedProminent)
+                        .keyboardShortcut(.defaultAction)
+                }
             }
             if wizard.canApprove {
                 if wizard.effectiveMode == .automatic, wizard.automationReasons.isEmpty {
@@ -474,28 +481,78 @@ private struct RunningView: View {
     }
 }
 
-/// Selectable card for a product.
-private struct ChoiceCard<Content: View>: View {
-    let isSelected: Bool
-    let action: () -> Void
-    @ViewBuilder var content: Content
+/// The product being released, switched from a menu. A grid of cards stops scaling
+/// past a handful of products and repeats a choice already made on the Products page.
+private struct ProductPickerCard: View {
+    let products: [Product]
+    @Binding var selection: UUID?
+
+    private var selected: Product? { products.first { $0.id == selection } }
 
     var body: some View {
-        Button(action: action) {
-            HStack(spacing: 12) {
-                content
-                Spacer(minLength: 8)
-                Image(systemName: isSelected ? "largecircle.fill.circle" : "circle")
-                    .font(.title3)
-                    .foregroundStyle(isSelected ? Color.accentColor : Color.secondary)
+        HStack(spacing: 12) {
+            if let selected {
+                ProductGlyph(type: selected.type)
+                VStack(alignment: .leading, spacing: 1) {
+                    Text(selected.name).font(.headline).lineLimit(1)
+                    Text("\(selected.type.displayName) · \(selected.slug) · \(selected.currentVersion.map { "live \($0)" } ?? "not released yet")")
+                        .font(.caption).foregroundStyle(.secondary).lineLimit(1)
+                }
+            } else {
+                Text("Choose a product").foregroundStyle(.secondary)
             }
-            .padding(14)
-            .background(.background, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
-            .overlay(RoundedRectangle(cornerRadius: 12, style: .continuous).strokeBorder(isSelected ? Color.accentColor : Color.primary.opacity(0.1), lineWidth: isSelected ? 2 : 0.5))
-            .contentShape(Rectangle())
+            Spacer(minLength: 8)
+            if products.count > 1 {
+                Menu {
+                    Picker("Product", selection: $selection) {
+                        ForEach(products) { product in
+                            Text("\(product.name) · \(product.currentVersion ?? "new")").tag(Optional(product.id))
+                        }
+                    }
+                    .pickerStyle(.inline)
+                    .labelsHidden()
+                } label: {
+                    Text("Change")
+                }
+                .fixedSize()
+                .help("Release another product")
+            }
         }
-        .buttonStyle(.plain)
-        .accessibilityAddTraits(isSelected ? .isSelected : [])
+        .card(padding: 14)
+    }
+}
+
+/// Shown when the release stopped on a dirty working copy: what is there and the fix.
+private struct DirtyWorkingCopyCard: View {
+    let changes: [String]
+    let isRunning: Bool
+    let onRevert: () -> Void
+    @State private var confirm = false
+
+    var body: some View {
+        HStack(alignment: .top, spacing: 12) {
+            TintedSymbol(systemImage: "externaldrive.badge.exclamationmark", color: .orange)
+            VStack(alignment: .leading, spacing: 4) {
+                Text("The working copy has \(changes.count) local change(s)").font(.headline)
+                Text("Releases start from a working copy that matches WordPress.org. ReleaseDock can copy everything changed into the Backups folder, revert, and run the checks again.")
+                    .font(.callout).foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+                Text(changes.prefix(5).joined(separator: "\n") + (changes.count > 5 ? "\n… and \(changes.count - 5) more" : ""))
+                    .font(.caption.monospaced()).foregroundStyle(.secondary)
+                    .textSelection(.enabled)
+                    .padding(.top, 2)
+            }
+            Spacer(minLength: 8)
+            Button("Back Up, Revert & Check Again…") { confirm = true }
+                .fixedSize()
+                .disabled(isRunning)
+        }
+        .card()
+        .confirmationDialog("Revert all local changes in the working copy?", isPresented: $confirm) {
+            SwiftUI.Button("Back Up and Revert", role: .destructive, action: onRevert)
+        } message: {
+            Text("Every changed, added, unversioned and ignored file plus the svn diff is copied into the Backups folder first. If any backup step fails, nothing is reverted.")
+        }
     }
 }
 

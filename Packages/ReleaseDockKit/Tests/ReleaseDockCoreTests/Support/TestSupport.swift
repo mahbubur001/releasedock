@@ -331,6 +331,7 @@ final class FaultInjectingSVN: SVNServicing, @unchecked Sendable {
     func copy(_ source: URL, to destination: URL) async throws { try await base.copy(source, to: destination) }
     func revert(_ path: URL) async throws { try await base.revert(path) }
     func cleanup(_ path: URL) async throws { try await base.cleanup(path) }
+    func resolve(_ paths: [URL], accept: SVNConflictChoice) async throws { try await base.resolve(paths, accept: accept) }
     func setProperty(_ name: String, value: String, paths: [URL]) async throws { try await base.setProperty(name, value: value, paths: paths) }
     func log(_ url: String, limit: Int) async throws -> [SVNLogEntry] {
         if failLogWithNetworkError {

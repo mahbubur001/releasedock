@@ -73,3 +73,46 @@ public struct RepositorySnapshot: Codable, Hashable, Sendable {
         self.notes = notes
     }
 }
+
+/// One local change in a product's working copy.
+public struct WorkingCopyChange: Hashable, Sendable, Identifiable {
+    /// Relative to the working-copy root.
+    public var path: String
+    public var status: SVNItemStatus
+    public var isConflict: Bool
+    public var isTreeConflict: Bool
+
+    public var id: String { path }
+
+    public init(path: String, status: SVNItemStatus, isConflict: Bool = false, isTreeConflict: Bool = false) {
+        self.path = path
+        self.status = status
+        self.isConflict = isConflict
+        self.isTreeConflict = isTreeConflict
+    }
+}
+
+/// A product's working copy as the Products page shows it.
+public struct WorkingCopyState: Hashable, Sendable {
+    public var exists: Bool
+    public var revision: Int?
+    /// Everything that would fail the "Working copy cleanliness" check.
+    public var changes: [WorkingCopyChange]
+
+    public var conflicts: [WorkingCopyChange] { changes.filter(\.isConflict) }
+    public var isClean: Bool { changes.isEmpty }
+
+    public init(exists: Bool, revision: Int? = nil, changes: [WorkingCopyChange] = []) {
+        self.exists = exists
+        self.revision = revision
+        self.changes = changes
+    }
+}
+
+/// Which side wins when resolving a conflict.
+public enum ConflictResolution: String, Sendable, CaseIterable {
+    /// Take the WordPress.org version; the local change is backed up first.
+    case server
+    /// Keep the local version.
+    case mine
+}

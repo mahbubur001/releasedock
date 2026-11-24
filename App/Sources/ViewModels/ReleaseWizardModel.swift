@@ -197,6 +197,55 @@ final class ReleaseWizardModel {
         await run { try await model.pipeline.cancel(id) }
     }
 
+    /// Whether the release can be left for Package with its product, package and mode kept.
+    /// Not once publishing may have started, and not for restores, whose package lives in
+    /// the release's own workspace.
+    var canGoBack: Bool {
+        guard let record, !isRunning, record.restoresVersion == nil, source != nil else { return false }
+        if record.state.isTerminal { return record.state != .completed || record.mode == .dryRun }
+        return !record.state.mayHaveCommitted
+    }
+
+    /// Returns to Package, cancelling an unfinished release first (which restores the
+    /// working copy). Returns false when the cancel failed.
+    @discardableResult
+    func backToPackage() async -> Bool {
+        guard canGoBack, let current = record else { return false }
+        if !current.state.isTerminal {
+            await cancelRelease()
+            guard record?.state == .cancelled else { return false }
+        }
+        record = nil
+        log = []
+        activity = nil
+        errorMessage = nil
+        return true
+    }
+
+    /// Runs every check again on the same package, e.g. after cleaning the working copy.
+    func checkAgain() async {
+        guard await backToPackage() else { return }
+        await prepare()
+    }
+
+    /// Backs up and reverts the working copy, then checks again. For a release that
+    /// stopped on a dirty working copy.
+    func revertWorkingCopyAndCheckAgain() async {
+        guard let productID = record?.productID ?? product?.id, !isRunning else { return }
+        isRunning = true
+        activity = "Backing up and reverting the working copy"
+        errorMessage = nil
+        do {
+            _ = try await model.pipeline.revertWorkingCopy(productID: productID)
+            isRunning = false
+            await checkAgain()
+        } catch {
+            isRunning = false
+            activity = nil
+            errorMessage = "Could not revert the working copy: \(error.localizedDescription)"
+        }
+    }
+
     func recover() async {
         guard let id = record?.id else { return }
         await run { try await model.pipeline.recover(id) }

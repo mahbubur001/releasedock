@@ -75,6 +75,21 @@ public struct SVNStatusEntry: Hashable, Sendable {
         default: props == .modified || props == .conflicted || isTreeConflict
         }
     }
+
+    /// A text, property or tree conflict left by an update.
+    public var isConflict: Bool {
+        item == .conflicted || props == .conflicted || isTreeConflict
+    }
+}
+
+/// `svn resolve --accept` choices ReleaseDock uses.
+public enum SVNConflictChoice: String, Sendable {
+    /// Replace with the local version, dropping the server's change.
+    case mineFull = "mine-full"
+    /// Replace with the server version, dropping the local change.
+    case theirsFull = "theirs-full"
+    /// Keep the file on disk as it is (the only choice valid for tree conflicts).
+    case working
 }
 
 public struct SVNLogEntry: Hashable, Sendable {

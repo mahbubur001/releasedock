@@ -826,7 +826,14 @@ public actor ReleasePipelineService {
         }
         return try await withProductLock(product.id) {
             if record.workingCopyModified {
-                try await resetWorkingCopy(product: product, backupName: "\(product.slug)-\(record.id.uuidString.prefix(8))-cancelled.diff")
+                // The staging started from a clean working copy, so when it still matches the
+                // preview there is nothing of the user's to save (as after a dry run).
+                var untouched = false
+                if let preview = record.preview {
+                    let strategy = deps.strategies.strategy(for: product.type)
+                    untouched = (try? await buildPreview(record: record, product: product, strategy: strategy).fingerprint) == preview.fingerprint
+                }
+                try await resetWorkingCopy(product: product, backupName: untouched ? nil : "\(product.slug)-\(record.id.uuidString.prefix(8))-cancelled.diff")
                 record.workingCopyModified = false
             }
             try move(&record, to: .cancelled, "Cancelled by user")
@@ -894,23 +901,8 @@ public actor ReleasePipelineService {
 
         var backupURL: URL?
         if let backupName {
-            let diff = (try? await deps.svn.diff(wc)) ?? ""
-            let listing = status.map { "\($0.item.rawValue) \($0.props.rawValue) \($0.path)" }.joined(separator: "\n")
-            let url = try deps.staging.writeBackup("# svn status\n\(listing)\n\n# svn diff (text files only; full copies are in the folder next to this file)\n\(diff)", name: backupName)
-            backupURL = url
-            let folder = url.deletingPathExtension().appendingPathExtension("files")
             let preserve: Set<SVNItemStatus> = [.added, .modified, .replaced, .conflicted, .merged, .obstructed, .unversioned, .ignored]
-            var copied: [String] = []
-            for entry in status.filter({ preserve.contains($0.item) || $0.props == .modified }).sorted(by: { $0.path < $1.path }) {
-                guard fm.fileExists(atPath: entry.path) else { continue }
-                guard entry.path.hasPrefix(root) else { throw ReleaseError.invalidState("Unexpected path outside the working copy: \(entry.path)") }
-                if copied.contains(where: { entry.path.hasPrefix($0 + "/") }) { continue }
-                let destination = folder.appendingPathComponent(String(entry.path.dropFirst(root.count)))
-                // No try?: a failed backup must stop the revert.
-                try fm.createDirectory(at: destination.deletingLastPathComponent(), withIntermediateDirectories: true)
-                try fm.copyItem(atPath: entry.path, toPath: destination.path)
-                copied.append(entry.path)
-            }
+            backupURL = try await backUp(status: status, copying: status.filter { preserve.contains($0.item) || $0.props == .modified }, workingCopy: wc, name: backupName)
         }
 
         try await deps.svn.revert(wc)
@@ -921,6 +913,105 @@ public actor ReleasePipelineService {
         }
         _ = try? await deps.svn.update(wc, setDepth: nil)
         return backupURL
+    }
+
+    /// Writes the status listing and diff to `Backups/<name>` and copies each of `entries`
+    /// that exists into the folder next to it. Throws if any copy fails, so callers never
+    /// discard what was not saved.
+    private func backUp(status: [SVNStatusEntry], copying entries: [SVNStatusEntry], workingCopy wc: URL, name: String) async throws -> URL {
+        let fm = FileManager.default
+        let root = wc.path.hasSuffix("/") ? wc.path : wc.path + "/"
+        let diff = (try? await deps.svn.diff(wc)) ?? ""
+        let listing = status.map { "\($0.item.rawValue) \($0.props.rawValue) \($0.path)" }.joined(separator: "\n")
+        let url = try deps.staging.writeBackup("# svn status\n\(listing)\n\n# svn diff (text files only; full copies are in the folder next to this file)\n\(diff)", name: name)
+        let folder = url.deletingPathExtension().appendingPathExtension("files")
+        var copied: [String] = []
+        for entry in entries.sorted(by: { $0.path < $1.path }) {
+            guard fm.fileExists(atPath: entry.path) else { continue }
+            guard entry.path.hasPrefix(root) else { throw ReleaseError.invalidState("Unexpected path outside the working copy: \(entry.path)") }
+            if copied.contains(where: { entry.path.hasPrefix($0 + "/") }) { continue }
+            let destination = folder.appendingPathComponent(String(entry.path.dropFirst(root.count)))
+            try fm.createDirectory(at: destination.deletingLastPathComponent(), withIntermediateDirectories: true)
+            try fm.copyItem(atPath: entry.path, toPath: destination.path)
+            copied.append(entry.path)
+        }
+        return url
+    }
+
+    /// Status of the product's working copy; local only, no network.
+    public func workingCopyState(productID: UUID) async throws -> WorkingCopyState {
+        let wc = try product(productID).workingCopyURL
+        guard FileManager.default.fileExists(atPath: wc.appendingPathComponent(".svn").path) else { return WorkingCopyState(exists: false) }
+        let changes = try await WorkingCopyOperations.changes(at: wc, svn: deps.svn)
+        let revision = try? await deps.svn.info(wc.path).revision
+        return WorkingCopyState(exists: true, revision: revision, changes: changes)
+    }
+
+    /// `svn update` (or the sparse checkout when there is no working copy yet). Local changes
+    /// are kept; where they collide with the server, svn leaves conflicts to resolve.
+    public func updateWorkingCopy(productID: UUID) async throws -> WorkingCopyState {
+        let product = try product(productID)
+        try ensureNoStagedRelease(product)
+        try await withProductLock(product.id) {
+            let wc = product.workingCopyURL
+            if FileManager.default.fileExists(atPath: wc.path),
+               let mismatch = try await WorkingCopyOperations.workingCopyMismatch(at: wc, expected: product.svnRepositoryURL, svn: deps.svn) {
+                throw ReleaseError.invalidState(mismatch)
+            }
+            try await deps.strategies.strategy(for: product.type).prepareWorkingCopy(product: product, currentVersion: product.currentVersion, svn: deps.svn)
+        }
+        return try await workingCopyState(productID: productID)
+    }
+
+    /// Resolves the given conflicts (paths relative to the working copy). Taking the server
+    /// version backs up the local files first. Returns the new state and the backup, if any.
+    public func resolveConflicts(productID: UUID, paths: [String], keeping side: ConflictResolution) async throws -> (state: WorkingCopyState, backup: URL?) {
+        let product = try product(productID)
+        try ensureNoStagedRelease(product)
+        let backup: URL? = try await withProductLock(product.id) {
+            let wc = product.workingCopyURL
+            let wanted = Set(paths.map { wc.appendingPathComponent($0).standardizedFileURL.path })
+            let status = try await deps.svn.status(wc, showUpdates: false)
+            let conflicts = status.filter { $0.isConflict && wanted.contains(URL(fileURLWithPath: $0.path).standardizedFileURL.path) }
+            guard !conflicts.isEmpty else { return nil }
+            for entry in conflicts where !PathSafety.isContained(URL(fileURLWithPath: entry.path), in: wc) {
+                throw ReleaseError.invalidState("Unexpected path outside the working copy: \(entry.path)")
+            }
+            let urls = { (entries: [SVNStatusEntry]) in entries.map { URL(fileURLWithPath: $0.path) } }
+            let trees = conflicts.filter(\.isTreeConflict)
+            let contents = conflicts.filter { !$0.isTreeConflict }
+            switch side {
+            case .mine:
+                // mine-full drops the conflict markers; tree conflicts only accept "working".
+                if !contents.isEmpty { try await deps.svn.resolve(urls(contents), accept: .mineFull) }
+                if !trees.isEmpty { try await deps.svn.resolve(urls(trees), accept: .working) }
+                return nil
+            case .server:
+                let stamp = ISO8601DateFormatter().string(from: Date()).replacingOccurrences(of: ":", with: "-")
+                let url = try await backUp(status: status, copying: conflicts, workingCopy: wc, name: "\(product.slug)-\(stamp)-conflicts.diff")
+                if !contents.isEmpty { try await deps.svn.resolve(urls(contents), accept: .theirsFull) }
+                // A tree conflict has no "theirs" text: revert it, drop what svn leaves behind
+                // unversioned (it is backed up), then take the server's state of that path.
+                for entry in trees {
+                    let path = URL(fileURLWithPath: entry.path)
+                    try await deps.svn.revert(path)
+                    if let left = try? await deps.svn.status(path, showUpdates: false).first(where: { $0.path == entry.path }),
+                       left.item == .unversioned || left.item == .ignored {
+                        try FileManager.default.removeItem(at: path)
+                    }
+                    _ = try? await deps.svn.update(path, setDepth: nil)
+                }
+                return url
+            }
+        }
+        return (try await workingCopyState(productID: productID), backup)
+    }
+
+    /// Updating or resolving under a staged release would change what was previewed.
+    private func ensureNoStagedRelease(_ product: Product) throws {
+        if try deps.releases.activeReleases().contains(where: { $0.productID == product.id && $0.workingCopyModified }) {
+            throw ReleaseError.invalidState("A release of \(product.name) is staged in the working copy. Publish or cancel it first.")
+        }
     }
 
     private func failAndReset(_ record: inout ReleaseRecord, product: Product, reason: String) async throws {

@@ -191,6 +191,68 @@ final class PipelineIntegrationTests: XCTestCase {
         XCTAssertEqual(localChangeCount, 0)
     }
 
+    func testCancellingAnUntouchedStagedReleaseWritesNoBackup() async throws {
+        let product = try registerPlugin()
+        var record = try await pipeline.createRelease(productID: product.id, source: try zipSource(version: "1.1.0"))
+        record = try await pipeline.prepare(record.id)
+        record = try await pipeline.cancel(record.id)
+        XCTAssertEqual(record.state, .cancelled)
+        XCTAssertEqual((try? FileManager.default.contentsOfDirectory(atPath: paths.backups.path)) ?? [], [])
+        let state = try await pipeline.workingCopyState(productID: product.id)
+        XCTAssertTrue(state.isClean, "\(state.changes)")
+
+        // A hand edit after the preview is the user's work: cancelling backs it up.
+        record = try await pipeline.createRelease(productID: product.id, source: try zipSource(version: "1.1.0"))
+        record = try await pipeline.prepare(record.id)
+        try Data("hand edit".utf8).write(to: product.workingCopyURL.appendingPathComponent("trunk/includes/class-sample.php"))
+        _ = try await pipeline.cancel(record.id)
+        XCTAssertTrue(try FileManager.default.contentsOfDirectory(atPath: paths.backups.path).contains { $0.hasSuffix("-cancelled.diff") })
+    }
+
+    /// Prepares a working copy whose trunk/readme.txt conflicts with a server change.
+    private func makeConflict(_ product: Product) async throws -> URL {
+        _ = try await pipeline.updateWorkingCopy(productID: product.id)
+        let readme = product.workingCopyURL.appendingPathComponent("trunk/readme.txt")
+        try Data("local edit\n".utf8).write(to: readme)
+        let other = work.path("other-wc-\(UUID().uuidString.prefix(4))")
+        try repo.run(["checkout", "\(repo.url)/sample-plugin/trunk", other.path])
+        try Data("server edit\n".utf8).write(to: other.appendingPathComponent("readme.txt"))
+        try repo.run(["commit", "-m", "external", other.path])
+        return readme
+    }
+
+    func testUpdateWorkingCopyReportsConflictsAndServerResolutionBacksUp() async throws {
+        let product = try registerPlugin()
+        let readme = try await makeConflict(product)
+        let state = try await pipeline.updateWorkingCopy(productID: product.id)
+        XCTAssertEqual(state.conflicts.map(\.path), ["trunk/readme.txt"])
+
+        let (resolved, backup) = try await pipeline.resolveConflicts(productID: product.id, paths: ["trunk/readme.txt"], keeping: .server)
+        XCTAssertTrue(resolved.isClean, "\(resolved.changes)")
+        XCTAssertEqual(try String(contentsOf: readme, encoding: .utf8), "server edit\n")
+        let saved = try XCTUnwrap(backup).deletingPathExtension().appendingPathExtension("files").appendingPathComponent("trunk/readme.txt")
+        XCTAssertTrue(try String(contentsOf: saved, encoding: .utf8).contains("local edit"))
+    }
+
+    func testResolvingConflictKeepingMineLeavesALocalChange() async throws {
+        let product = try registerPlugin()
+        let readme = try await makeConflict(product)
+        _ = try await pipeline.updateWorkingCopy(productID: product.id)
+        let (resolved, backup) = try await pipeline.resolveConflicts(productID: product.id, paths: ["trunk/readme.txt"], keeping: .mine)
+        XCTAssertNil(backup)
+        XCTAssertEqual(resolved.conflicts, [])
+        XCTAssertEqual(resolved.changes.map(\.path), ["trunk/readme.txt"])
+        XCTAssertEqual(try String(contentsOf: readme, encoding: .utf8), "local edit\n")
+    }
+
+    func testUpdateIsRefusedWhileAReleaseIsStaged() async throws {
+        let product = try registerPlugin()
+        var record = try await pipeline.createRelease(productID: product.id, source: try zipSource(version: "1.1.0"))
+        record = try await pipeline.prepare(record.id)
+        XCTAssertEqual(record.state, .previewed)
+        await XCTAssertThrowsErrorAsync(try await self.pipeline.updateWorkingCopy(productID: product.id))
+    }
+
     func testRemoteChangeAfterApprovalBlocksPublishing() async throws {
         let product = try registerPlugin()
         var record = try await pipeline.createRelease(productID: product.id, source: try zipSource(version: "1.1.0"))

@@ -179,6 +179,11 @@ enum WorkingCopyOperations {
     }
 
     static func localChanges(at path: URL, svn: SVNServicing) async throws -> [String] {
+        try await changes(at: path, svn: svn).map { "\($0.status.rawValue): \($0.path)" }
+    }
+
+    /// Local changes that make the working copy dirty, with paths relative to `path`.
+    static func changes(at path: URL, svn: SVNServicing) async throws -> [WorkingCopyChange] {
         let root = path.standardizedFileURL.path
         return try await svn.status(path, showUpdates: false)
             .filter { entry in
@@ -190,7 +195,7 @@ enum WorkingCopyOperations {
             }
             .map { entry in
                 let p = entry.path.hasPrefix(root + "/") ? String(entry.path.dropFirst(root.count + 1)) : entry.path
-                return "\(entry.item.rawValue): \(p)"
+                return WorkingCopyChange(path: p, status: entry.item, isConflict: entry.isConflict, isTreeConflict: entry.isTreeConflict)
             }
     }
 }

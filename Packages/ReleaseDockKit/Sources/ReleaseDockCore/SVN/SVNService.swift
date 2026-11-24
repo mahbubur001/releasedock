@@ -19,6 +19,8 @@ public protocol SVNServicing: Sendable {
     func copy(_ source: URL, to destination: URL) async throws
     func revert(_ path: URL) async throws
     func cleanup(_ path: URL) async throws
+    /// Marks conflicts as resolved with the given choice.
+    func resolve(_ paths: [URL], accept: SVNConflictChoice) async throws
     func setProperty(_ name: String, value: String, paths: [URL]) async throws
     /// Commits and returns the new revision. Throws `SVNError.commitOutcomeUncertain` when
     /// the result cannot be known (timeout, interruption) — callers must not retry blindly.
@@ -308,6 +310,12 @@ public final class SVNService: SVNServicing, @unchecked Sendable {
 
     public func cleanup(_ path: URL) async throws {
         try await svn(["cleanup", Self.target(path)])
+    }
+
+    public func resolve(_ paths: [URL], accept: SVNConflictChoice) async throws {
+        try await withTargets(paths) { targets in
+            try await self.svn(["resolve", "--accept", accept.rawValue, "--targets", targets.path])
+        }
     }
 
     public func setProperty(_ name: String, value: String, paths: [URL]) async throws {
