@@ -89,6 +89,19 @@ final class ReleaseWizardModel {
         }
     }
 
+    /// Continues an unfinished release, e.g. one prepared before switching sections.
+    func resume(_ release: ReleaseRecord) {
+        guard record?.id != release.id else { return }
+        record = release
+        productID = release.productID
+        source = release.source
+        modeOverride = release.mode
+        kind = release.kind
+        log = []
+        errorMessage = nil
+        observeEvents()
+    }
+
     func reset() {
         record = nil
         source = nil

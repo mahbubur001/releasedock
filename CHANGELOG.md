@@ -5,6 +5,11 @@ All notable changes to ReleaseDock are documented here. The format follows [Keep
 ## [Unreleased]
 
 ### Changed
+- New native macOS design (from the approved HTML preview):
+  - **Sidebar** is a native source list: Overview, Products, New Release, History, Updates, Settings, with badges, svn status and the app version at the bottom.
+  - **Overview** leads with what needs you: a summary line, a drop area to start a release, releases waiting for approval, releases going live, recent outcomes and a card per product.
+  - **New Release** has four stages (Package → Checks → Review → Publish) instead of nine steps: product, publish kind and mode as cards; a live checklist while preparing; a review with the version change, summary tiles, What's new, problems first with their fixes, the SVN changes beside each file's diff, and what was excluded; a publish confirmation that lists exactly what happens; and a result page with Committed → Verified → Waiting to go live → Live.
+  - A prepared release now survives switching sections, and Overview's **Review & Publish** reopens it.
 - The cursor follows the macOS convention: buttons, switches, pop-up menus and list rows keep the arrow; only links to web pages show the pointing hand. The app-wide `NSButton` cursor override is gone.
 
 ### Added

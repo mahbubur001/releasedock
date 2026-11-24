@@ -88,13 +88,14 @@ Debug builds read these environment variables (none exist in Release builds):
 | Variable | Effect |
 |---|---|
 | `RELEASEDOCK_DATA_DIR` | Use an isolated data folder (also honoured in Release) |
-| `RELEASEDOCK_UI_TEST_SECTION` | Open a section (`dashboard`, `products`, `wizard`, `history`, `updates`, `settings`) |
+| `RELEASEDOCK_UI_TEST_SECTION` | Open a section (`dashboard` (Overview), `products`, `wizard` (New Release), `history`, `updates`, `settings`) |
 | `RELEASEDOCK_UI_TEST_OPEN` | Open a ZIP or folder in the wizard at launch |
 | `RELEASEDOCK_UI_TEST_AUTOPREPARE=1` | Run preparation when a package is opened |
 | `RELEASEDOCK_UI_TEST_AUTOPUBLISH=1` | Then approve and publish — refused unless the repository is a local `file://` URL |
 | `RELEASEDOCK_UI_TEST_EXISTING_WC` | Open Add Product → Use existing working copy with a folder |
-| `RELEASEDOCK_UI_CURSOR_TEST`, `RELEASEDOCK_UI_CURSOR_POINTS=auto` | Hover every button/row and record the cursor shown |
 | `RELEASEDOCK_UI_DUMP_VIEWS` | Write the AppKit view hierarchy to a file |
+
+Demo data for screenshots and manual checks: `RELEASEDOCK_MAKE_DEMO=/tmp/rd-demo swift test --filter DemoDataTests` (in `Packages/ReleaseDockKit`) builds local repositories, two products and a release history; launch the Debug app with `RELEASEDOCK_DATA_DIR=/tmp/rd-demo/data`.
 
 ## Live checks against WordPress.org
 

@@ -259,7 +259,7 @@ private struct DirectoryStatusRow: View {
 }
 
 /// The product's GitHub release for this version, with a way to create or retry it.
-private struct GitHubReleaseRow: View {
+struct GitHubReleaseRow: View {
     @Environment(AppModel.self) private var model
     @Environment(\.openURL) private var openURL
     let record: ReleaseRecord

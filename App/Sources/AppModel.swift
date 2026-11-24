@@ -28,22 +28,22 @@ enum SidebarItem: String, CaseIterable, Identifiable, Hashable {
 
     var title: String {
         switch self {
-        case .dashboard: "Dashboard"
+        case .dashboard: "Overview"
         case .products: "Products"
-        case .wizard: "Release Wizard"
-        case .history: "Release History"
-        case .updates: "GitHub Updates"
+        case .wizard: "New Release"
+        case .history: "History"
+        case .updates: "Updates"
         case .settings: "Settings"
         }
     }
 
     var symbol: String {
         switch self {
-        case .dashboard: "gauge.with.dots.needle.33percent"
+        case .dashboard: "square.grid.2x2"
         case .products: "shippingbox"
-        case .wizard: "wand.and.stars"
+        case .wizard: "paperplane"
         case .history: "clock.arrow.circlepath"
-        case .updates: "arrow.down.app"
+        case .updates: "arrow.down.circle"
         case .settings: "gearshape"
         }
     }
@@ -78,6 +78,8 @@ final class AppModel {
     /// A ZIP or folder opened from Finder (Open With, Dock icon drop) for the wizard.
     var pendingSource: URL?
     var historySelection: UUID?
+    /// The release wizard lives here so a prepared release survives switching sections.
+    var wizard: ReleaseWizardModel!
     var showAddProduct = false
     var alert: AlertMessage?
 
@@ -145,6 +147,30 @@ final class AppModel {
         if settings.githubRepository.isEmpty, let bundled = Bundle.main.object(forInfoDictionaryKey: "RDGitHubRepository") as? String, !bundled.isEmpty {
             settings.githubRepository = bundled
         }
+        wizard = ReleaseWizardModel(model: self)
+    }
+
+    /// Releases that were prepared and wait for a decision.
+    var releasesAwaitingApproval: [ReleaseRecord] {
+        releases.filter { $0.state == .previewed || $0.state == .approved }
+    }
+
+    /// Opens an unfinished release in New Release, or its report in History.
+    func open(_ release: ReleaseRecord) {
+        if !release.state.isTerminal, release.state != .recoveryRequired {
+            wizard.resume(release)
+            selection = .wizard
+        } else {
+            historySelection = release.id
+            selection = .history
+        }
+    }
+
+    /// Starts a new release from a dropped or chosen package.
+    func startRelease(from url: URL, productID: UUID? = nil) {
+        if let productID { wizardProductID = productID }
+        pendingSource = url
+        selection = .wizard
     }
 
     /// Opens the store in the standard location, or returns the error to show.

@@ -211,9 +211,20 @@ final class LocalSVNRepository {
     }
 
     init() throws {
-        let admin = ["/opt/homebrew/bin/svnadmin", "/usr/local/bin/svnadmin", "/opt/local/bin/svnadmin", "/usr/bin/svnadmin"].first { FileManager.default.isExecutableFile(atPath: $0) }!
         root = dir.path("repo")
-        try Self.run(URL(fileURLWithPath: admin), ["create", root.path])
+        try Self.create(root)
+    }
+
+    /// A repository at `root` that outlives the test (demo data).
+    init(persistentAt root: URL) throws {
+        self.root = root
+        try FileManager.default.createDirectory(at: root.deletingLastPathComponent(), withIntermediateDirectories: true)
+        try Self.create(root)
+    }
+
+    private static func create(_ root: URL) throws {
+        let admin = ["/opt/homebrew/bin/svnadmin", "/usr/local/bin/svnadmin", "/opt/local/bin/svnadmin", "/usr/bin/svnadmin"].first { FileManager.default.isExecutableFile(atPath: $0) }!
+        try run(URL(fileURLWithPath: admin), ["create", root.path])
     }
 
     var url: String { "file://" + root.path }
@@ -249,11 +260,11 @@ final class LocalSVNRepository {
     }
 
     /// Creates `/<slug>/{trunk,tags,assets}` and optionally publishes an initial version.
-    func createPlugin(slug: String, initialVersion: String?) throws {
+    func createPlugin(slug: String, initialVersion: String?, name: String = "Sample Plugin") throws {
         try run(["mkdir", "--parents", "-m", "Create \(slug)", "\(url)/\(slug)/trunk", "\(url)/\(slug)/tags", "\(url)/\(slug)/assets"])
         guard let initialVersion else { return }
         let src = TempDir()
-        let plugin = Fixtures.makePlugin(in: src, at: "p", version: initialVersion)
+        let plugin = Fixtures.makePlugin(in: src, at: "p", version: initialVersion, name: name)
         let wc = dir.path("seed-\(UUID().uuidString)")
         try run(["checkout", "\(url)/\(slug)", wc.path])
         let trunk = wc.appendingPathComponent("trunk")
@@ -265,11 +276,11 @@ final class LocalSVNRepository {
         try run(["commit", "-m", "Initial \(initialVersion)", wc.path])
     }
 
-    func createTheme(slug: String, initialVersion: String?) throws {
+    func createTheme(slug: String, initialVersion: String?, name: String = "Sample Theme") throws {
         try run(["mkdir", "--parents", "-m", "Create \(slug)", "\(url)/\(slug)"])
         guard let initialVersion else { return }
         let src = TempDir()
-        let theme = Fixtures.makeTheme(in: src, at: "t", version: initialVersion)
+        let theme = Fixtures.makeTheme(in: src, at: "t", version: initialVersion, name: name)
         try run(["import", "-m", "Initial \(initialVersion)", theme.path, "\(url)/\(slug)/\(initialVersion)"])
     }
 }
