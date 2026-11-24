@@ -1,5 +1,14 @@
 [
   {
+    "version": "0.2.2",
+    "build": "7",
+    "channel": "",
+    "notes": "Update the SVN working copy and resolve conflicts from Products; go Back or Check Again in New Release; one-click backup, revert and re-check for a dirty working copy; product picker as a menu.",
+    "signature": "aRLw0FQXor/QEwsaeqIatn0md/udPpH0e8nn62cEFqlHd3KeRTU7C2U17CqAAiF9unxv0WFH9mW0WyW7VXxXAQ==",
+    "length": "6807393",
+    "date": "Tue, 24 Nov 2026 10:51:01 GMT"
+  },
+  {
     "version": "0.2.1",
     "build": "6",
     "channel": "",
