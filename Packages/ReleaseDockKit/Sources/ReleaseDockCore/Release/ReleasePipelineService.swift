@@ -227,7 +227,10 @@ public actor ReleasePipelineService {
         let snapshot = await gatherSnapshot(product: product, version: record.version, strategy: strategy)
         record.repository = snapshot
         record.previousVersion = snapshot.currentVersion ?? product.currentVersion
-        let context = ValidationContext(product: product, inspection: inspection, detected: record.detected, detectionError: detectionError, repository: snapshot, git: gitState, kind: record.kind)
+        if product.type == .plugin, let assetsPath = product.assetsPath {
+            record.assets = try? AssetInspector().inspect(folderAt: URL(fileURLWithPath: assetsPath, isDirectory: true))
+        }
+        let context = ValidationContext(product: product, inspection: inspection, detected: record.detected, detectionError: detectionError, repository: snapshot, git: gitState, kind: record.kind, assets: record.assets)
         let report = deps.validator.validate(context)
         record.validation = report
         if report.isBlocking {
@@ -426,7 +429,7 @@ public actor ReleasePipelineService {
     /// against a stale report.
     private func revalidate(_ record: inout ReleaseRecord, product: Product, preview: ReleasePreview) {
         guard let inspection = record.inspection else { return }
-        let context = ValidationContext(product: product, inspection: inspection, detected: record.detected, repository: record.repository, preview: preview, kind: record.kind, codeChecks: record.codeChecks)
+        let context = ValidationContext(product: product, inspection: inspection, detected: record.detected, repository: record.repository, preview: preview, kind: record.kind, codeChecks: record.codeChecks, assets: record.assets)
         record.validation = deps.validator.validate(context)
     }
 

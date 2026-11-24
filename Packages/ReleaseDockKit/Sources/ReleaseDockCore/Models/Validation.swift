@@ -24,13 +24,14 @@ public enum ValidationCheckID: String, Codable, CaseIterable, Sendable, Identifi
     case portableFilenames
     case phpSyntax
     case pluginCheck
+    case directoryAssets
 
     public var id: String { rawValue }
 
     /// Required checks always run and their failures always block a release.
     public var isRequired: Bool {
         switch self {
-        case .changelogEntry, .testedUpTo, .packageSize, .gitWorkingTree, .portableFilenames, .phpSyntax, .pluginCheck: false
+        case .changelogEntry, .testedUpTo, .packageSize, .gitWorkingTree, .portableFilenames, .phpSyntax, .pluginCheck, .directoryAssets: false
         default: true
         }
     }
@@ -59,6 +60,7 @@ public enum ValidationCheckID: String, Codable, CaseIterable, Sendable, Identifi
         case .portableFilenames: "Portable file names"
         case .phpSyntax: "PHP syntax"
         case .pluginCheck: "Plugin Check"
+        case .directoryAssets: "Directory assets"
         }
     }
 }

@@ -256,6 +256,8 @@ public struct ReleaseRecord: Codable, Hashable, Sendable, Identifiable {
     public var verifiedNotCommitted: Bool
     /// Post-release instructions for the user (e.g. Release Confirmation).
     public var guidance: [String]
+    /// The plugin's directory-assets folder as inspected for this release.
+    public var assets: AssetsReport?
     /// PHP lint and Plugin Check results for the staged candidate.
     public var codeChecks: CodeCheckReport?
     /// Last WordPress.org directory check after the commit.
