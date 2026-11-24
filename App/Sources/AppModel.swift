@@ -11,6 +11,10 @@ struct AppSettings: Codable, Equatable {
     var notificationsEnabled: Bool = true
     /// Local WordPress install with Plugin Check active; nil or empty turns Plugin Check off.
     var pluginCheckWordPressPath: String?
+    /// Minutes a commit may take before its outcome is treated as uncertain; nil = 30.
+    var commitTimeoutMinutes: Int?
+
+    static let defaultCommitTimeoutMinutes = 30
 
     static let key = "app.settings"
     /// Former release repository (deleted); a saved value equal to it is replaced by the bundled default.
@@ -97,7 +101,12 @@ final class AppModel {
         let loadedSettings = (try? store.setting(AppSettings.self, forKey: AppSettings.key)) ?? AppSettings()
         settings = loadedSettings
         codeCheckConfiguration.value = CodeCheckConfiguration(pluginCheckWordPressPath: loadedSettings.pluginCheckWordPressPath)
-        svn = SVNService(executable: loadedSettings.svnExecutablePath.isEmpty ? nil : URL(fileURLWithPath: loadedSettings.svnExecutablePath))
+        let commitMinutes = loadedSettings.commitTimeoutMinutes ?? AppSettings.defaultCommitTimeoutMinutes
+        svn = SVNService(
+            executable: loadedSettings.svnExecutablePath.isEmpty ? nil : URL(fileURLWithPath: loadedSettings.svnExecutablePath),
+            commitTimeout: .seconds(commitMinutes * 60),
+            commitHTTPTimeoutSeconds: commitMinutes * 60
+        )
         productService = ProductService(repository: store, paths: paths)
         repositorySetup = RepositorySetupService(svn: svn)
         notifications = UserNotificationService()

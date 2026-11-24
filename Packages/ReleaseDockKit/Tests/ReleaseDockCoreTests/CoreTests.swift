@@ -278,3 +278,31 @@ final class KeychainTests: XCTestCase {
         XCTAssertEqual(try keychain.password(for: item), "second")
     }
 }
+
+/// Records requests and answers like `svn` would.
+final class RecordingRunner: ProcessRunning, @unchecked Sendable {
+    private let lock = NSLock()
+    private var _requests: [ProcessRequest] = []
+    var requests: [ProcessRequest] { lock.withLock { _requests } }
+
+    func run(_ request: ProcessRequest) async throws -> ProcessResult {
+        lock.withLock { _requests.append(request) }
+        let output = request.arguments.first == "commit" ? "Committed revision 42.\n" : "1.14.5\n"
+        return ProcessResult(exitCode: 0, standardOutput: Data(output.utf8), standardError: Data(), duration: .zero, displayCommand: request.displayCommand)
+    }
+}
+
+final class SVNTimeoutTests: XCTestCase {
+    func testCommitsUseTheLongHTTPTimeoutAndReadsTheShortOne() async throws {
+        let runner = RecordingRunner()
+        let svn = SVNService(runner: runner, executable: URL(fileURLWithPath: "/usr/bin/true"), commitTimeout: .seconds(3600), httpTimeoutSeconds: 120, commitHTTPTimeoutSeconds: 3600)
+        let revision = try await svn.commit([URL(fileURLWithPath: "/tmp/wc")], message: "Release", credentials: nil)
+        XCTAssertEqual(revision, 42)
+        _ = try? await svn.cat("https://plugins.svn.wordpress.org/x/trunk/readme.txt")
+        let commit = try XCTUnwrap(runner.requests.first { $0.arguments.first == "commit" })
+        XCTAssertTrue(commit.arguments.contains("servers:global:http-timeout=3600"), "\(commit.arguments)")
+        XCTAssertEqual(commit.timeout, .seconds(3600))
+        let cat = try XCTUnwrap(runner.requests.first { $0.arguments.first == "cat" })
+        XCTAssertTrue(cat.arguments.contains("servers:global:http-timeout=120"))
+    }
+}

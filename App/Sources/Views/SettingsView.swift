@@ -18,7 +18,10 @@ struct SettingsView: View {
                         .textSelection(.enabled)
                 }
                 TextField("svn executable", text: $draft.svnExecutablePath, prompt: Text("Automatic (Homebrew, MacPorts, /usr/bin)"))
-                Text("Install Subversion with `brew install subversion` if it is missing. Changing the path takes effect after restarting ReleaseDock.")
+                Picker("Commit timeout", selection: Binding(get: { draft.commitTimeoutMinutes ?? AppSettings.defaultCommitTimeoutMinutes }, set: { draft.commitTimeoutMinutes = $0 })) {
+                    ForEach([15, 30, 60, 120], id: \.self) { Text("\($0) minutes").tag($0) }
+                }
+                Text("Install Subversion with `brew install subversion` if it is missing. WordPress.org can take minutes to finish committing a large release; if a commit still times out, ReleaseDock checks the repository instead of retrying. Changes to the path or timeout take effect after restarting ReleaseDock.")
                     .font(.caption).foregroundStyle(.secondary)
             }
             Section("Code checks") {

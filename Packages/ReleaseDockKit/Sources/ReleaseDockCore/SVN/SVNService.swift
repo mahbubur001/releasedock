@@ -46,21 +46,28 @@ public final class SVNService: SVNServicing, @unchecked Sendable {
     private let preferredExecutable: URL?
     public var commandTimeout: Duration
     public var commitTimeout: Duration
-    /// HTTP timeout passed to svn (seconds). svn's own default is 600 s.
+    /// HTTP timeout passed to svn (seconds) for reads, so a dead connection fails fast.
+    /// svn's own default is 600 s.
     public var httpTimeoutSeconds: Int
+    /// HTTP timeout for commits. WordPress.org can take minutes to finish a large commit
+    /// ("Committing transaction…"); a short timeout there turns a successful commit into
+    /// E175012 and an uncertain outcome.
+    public var commitHTTPTimeoutSeconds: Int
 
     public init(
         runner: ProcessRunning = ProcessRunner(),
         executable: URL? = nil,
         commandTimeout: Duration = .seconds(300),
         commitTimeout: Duration = .seconds(1800),
-        httpTimeoutSeconds: Int = 120
+        httpTimeoutSeconds: Int = 120,
+        commitHTTPTimeoutSeconds: Int = 1800
     ) {
         self.runner = runner
         preferredExecutable = executable
         self.commandTimeout = commandTimeout
         self.commitTimeout = commitTimeout
         self.httpTimeoutSeconds = httpTimeoutSeconds
+        self.commitHTTPTimeoutSeconds = commitHTTPTimeoutSeconds
     }
 
     // MARK: Installation
@@ -96,14 +103,14 @@ public final class SVNService: SVNServicing, @unchecked Sendable {
         target(url.isFileURL ? url.path : url.absoluteString)
     }
 
-    private var globalOptions: [String] {
-        ["--non-interactive", "--config-option", "servers:global:http-timeout=\(httpTimeoutSeconds)"]
+    static func globalOptions(httpTimeout: Int) -> [String] {
+        ["--non-interactive", "--config-option", "servers:global:http-timeout=\(httpTimeout)"]
     }
 
     @discardableResult
-    private func svn(_ arguments: [String], credentials: SVNCredentials? = nil, workingDirectory: URL? = nil, timeout: Duration? = nil, throwOnFailure: Bool = true) async throws -> ProcessResult {
+    private func svn(_ arguments: [String], credentials: SVNCredentials? = nil, workingDirectory: URL? = nil, timeout: Duration? = nil, httpTimeout: Int? = nil, throwOnFailure: Bool = true) async throws -> ProcessResult {
         let executable = try await svnExecutable()
-        var args = arguments + globalOptions
+        var args = arguments + Self.globalOptions(httpTimeout: httpTimeout ?? httpTimeoutSeconds)
         var stdin: Data?
         if let credentials {
             // Password via stdin (requires --non-interactive); --no-auth-cache keeps it out of ~/.subversion.
@@ -318,7 +325,7 @@ public final class SVNService: SVNServicing, @unchecked Sendable {
         let args = ["commit", "--file", messageFile.path, "--encoding", "UTF-8"] + paths.map(Self.target)
         let result: ProcessResult
         do {
-            result = try await svn(args, credentials: credentials, timeout: commitTimeout, throwOnFailure: false)
+            result = try await svn(args, credentials: credentials, timeout: commitTimeout, httpTimeout: commitHTTPTimeoutSeconds, throwOnFailure: false)
         } catch ProcessRunnerError.timedOut(let partial) {
             if let revision = Self.committedRevision(in: partial.stdout) { return revision }
             throw SVNError.commitOutcomeUncertain("timed out after \(partial.duration)")

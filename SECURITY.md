@@ -35,4 +35,3 @@ Please report security issues privately to the maintainers (GitHub Security Advi
 
 - WordPress.org reads are anonymous, so SVN credentials are only proven valid by a commit (an auth failure there is safe and recoverable).
 - Checksum verification can report differences if a repository applies `svn:eol-style`/keyword properties; these are reported as verification warnings, not hidden.
-- Files whose type changes between versions (file ↔ directory) stop staging with an "obstructed" error and need manual resolution.

@@ -12,6 +12,9 @@ All notable changes to ReleaseDock are documented here. The format follows [Keep
 - Deeper readme checks, matching the WordPress.org directory parser: short description over 150 characters, missing short description (including one swallowed as a header because it contains ":" directly under the headers), missing Description section, sections longer than WordPress.org keeps (2,500 words; 5,000 for Changelog and FAQ), readmes over 10 KB, theme upgrade notices over 300 characters, and `Requires Plugins` entries that are not directory slugs.
 - Directory assets check (plugins with an assets folder): names, lowercase, pixel dimensions matching the name, size limits (banners 4 MB, icons 1 MB, screenshots 10 MB), a 1544×500 banner without its 772×250 partner, `icon.svg` without a PNG/JPG fallback, and a `blueprints/blueprint.json` that Live Preview cannot read. All warnings; the check can be turned off per product.
 
+### Changed
+- Commits use their own, longer SVN HTTP timeout (30 minutes by default, adjustable in Settings) while reads keep failing fast after 2 minutes. Large releases no longer hit E175012 while WordPress.org finishes "Committing transaction…".
+
 ### Fixed
 - readme headers are read like WordPress.org: `*`/`-` around keys and `<>` around values are ignored, and an unknown "header" after a blank line starts the short description.
 
