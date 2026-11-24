@@ -15,6 +15,7 @@ All notable changes to ReleaseDock are documented here. The format follows [Keep
 - The release report shows "What's new": the changelog entry and upgrade notice for the version being released.
 - Build command per product (e.g. `composer install --no-dev && npm run build`). For folder releases it runs in a login shell on an APFS clone of the folder, and the built copy is what gets inspected and published; the development folder is never modified. The output appears in the report, and a failing build stops the release. ZIP releases are used as they are.
 - Folder releases honour `export-ignore` in `.gitattributes` when there is no `.distignore`, like `git archive` and 10up's deploy action.
+- GitHub release per product (opt-in): after a verified version release, GitHub tags the released commit (`v1.2.0`, prefix configurable) and publishes the changelog entry with the exact ZIP sent to WordPress.org attached. The tag is created through the GitHub API, so the local repository is never written to; an existing release for the tag is reused, and a failure never affects the WordPress.org release (retry from the report). Uses a separate release token in Settings (Contents: read and write).
 
 ### Changed
 - Commits use their own, longer SVN HTTP timeout (30 minutes by default, adjustable in Settings) while reads keep failing fast after 2 minutes. Large releases no longer hit E175012 while WordPress.org finishes "Committing transaction…".

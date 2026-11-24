@@ -156,6 +156,28 @@ struct ProductEditorView: View {
                     }
                     TextField("GitHub repository", text: $editor.githubText, prompt: Text("Optional, owner/name"))
                 }
+                Section("GitHub release") {
+                    Toggle("Create a GitHub release after each version release", isOn: Binding(
+                        get: { editor.product.githubRelease?.enabled ?? false },
+                        set: { enabled in
+                            var settings = editor.product.githubRelease ?? GitHubReleaseSettings()
+                            settings.enabled = enabled
+                            editor.product.githubRelease = settings
+                        }
+                    ))
+                    if editor.product.githubRelease?.enabled == true {
+                        TextField("Tag prefix", text: Binding(
+                            get: { editor.product.githubRelease?.tagPrefix ?? "v" },
+                            set: { editor.product.githubRelease?.tagPrefix = $0 }
+                        ), prompt: Text("None"))
+                        Toggle("Create as draft", isOn: Binding(
+                            get: { editor.product.githubRelease?.draft ?? false },
+                            set: { editor.product.githubRelease?.draft = $0 }
+                        ))
+                    }
+                    Text("GitHub tags the released commit (\(editor.product.githubRelease?.tagPrefix ?? "v")1.2.0) and publishes the changelog entry with the exact ZIP sent to WordPress.org. Your local repository is not changed. Needs a folder release from Git, the commit pushed to GitHub, and a release token in Settings.")
+                        .font(.caption).foregroundStyle(.secondary)
+                }
                 Section("Build") {
                     TextField("Build command", text: optional(\.buildCommand), prompt: Text("Optional, e.g. composer install --no-dev && npm run build"), axis: .vertical)
                         .font(.body.monospaced())

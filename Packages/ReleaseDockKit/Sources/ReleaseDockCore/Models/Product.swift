@@ -120,6 +120,8 @@ public struct Product: Codable, Identifiable, Hashable, Sendable {
     /// Shell command run on a copy of a folder source before inspection, e.g.
     /// `composer install --no-dev && npm run build`. Not used for ZIP sources.
     public var buildCommand: String?
+    /// Opt-in GitHub release after each version release; needs `githubRepositoryURL`.
+    public var githubRelease: GitHubReleaseSettings?
     public var svnUsername: String?
     public var createdAt: Date
     public var updatedAt: Date
@@ -142,6 +144,7 @@ public struct Product: Codable, Identifiable, Hashable, Sendable {
         mainPluginFile: String? = nil,
         assetsPath: String? = nil,
         buildCommand: String? = nil,
+        githubRelease: GitHubReleaseSettings? = nil,
         svnUsername: String? = nil,
         createdAt: Date = Date(),
         updatedAt: Date = Date()
@@ -163,6 +166,7 @@ public struct Product: Codable, Identifiable, Hashable, Sendable {
         self.mainPluginFile = mainPluginFile
         self.assetsPath = assetsPath
         self.buildCommand = buildCommand
+        self.githubRelease = githubRelease
         self.svnUsername = svnUsername
         self.createdAt = createdAt
         self.updatedAt = updatedAt

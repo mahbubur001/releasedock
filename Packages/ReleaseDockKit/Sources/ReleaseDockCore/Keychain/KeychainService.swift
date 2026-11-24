@@ -33,6 +33,9 @@ public struct KeychainItem: Hashable, Sendable {
 
     /// GitHub token used for private ReleaseDock update checks.
     public static let githubToken = KeychainItem(service: "com.releasedock.github", account: "update-check-token")
+
+    /// GitHub token with Contents: read and write, used to create releases of products.
+    public static let githubReleaseToken = KeychainItem(service: "com.releasedock.github", account: "release-token")
 }
 
 public protocol KeychainServicing: Sendable {

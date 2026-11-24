@@ -26,6 +26,8 @@ public struct PipelineDependencies: Sendable {
     public var codeChecker: CodeChecking?
     /// Runs products' build commands; nil disables builds.
     public var builder: Building?
+    /// Creates GitHub releases for products that opt in; nil disables them.
+    public var githubReleaser: GitHubReleasing?
     /// Recorded in manifests, e.g. "ReleaseDock 1.0.0 (42)".
     public var generator: String
 
@@ -45,6 +47,7 @@ public struct PipelineDependencies: Sendable {
         wordpressOrg: WordPressOrgServicing? = nil,
         codeChecker: CodeChecking? = nil,
         builder: Building? = nil,
+        githubReleaser: GitHubReleasing? = nil,
         generator: String = "ReleaseDock"
     ) {
         self.products = products
@@ -62,6 +65,7 @@ public struct PipelineDependencies: Sendable {
         self.wordpressOrg = wordpressOrg
         self.codeChecker = codeChecker
         self.builder = builder
+        self.githubReleaser = githubReleaser
         self.generator = generator
     }
 }
@@ -591,13 +595,69 @@ public actor ReleasePipelineService {
         updated.updatedAt = Date()
         try deps.products.save(updated)
         try writeManifest(&record, strategy: strategy)
+        let createsGitHubRelease = record.kind == .version && updated.githubRelease?.enabled == true && deps.githubReleaser != nil
+        if createsGitHubRelease {
+            // Keep the exact published package next to the manifest for the release asset.
+            record.releaseZipPath = try? await writeReleaseZip(record: record, candidate: candidate)?.path
+            try deps.releases.save(record)
+        }
         deps.staging.removeWorkspace(for: record.id)
+        if createsGitHubRelease {
+            emit(record, "Creating the GitHub release")
+            record = try await createGitHubRelease(record, product: updated)
+        }
         await deps.notifications.notify(
             title: record.kind == .readmeUpdate ? "\(product.name) \(version) readme updated" : "\(product.name) \(version) released",
             body: "Committed revision \(record.committedRevision.map(String.init) ?? "?")." + (report.isClean ? "" : " Verification found differences; review the report."),
             identifier: record.id.uuidString
         )
         return record
+    }
+
+    // MARK: GitHub release
+
+    /// Creates (or completes) the GitHub release of a completed version release. Never
+    /// changes the release's state: the WordPress.org release stands either way.
+    public func publishGitHubRelease(_ id: UUID) async throws -> ReleaseRecord {
+        let record = try load(id)
+        guard record.state == .completed, record.kind == .version, record.mode != .dryRun else {
+            throw ReleaseError.invalidState("Only a completed version release can get a GitHub release.")
+        }
+        return try await createGitHubRelease(record, product: try product(record.productID))
+    }
+
+    private func createGitHubRelease(_ record: ReleaseRecord, product: Product) async throws -> ReleaseRecord {
+        guard let releaser = deps.githubReleaser else { return record }
+        let token = (try? deps.keychain.password(for: .githubReleaseToken)) ?? nil
+        let zip = record.releaseZipPath.map { URL(fileURLWithPath: $0) }.flatMap { FileManager.default.fileExists(atPath: $0.path) ? $0 : nil }
+        let result = await GitHubReleasePublisher(github: releaser).publish(record: record, product: product, zip: zip, token: token)
+        var latest = try load(record.id)
+        latest.githubRelease = result
+        try deps.releases.save(latest)
+        emit(latest, result.succeeded ? "GitHub release \(result.tag) is ready" : "GitHub release failed: \(result.error ?? "")")
+        if !result.succeeded {
+            await deps.notifications.notify(title: "GitHub release failed: \(product.name)", body: result.error ?? "", identifier: "\(record.id.uuidString)-github")
+        }
+        return latest
+    }
+
+    /// Zips the candidate as `<slug>/…` into `<slug>-<version>.zip` next to the manifest.
+    private func writeReleaseZip(record: ReleaseRecord, candidate: StagedCandidate) async throws -> URL? {
+        guard let version = record.version, let manifest = record.manifestPath else { return nil }
+        let folder = URL(fileURLWithPath: manifest).deletingLastPathComponent()
+        let zip = folder.appendingPathComponent("\(record.productSlug)-\(version).zip")
+        let scratch = try deps.staging.workspace(for: record.id).appendingPathComponent("zip-\(UUID().uuidString)", isDirectory: true)
+        defer { try? FileManager.default.removeItem(at: scratch) }
+        let root = scratch.appendingPathComponent(record.productSlug, isDirectory: true)
+        try BuildService.cloneTree(from: candidate.rootURL, to: root)
+        try? FileManager.default.removeItem(at: zip)
+        let result = try await ProcessRunner().run(ProcessRequest(
+            executableURL: URL(fileURLWithPath: "/usr/bin/ditto"),
+            arguments: ["-c", "-k", "--norsrc", "--noextattr", "--noqtn", "--keepParent", root.path, zip.path],
+            timeout: .seconds(300)
+        ))
+        guard result.succeeded else { return nil }
+        return zip
     }
 
     // MARK: Directory status

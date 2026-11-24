@@ -106,6 +106,10 @@ struct ReleaseReportView: View {
                     Divider()
                     DirectoryStatusRow(record: record)
                 }
+                if record.kind == .version, product?.githubRelease?.enabled == true || record.githubRelease != nil {
+                    Divider()
+                    GitHubReleaseRow(record: record)
+                }
                 if !record.guidance.isEmpty {
                     Divider()
                     ForEach(record.guidance, id: \.self) { Label($0, systemImage: "info.circle").font(.callout) }
@@ -250,6 +254,56 @@ private struct DirectoryStatusRow: View {
         case .live?: .green
         case .pending?: .orange
         default: .secondary
+        }
+    }
+}
+
+/// The product's GitHub release for this version, with a way to create or retry it.
+private struct GitHubReleaseRow: View {
+    @Environment(AppModel.self) private var model
+    @Environment(\.openURL) private var openURL
+    let record: ReleaseRecord
+    @State private var latest: GitHubReleaseResult?
+    @State private var working = false
+
+    private var result: GitHubReleaseResult? { latest ?? record.githubRelease }
+
+    var body: some View {
+        HStack(alignment: .firstTextBaseline) {
+            Text("GitHub").foregroundStyle(.secondary).frame(width: 130, alignment: .leading)
+            VStack(alignment: .leading, spacing: 3) {
+                if let result, result.succeeded, let url = result.url {
+                    Button {
+                        openURL(url)
+                    } label: {
+                        Label("Release \(result.tag)\(result.assetName.map { " with \($0)" } ?? "")", systemImage: "arrow.up.right.square")
+                    }
+                    .buttonStyle(InlineLinkButtonStyle())
+                } else if let error = result?.error {
+                    Label(error, systemImage: "exclamationmark.triangle.fill").foregroundStyle(.orange).font(.callout)
+                        .fixedSize(horizontal: false, vertical: true)
+                } else {
+                    Text("Not created yet").font(.callout).foregroundStyle(.secondary)
+                }
+                ForEach(result?.notes ?? [], id: \.self) { Text($0).font(.caption).foregroundStyle(.secondary) }
+            }
+            Spacer(minLength: 8)
+            if working {
+                ProgressView().controlSize(.small)
+            } else if result?.succeeded != true {
+                Button(result == nil ? "Create GitHub Release" : "Try Again") {
+                    Task {
+                        working = true
+                        defer { working = false }
+                        do {
+                            latest = try await model.pipeline.publishGitHubRelease(record.id).githubRelease
+                            model.reload()
+                        } catch {
+                            model.show(error, title: "Could not create the GitHub release")
+                        }
+                    }
+                }
+            }
         }
     }
 }

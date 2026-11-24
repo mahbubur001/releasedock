@@ -8,6 +8,8 @@ struct SettingsView: View {
     @State private var draft = AppSettings()
     @State private var githubToken = ""
     @State private var tokenStored = false
+    @State private var releaseToken = ""
+    @State private var releaseTokenStored = false
     @State private var message: String?
 
     var body: some View {
@@ -58,6 +60,17 @@ struct SettingsView: View {
                     }
                 }
             }
+            Section("GitHub releases") {
+                SecureField("Release token", text: $releaseToken, prompt: Text(releaseTokenStored ? "Stored in Keychain" : "Needed only for products that create GitHub releases"))
+                Text("A fine-grained token limited to your plugin and theme repositories, with Contents: read and write. It is stored in the Keychain.")
+                    .font(.caption).foregroundStyle(.secondary)
+                if releaseTokenStored {
+                    Button("Remove Release Token", role: .destructive) {
+                        try? model.keychain.deletePassword(for: .githubReleaseToken)
+                        releaseTokenStored = false
+                    }
+                }
+            }
             Section("Notifications") {
                 Toggle("Notify about releases and updates", isOn: $draft.notificationsEnabled)
             }
@@ -81,12 +94,13 @@ struct SettingsView: View {
         .toolbar {
             ToolbarItem {
                 Button("Save") { save() }
-                    .disabled(draft == model.settings && githubToken.isEmpty)
+                    .disabled(draft == model.settings && githubToken.isEmpty && releaseToken.isEmpty)
             }
         }
         .onAppear {
             draft = model.settings
             tokenStored = ((try? model.keychain.password(for: .githubToken)) ?? nil) != nil
+            releaseTokenStored = ((try? model.keychain.password(for: .githubReleaseToken)) ?? nil) != nil
         }
     }
 
@@ -126,6 +140,16 @@ struct SettingsView: View {
                 || fm.fileExists(atPath: ((wordpress as NSString).deletingLastPathComponent as NSString).appendingPathComponent("wp-config.php"))
             guard hasConfig, fm.fileExists(atPath: (wordpress as NSString).appendingPathComponent("wp-load.php")) else {
                 message = "\(wordpress) is not a WordPress install (no wp-load.php / wp-config.php)."
+                return
+            }
+        }
+        if !releaseToken.isEmpty {
+            do {
+                try model.keychain.setPassword(releaseToken, for: .githubReleaseToken)
+                releaseTokenStored = true
+                releaseToken = ""
+            } catch {
+                message = error.localizedDescription
                 return
             }
         }
