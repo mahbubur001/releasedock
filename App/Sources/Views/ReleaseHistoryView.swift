@@ -125,9 +125,10 @@ private struct HistoryRow: View {
     }
 
     private var subtitle: String {
-        let what = release.kind == .readmeUpdate ? "Readme update"
+        var what = release.kind == .readmeUpdate ? "Readme update"
             : release.mode == .dryRun ? "Dry run"
             : release.previousVersion.map { "from \($0)" } ?? "First release"
+        if let restored = release.restoresVersion { what = "Restores \(restored)" + (release.mode == .dryRun ? " · dry run" : "") }
         return "\(what) · \(release.createdAt.formatted(.relative(presentation: .named)))"
     }
 }

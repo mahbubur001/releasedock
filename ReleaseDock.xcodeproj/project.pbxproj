@@ -32,12 +32,14 @@
 		C95F6E3239C13581ED537E1B /* ReleaseDetailViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = D83B5EB39E7987D93730C3AE /* ReleaseDetailViews.swift */; };
 		D7C6AF9EBAB0FA60E792E92B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 823C4B4F2D68BBB08C6F8B39 /* Assets.xcassets */; };
 		E66D54710AC4890D42538B81 /* AddProductView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E5F593598358DA989ED08AD /* AddProductView.swift */; };
+		E7D35393AFF3D86754EA1E9F /* RestoreVersionSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27483C308F6CFDD4D29CF8CC /* RestoreVersionSheet.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		05A9A10F06D5B7E0C55567D5 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		16A6AEAD4BD7E9292A8E9E79 /* ReleaseDock.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ReleaseDock.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1E5F593598358DA989ED08AD /* AddProductView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddProductView.swift; sourceTree = "<group>"; };
+		27483C308F6CFDD4D29CF8CC /* RestoreVersionSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RestoreVersionSheet.swift; sourceTree = "<group>"; };
 		2DBB9BAD13C5BE597C11A0D4 /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Release.xcconfig; sourceTree = "<group>"; };
 		2F478EDBE9334187ADB48AED /* ReleaseDockApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReleaseDockApp.swift; sourceTree = "<group>"; };
 		32AC0AC90DE217058614E95A /* DashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardView.swift; sourceTree = "<group>"; };
@@ -110,6 +112,7 @@
 				D83B5EB39E7987D93730C3AE /* ReleaseDetailViews.swift */,
 				9EAAF0334553C90E81D2DFCD /* ReleaseHistoryView.swift */,
 				AACF8F62816E7AE9AD0BF484 /* ReleaseWizardView.swift */,
+				27483C308F6CFDD4D29CF8CC /* RestoreVersionSheet.swift */,
 				05A9A10F06D5B7E0C55567D5 /* SettingsView.swift */,
 				B82672979B500FB1A5B7326C /* Sidebar.swift */,
 				8C58D84B9A3A99990ACB5B7C /* Theme.swift */,
@@ -274,6 +277,7 @@
 				B44D314F5F74C7246F8AAB46 /* ReleaseHistoryView.swift in Sources */,
 				A00AD7B3E5ED060BB725BB82 /* ReleaseWizardModel.swift in Sources */,
 				5114CB18A1FE2234B9C96F76 /* ReleaseWizardView.swift in Sources */,
+				E7D35393AFF3D86754EA1E9F /* RestoreVersionSheet.swift in Sources */,
 				92F47382E21EE21ED47F43DB /* SettingsView.swift in Sources */,
 				1EBFAFC81FBB72ED3464EF0D /* Sidebar.swift in Sources */,
 				A623318B8D560AC74EB8775B /* SparkleUpdateService.swift in Sources */,

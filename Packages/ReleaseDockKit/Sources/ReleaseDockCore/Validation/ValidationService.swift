@@ -16,8 +16,10 @@ public struct ValidationContext: Sendable {
     public var codeChecks: CodeCheckReport?
     /// The plugin's assets folder, when one is configured.
     public var assets: AssetsReport?
+    /// Set when the package is an older release's code exported from SVN.
+    public var restoresVersion: String?
 
-    public init(product: Product, inspection: PackageInspection, detected: DetectedProduct?, detectionError: String? = nil, repository: RepositorySnapshot?, git: GitRepositoryState? = nil, preview: ReleasePreview? = nil, kind: ReleaseKind = .version, codeChecks: CodeCheckReport? = nil, assets: AssetsReport? = nil) {
+    public init(product: Product, inspection: PackageInspection, detected: DetectedProduct?, detectionError: String? = nil, repository: RepositorySnapshot?, git: GitRepositoryState? = nil, preview: ReleasePreview? = nil, kind: ReleaseKind = .version, codeChecks: CodeCheckReport? = nil, assets: AssetsReport? = nil, restoresVersion: String? = nil) {
         self.product = product
         self.inspection = inspection
         self.detected = detected
@@ -28,6 +30,7 @@ public struct ValidationContext: Sendable {
         self.kind = kind
         self.codeChecks = codeChecks
         self.assets = assets
+        self.restoresVersion = restoresVersion
     }
 }
 
@@ -449,7 +452,10 @@ public struct ValidationService: ValidationServicing {
             results += portability.map { .warn(.portableFilenames, $0.message, file: $0.path) }
         }
 
-        if let git = c.git, git.isRepository {
+        if let restored = c.restoresVersion {
+            // The package was exported from the released tag, not from a development folder.
+            results.append(.pass(.gitWorkingTree, "Code exported from the released \(restored) on WordPress.org"))
+        } else if let git = c.git, git.isRepository {
             if git.isClean {
                 results.append(.pass(.gitWorkingTree, "Git tree clean at \(git.headCommit?.prefix(10) ?? "?")"))
             } else if settings.requireCleanGitTree {

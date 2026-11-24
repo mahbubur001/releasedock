@@ -121,6 +121,7 @@ struct ProductDetailView: View {
     @State private var confirmRevert = false
     @State private var reverting = false
     @State private var bumpTarget: VersionBumpTarget?
+    @State private var restoring = false
 
     private var hasWorkingCopy: Bool { FileManager.default.fileExists(atPath: product.workingCopyURL.appendingPathComponent(".svn").path) }
 
@@ -170,6 +171,15 @@ struct ProductDetailView: View {
                     GroupedRow(isFirst: true) {
                         label("Mode")
                         value(product.releaseMode.displayName + (product.releaseMode == .automatic ? (product.automationEnabled ? " · allowed" : " · not allowed yet") : ""))
+                    }
+                    if let live = product.currentVersion {
+                        GroupedRow {
+                            label("Restore")
+                            value("Problem in \(live)? Ship an older version's code again as a new version.")
+                            Button("Restore Older Version…") { restoring = true }
+                                .fixedSize()
+                                .disabled(model.wizard.isRunning)
+                        }
                     }
                     GroupedRow {
                         label("Build command")
@@ -223,6 +233,13 @@ struct ProductDetailView: View {
         .sheet(item: $bumpTarget) { target in
             VersionBumpSheet(product: product, folder: target.folder)
         }
+        .sheet(isPresented: $restoring) {
+            RestoreVersionSheet(product: product)
+        }
+        #if DEBUG
+        // UI verification: RELEASEDOCK_UI_TEST_RESTORE=1 opens the restore sheet; =auto also prepares it.
+        .onAppear { if ProcessInfo.processInfo.environment["RELEASEDOCK_UI_TEST_RESTORE"] != nil, product.currentVersion != nil { restoring = true } }
+        #endif
     }
 
     private var header: some View {
@@ -257,6 +274,7 @@ struct ProductDetailView: View {
             Menu {
                 SwiftUI.Button("Show Working Copy in Finder") { NSWorkspace.shared.open(product.workingCopyURL) }
                 SwiftUI.Button("Revert Working Copy…") { confirmRevert = true }.disabled(!hasWorkingCopy)
+                SwiftUI.Button("Restore Older Version…") { restoring = true }.disabled(product.currentVersion == nil || model.wizard.isRunning)
                 Divider()
                 SwiftUI.Button("Delete Product…", role: .destructive, action: onDelete)
             } label: {

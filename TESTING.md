@@ -90,6 +90,7 @@ Debug builds read these environment variables (none exist in Release builds):
 | `RELEASEDOCK_DATA_DIR` | Use an isolated data folder (also honoured in Release) |
 | `RELEASEDOCK_UI_TEST_SECTION` | Open a section (`dashboard` (Overview), `products`, `wizard` (New Release), `history`, `updates`, `settings`) |
 | `RELEASEDOCK_UI_TEST_HISTORY` | Select the History entry at this index |
+| `RELEASEDOCK_UI_TEST_RESTORE` | `1` opens Restore Older Version for the selected product; `auto` also prepares the suggested restore |
 | `RELEASEDOCK_UI_TEST_OPEN` | Open a ZIP or folder in the wizard at launch |
 | `RELEASEDOCK_UI_TEST_AUTOPREPARE=1` | Run preparation when a package is opened |
 | `RELEASEDOCK_UI_TEST_AUTOPUBLISH=1` | Then approve and publish — refused unless the repository is a local `file://` URL |

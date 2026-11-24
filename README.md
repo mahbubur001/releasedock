@@ -13,7 +13,7 @@
   <img alt="macOS 14+" src="https://img.shields.io/badge/macOS-14%2B-blue">
   <img alt="Swift 6" src="https://img.shields.io/badge/Swift-6-orange">
   <img alt="SwiftUI" src="https://img.shields.io/badge/UI-SwiftUI-purple">
-  <img alt="Tests" src="https://img.shields.io/badge/tests-205%20passing-brightgreen">
+  <img alt="Tests" src="https://img.shields.io/badge/tests-209%20passing-brightgreen">
   <img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-green">
 </p>
 
@@ -53,6 +53,7 @@ ReleaseDock is a native macOS app that does the whole release for you. It checks
 **Exact preview, single commit, verified result**
 - **Plugins:** `trunk` is updated and `svn cp trunk tags/<version>` is added. The `/assets` folder (banners, icons, screenshots) can be synced, with correct MIME types.
 - **Readme & Assets Update (plugins):** raise *Tested up to* or fix the readme without a new version. The readme is updated in `trunk` and in the released tag in one commit; a package whose code differs from the released tag is refused.
+- **Restore an older version:** when a release breaks sites, **Products → Restore Older Version…** exports an earlier version from SVN, gives it a new, higher version with a changelog entry, and runs it through the normal checks and review. WordPress.org never moves backwards, so sites on the broken version update to the restored code; released tags are never changed.
 - **Themes:** the previous version directory is copied to `/<version>/`, as the Themes handbook describes.
 - **Preview:** you see every SVN change and the full diff before anything is committed. Your approval covers exactly that preview; if the working copy changes, you have to approve again.
 - **Verification:** after the commit, ReleaseDock checks the server copy file by file (SHA-256) and records the revision in a release manifest.
@@ -149,7 +150,7 @@ When it finishes, the release report shows the committed revision, the release U
              └──► Manifest · History · Notification
 ```
 
-- All release logic lives in **ReleaseDockCore**, a Swift package with no UI code and 205 tests.
+- All release logic lives in **ReleaseDockCore**, a Swift package with no UI code and 209 tests.
 - Integration tests run the real `svn` binary against local repositories laid out like WordPress.org.
 - The SwiftUI app is a thin layer on top of the package.
 

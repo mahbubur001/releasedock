@@ -26,6 +26,7 @@ public enum ReleaseError: Error, LocalizedError, Sendable {
     case notCommitted
     case readmeUpdateChangesCode(tag: String, paths: [String])
     case buildFailed(command: String, exitCode: Int32, output: String)
+    case restoreNotPossible(String)
 
     public var errorDescription: String? {
         switch self {
@@ -44,6 +45,7 @@ public enum ReleaseError: Error, LocalizedError, Sendable {
         case .notCommitted: "The commit did not reach the repository."
         case .buildFailed(let command, let exitCode, let output):
             "The build command failed (exit code \(exitCode)): \(command)\n\(output.suffix(800))"
+        case .restoreNotPossible(let reason): reason
         case .readmeUpdateChangesCode(let tag, let paths):
             "The package differs from the released \(tag) in \(paths.count) file(s) besides the readme (\(paths.prefix(5).joined(separator: ", "))\(paths.count > 5 ? ", …" : "")). Publish a new version to ship code changes."
         }

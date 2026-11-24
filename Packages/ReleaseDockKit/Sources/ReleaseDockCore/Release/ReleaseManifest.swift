@@ -18,6 +18,8 @@ public struct ReleaseManifest: Codable, Hashable, Sendable {
     public var previousVersion: String?
     public var mode: ReleaseMode
     public var kind: ReleaseKind?
+    /// The older version whose code this release restores.
+    public var restoresVersion: String?
     public var sourceKind: SourceKind
     public var sourcePath: String
     public var sourceSHA256: String
@@ -44,6 +46,7 @@ public struct ReleaseManifest: Codable, Hashable, Sendable {
             previousVersion: record.previousVersion,
             mode: record.mode,
             kind: record.kind,
+            restoresVersion: record.restoresVersion,
             sourceKind: record.source.kind,
             sourcePath: record.source.path,
             sourceSHA256: record.sourceSHA256 ?? "",

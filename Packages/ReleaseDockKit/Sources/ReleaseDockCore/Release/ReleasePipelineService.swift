@@ -165,6 +165,58 @@ public actor ReleasePipelineService {
         return record
     }
 
+    // MARK: Restore an older version
+
+    /// The released versions older than the current one, newest first, and a suggested
+    /// version for re-releasing one of them.
+    public func restoreOptions(productID: UUID) async throws -> RestoreOptions {
+        let product = try product(productID)
+        let snapshot = try await deps.strategies.strategy(for: product.type).inspectRemote(product: product, candidateVersion: nil, svn: deps.svn)
+        return RestoreOptions(snapshot: snapshot)
+    }
+
+    /// Exports `oldVersion` from the repository and bumps it to `newVersion`, which must be
+    /// newer than every released version. The result is an ordinary folder release that runs
+    /// every check; WordPress.org never moves backwards, so sites on the broken version update.
+    public func createRestoreRelease(productID: UUID, restoring oldVersion: String, as newVersion: String, changelogNotes: String, mode: ReleaseMode? = nil) async throws -> ReleaseRecord {
+        let product = try product(productID)
+        let strategy = deps.strategies.strategy(for: product.type)
+        let snapshot = try await strategy.inspectRemote(product: product, candidateVersion: newVersion, svn: deps.svn)
+        let options = RestoreOptions(snapshot: snapshot)
+        guard let current = options.currentVersion else {
+            throw ReleaseError.restoreNotPossible("\(product.name) has no released version in the repository.")
+        }
+        guard snapshot.existingVersions.contains(oldVersion) else {
+            throw ReleaseError.restoreNotPossible("\(oldVersion) is not a released version of \(product.name).")
+        }
+        guard PHPVersion.compare(oldVersion, current) < 0 else {
+            throw ReleaseError.restoreNotPossible("\(oldVersion) is not older than the current version \(current).")
+        }
+        if let highest = options.highestVersion, PHPVersion.compare(newVersion, highest) <= 0 {
+            throw ReleaseError.restoreNotPossible("\(newVersion) must be newer than \(highest) so sites update to it.")
+        }
+
+        var record = ReleaseRecord(product: product, source: .folder(path: ""), mode: mode ?? product.releaseMode)
+        record.restoresVersion = oldVersion
+        let folder = try deps.staging.workspace(for: record.id)
+            .appendingPathComponent("restore", isDirectory: true)
+            .appendingPathComponent(product.slug, isDirectory: true)
+        do {
+            try FileManager.default.createDirectory(at: folder.deletingLastPathComponent(), withIntermediateDirectories: true)
+            let base = product.svnRepositoryURL.absoluteString.trimmingTrailingSlash
+            try await deps.svn.export("\(base)/\(strategy.releasePath(version: oldVersion))", to: folder)
+            let bump = VersionBumpService()
+            try bump.apply(try bump.plan(folder: folder, product: product, newVersion: newVersion, changelogNotes: changelogNotes), folder: folder)
+        } catch {
+            deps.staging.removeWorkspace(for: record.id)
+            throw error
+        }
+        record.source = .folder(path: folder.path)
+        try deps.releases.save(record)
+        emit(record, "Restoring the \(oldVersion) code as \(newVersion)")
+        return record
+    }
+
     // MARK: Prepare (Detected → Previewed)
 
     /// Inspects, validates, stages and previews the release. A dry run completes here.
@@ -206,7 +258,8 @@ public actor ReleasePipelineService {
             let url = URL(fileURLWithPath: path, isDirectory: true)
             // A build runs on a clone; the development folder itself is never modified.
             var root = url
-            if let command = product.effectiveBuildCommand, let builder = deps.builder {
+            // Restored code comes from a released tag, which already holds the built files.
+            if record.restoresVersion == nil, let command = product.effectiveBuildCommand, let builder = deps.builder {
                 emit(record, "Running the build command")
                 let build = try await builder.build(source: url, command: command, workspace: try deps.staging.workspace(for: record.id))
                 record.build = build
@@ -215,7 +268,7 @@ public actor ReleasePipelineService {
             inspection = try deps.folderInspector.inspect(folderAt: root, options: options)
             packageRoot = root
             entries = inspection.includedEntries
-            if await deps.git.isAvailable() {
+            if record.restoresVersion == nil, await deps.git.isAvailable() {
                 let git = try? await deps.git.state(of: url)
                 record.gitCommit = git?.headCommit
                 gitState = git
@@ -246,7 +299,7 @@ public actor ReleasePipelineService {
         if product.type == .plugin, let assetsPath = product.assetsPath {
             record.assets = try? AssetInspector().inspect(folderAt: URL(fileURLWithPath: assetsPath, isDirectory: true))
         }
-        let context = ValidationContext(product: product, inspection: inspection, detected: record.detected, detectionError: detectionError, repository: snapshot, git: gitState, kind: record.kind, assets: record.assets)
+        let context = ValidationContext(product: product, inspection: inspection, detected: record.detected, detectionError: detectionError, repository: snapshot, git: gitState, kind: record.kind, assets: record.assets, restoresVersion: record.restoresVersion)
         let report = deps.validator.validate(context)
         record.validation = report
         if report.isBlocking {
@@ -368,7 +421,8 @@ public actor ReleasePipelineService {
     }
 
     func commitMessage(record: ReleaseRecord) -> String {
-        let summary = record.kind == .readmeUpdate ? "Update readme for \(record.productName) \(record.version ?? "")" : "Release \(record.productName) \(record.version ?? "")"
+        var summary = record.kind == .readmeUpdate ? "Update readme for \(record.productName) \(record.version ?? "")" : "Release \(record.productName) \(record.version ?? "")"
+        if let restored = record.restoresVersion { summary += " (restores the \(restored) code)" }
         return "\(summary)\n\n\(record.commitMarker)\n"
     }
 
@@ -445,7 +499,7 @@ public actor ReleasePipelineService {
     /// against a stale report.
     private func revalidate(_ record: inout ReleaseRecord, product: Product, preview: ReleasePreview) {
         guard let inspection = record.inspection else { return }
-        let context = ValidationContext(product: product, inspection: inspection, detected: record.detected, repository: record.repository, preview: preview, kind: record.kind, codeChecks: record.codeChecks, assets: record.assets)
+        let context = ValidationContext(product: product, inspection: inspection, detected: record.detected, repository: record.repository, preview: preview, kind: record.kind, codeChecks: record.codeChecks, assets: record.assets, restoresVersion: record.restoresVersion)
         record.validation = deps.validator.validate(context)
     }
 

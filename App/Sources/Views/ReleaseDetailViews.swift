@@ -49,13 +49,14 @@ struct ReleaseHeroCard: View {
             HStack(spacing: 14) {
                 versionColumn(record.repository?.currentVersion ?? record.previousVersion ?? "—", caption: record.repository?.currentVersionSource ?? "Current", faded: true)
                 Image(systemName: "arrow.right").font(.title3.weight(.semibold)).foregroundStyle(.green)
-                versionColumn(record.version ?? "—", caption: record.productType == .plugin ? "From plugin header" : "From style.css")
+                versionColumn(record.version ?? "—", caption: record.restoresVersion.map { "Code of \($0)" } ?? (record.productType == .plugin ? "From plugin header" : "From style.css"))
             }
         }
     }
 
     private var subtitle: String {
-        [record.productType.displayName, record.kind == .readmeUpdate ? record.kind.displayName : record.mode.displayName, URL(fileURLWithPath: record.source.path).lastPathComponent]
+        let source = record.restoresVersion.map { "Restores the \($0) code" } ?? URL(fileURLWithPath: record.source.path).lastPathComponent
+        return [record.productType.displayName, record.kind == .readmeUpdate ? record.kind.displayName : record.mode.displayName, source]
             .joined(separator: " · ")
     }
 

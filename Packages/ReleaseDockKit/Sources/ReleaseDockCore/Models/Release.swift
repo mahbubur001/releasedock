@@ -268,6 +268,8 @@ public struct ReleaseRecord: Codable, Hashable, Sendable, Identifiable {
     public var codeChecks: CodeCheckReport?
     /// Last WordPress.org directory check after the commit.
     public var directoryStatus: DirectoryStatus?
+    /// Set when this release restores an older released version's code under a new version.
+    public var restoresVersion: String?
     public var createdAt: Date
     public var updatedAt: Date
 
@@ -321,5 +323,23 @@ public struct ReleaseRecord: Codable, Hashable, Sendable, Identifiable {
         case .live?, .superseded?: return false
         case .pending?, .notListed?, nil: return true
         }
+    }
+}
+
+/// What can be restored: released versions older than the current one, newest first.
+public struct RestoreOptions: Hashable, Sendable {
+    public var currentVersion: String?
+    /// Highest version in the repository; a restore must be released above it.
+    public var highestVersion: String?
+    public var olderVersions: [String]
+    public var suggestedVersion: String?
+
+    public init(snapshot: RepositorySnapshot) {
+        currentVersion = snapshot.currentVersion
+        highestVersion = VersionService().highest(of: snapshot.existingVersions + [snapshot.currentVersion].compactMap { $0 })
+        olderVersions = snapshot.existingVersions
+            .filter { version in snapshot.currentVersion.map { PHPVersion.compare(version, $0) < 0 } ?? false }
+            .sorted { PHPVersion.compare($0, $1) > 0 }
+        suggestedVersion = highestVersion.flatMap { VersionBumpService.suggest(.patch, from: $0) }
     }
 }

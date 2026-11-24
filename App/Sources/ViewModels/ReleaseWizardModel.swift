@@ -160,6 +160,22 @@ final class ReleaseWizardModel {
         }
     }
 
+    /// Exports an older released version, gives it `newVersion` and prepares it like any release.
+    func prepareRestore(productID: UUID, restoring oldVersion: String, as newVersion: String, notes: String, mode: ReleaseMode) async {
+        guard !isRunning else { return }
+        reset()
+        self.productID = productID
+        modeOverride = mode
+        observeEvents()
+        await run {
+            activity = "Exporting \(oldVersion) from the repository"
+            let created = try await model.pipeline.createRestoreRelease(productID: productID, restoring: oldVersion, as: newVersion, changelogNotes: notes, mode: mode)
+            record = created
+            source = created.source
+            return try await model.pipeline.prepare(created.id)
+        }
+    }
+
     func approveAndPublish(automatic: Bool) async {
         guard let id = record?.id else { return }
         await run {
