@@ -6,6 +6,15 @@
     <description>ReleaseDock updates</description>
     <language>en</language>
     <item>
+      <title>Version 0.2.1</title>
+      <pubDate>Tue, 24 Nov 2026 07:32:05 GMT</pubDate>
+      <sparkle:version>6</sparkle:version>
+      <sparkle:shortVersionString>0.2.1</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+      <description><![CDATA[<p>Same as 0.2.0, correctly signed so it installs in-app. New native macOS design; Readme &amp; Assets Update; Restore Older Version; Bump Version; build command and optional GitHub release per product; PHP lint and Plugin Check; deeper readme, asset and theme checks; directory status after release; longer commit timeout. See CHANGELOG.md.</p>]]></description>
+      <enclosure url="https://github.com/mahbubur001/releasedock/releases/download/v0.2.1/ReleaseDock-0.2.1.zip" length="6583765" type="application/octet-stream" sparkle:edSignature="wO9Lq4hjwj35bGZhVH+Xyo/PwRBXbaHFVBMFRgdEiLhOZQvzsJDn0966kydHZw2Fw7zeq0vbL3q1macduMU5Dw=="/>
+    </item>
+    <item>
       <title>Version 0.1.3</title>
       <pubDate>Mon, 23 Nov 2026 08:42:40 GMT</pubDate>
       <sparkle:version>4</sparkle:version>
