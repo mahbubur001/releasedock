@@ -1,12 +1,23 @@
 [
   {
+    "version": "0.2.3",
+    "build": "8",
+    "channel": "",
+    "notes": "Update button in the toolbar, new update window and Settings window, product icons, no more GitHub rate limit.",
+    "signature": "w5cPMuKN5+q3waLnqOfVar8To60XI1kZxQX/82WEBephS+3iV/iQkdP0G/f57CFIrZ2CpFxF+Apv5QwQhdDODg==",
+    "length": "7070688",
+    "date": "Wed, 25 Nov 2026 10:42:55 GMT",
+    "html": "<h3>Added</h3><ul><li>Products show their WordPress.org icon on Overview, Products, New Release and History, taken from the product's assets folder or the SVN working copy's <code>assets/</code> folder. Animated GIF icons use their most detailed frame.</li><li>When a new ReleaseDock version is found, <b>Update found</b> and an <b>Update</b> button appear at the top right of the toolbar. The update window lists what's new in every version since yours, grouped as New, Improved and Fixed, then downloads, verifies and relaunches with progress.</li><li>Settings is its own window, opened with \u2318, or the gear beside the app name at the bottom of the sidebar, with General, Subversion, Checks, Accounts, Updates and About tabs. Changes apply as you make them.</li></ul><h3>Changed</h3><ul><li>Update checks read the signed update feed instead of the GitHub API, so they no longer stop at GitHub's rate limit. The GitHub repository and token settings for app updates are gone.</li><li>The Updates and Settings sidebar items and the update banner on Overview are removed.</li><li>Updates that Sparkle downloads in the background can be installed right away from the toolbar instead of only on quit.</li></ul><h3>Fixed</h3><ul><li>The beta update channel is applied at launch, not only after changing it in Settings.</li></ul>"
+  },
+  {
     "version": "0.2.2",
     "build": "7",
     "channel": "",
     "notes": "Update the SVN working copy and resolve conflicts from Products; go Back or Check Again in New Release; one-click backup, revert and re-check for a dirty working copy; product picker as a menu.",
     "signature": "aRLw0FQXor/QEwsaeqIatn0md/udPpH0e8nn62cEFqlHd3KeRTU7C2U17CqAAiF9unxv0WFH9mW0WyW7VXxXAQ==",
     "length": "6807393",
-    "date": "Tue, 24 Nov 2026 10:51:01 GMT"
+    "date": "Tue, 24 Nov 2026 10:51:01 GMT",
+    "html": "<h3>Added</h3><ul><li><b>Working copy</b> on each product page: its revision and whether it is clean, has local changes or has conflicts, with the list of changes. <b>Update</b> runs <code>svn update</code> (or the first checkout) and keeps local changes; <b>Revert\u2026</b> backs everything up and matches the server.</li><li>Conflicts after an update open a sheet with one choice per file: the WordPress.org version (your file is backed up first) or yours. Update and resolve are refused while a release is staged.</li><li>New Release: <b>Back</b> returns to Package with the same product, package and mode (a staged release is cancelled and the working copy restored), and <b>Check Again</b> runs every check again on the same package.</li><li>A release that stopped on a dirty working copy shows the changes and <b>Back Up, Revert &amp; Check Again\u2026</b>.</li></ul><h3>Changed</h3><ul><li>New Release picks the product from a <b>Change</b> menu on a single card instead of a grid of cards.</li><li>Cancelling a staged release no longer writes a backup when the working copy still matches the preview; only hand edits are backed up.</li></ul>"
   },
   {
     "version": "0.2.1",
@@ -15,7 +26,8 @@
     "notes": "Same as 0.2.0, correctly signed so it installs in-app. New native macOS design; Readme & Assets Update; Restore Older Version; Bump Version; build command and optional GitHub release per product; PHP lint and Plugin Check; deeper readme, asset and theme checks; directory status after release; longer commit timeout. See CHANGELOG.md.",
     "signature": "wO9Lq4hjwj35bGZhVH+Xyo/PwRBXbaHFVBMFRgdEiLhOZQvzsJDn0966kydHZw2Fw7zeq0vbL3q1macduMU5Dw==",
     "length": "6583765",
-    "date": "Tue, 24 Nov 2026 07:32:05 GMT"
+    "date": "Tue, 24 Nov 2026 07:32:05 GMT",
+    "html": "<h3>Fixed</h3><ul><li>0.2.0 could not be installed from inside the app (\"The update is improperly signed\"): it was signed with an old Sparkle key instead of the app's key. 0.2.1 contains the same changes, correctly signed. The release script now refuses to publish an update whose signature does not verify with the public key built into the app.</li></ul>"
   },
   {
     "version": "0.1.3",
@@ -24,6 +36,7 @@
     "notes": "Releases and in-app updates now come from the public mahbubur001/releasedock repository, signed with a new key. Sidebar toggle with a pointing-hand cursor.",
     "signature": "/PR+aY9jYeMwrLJsM3O1WWG/8hzT2wyVu8a0NyNqqfle9BFoY4nXYqS97JqgaZ2J0VnYpE4V6Zl+9+YaRZHMDA==",
     "length": "5131099",
-    "date": "Mon, 23 Nov 2026 08:42:40 GMT"
+    "date": "Mon, 23 Nov 2026 08:42:40 GMT",
+    "html": "<h3>Changed</h3><ul><li>The source repository is now public, and releases and the update feed are published from it (<code>mahbubur001/releasedock</code>). The separate <code>releasedock-releases</code> repository has been retired; a saved update repository pointing to it is switched over automatically.</li><li>Updates are signed with a new Sparkle EdDSA key. 0.1.0\u20130.1.2 can't update to 0.1.3 in-app; download it once from GitHub, and later updates install in-app again.</li><li>The sidebar toggle is ReleaseDock's own button and shows a pointing-hand cursor.</li></ul>"
   }
 ]
