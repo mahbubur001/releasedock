@@ -108,7 +108,7 @@ private struct HistoryRow: View {
     var body: some View {
         SelectableRow(isSelected: isSelected, action: action) {
             HStack(spacing: 10) {
-                ProductGlyph(type: release.productType, size: 26)
+                ProductGlyph(type: release.productType, size: 26, productID: release.productID)
                 VStack(alignment: .leading, spacing: 2) {
                     Text("\(release.productName) \(release.version ?? "")").font(.callout.weight(.semibold)).lineLimit(1)
                     Text(subtitle).font(.caption).foregroundStyle(.secondary).lineLimit(1)
@@ -180,7 +180,7 @@ private struct ReleaseHistoryDetail: View {
 
     private var header: some View {
         HStack(spacing: 12) {
-            ProductGlyph(type: record.productType, size: 36)
+            ProductGlyph(type: record.productType, size: 36, productID: record.productID)
             VStack(alignment: .leading, spacing: 2) {
                 Text("\(record.productName) \(record.version ?? "")").font(.title3.weight(.semibold)).lineLimit(1)
                 HStack(spacing: 6) {

@@ -7,7 +7,7 @@ ReleaseDock.app (SwiftUI, App/)                 ReleaseDockKit (Swift package, P
 ┌───────────────────────────────┐               ┌──────────────────────────────────────────────┐
 │ Views  ─► ViewModels ─► AppModel ─────────────►│ ReleasePipelineService (actor)                │
 │ (Dashboard, Products, Wizard, │  composition  │   ├─ ZIPInspectionService / FolderInspection  │
-│  History, Updates, Settings)  │     root      │   ├─ ProductDetector + VersionService          │
+│  History; Settings, Update)   │     root      │   ├─ ProductDetector + VersionService          │
 │                               │               │   ├─ ValidationService (pure)                 │
 │ Platform/                     │               │   ├─ ReleaseStagingService                    │
 │  SparkleUpdateService ──────► Sparkle 2       │   ├─ Plugin/ThemeReleaseStrategy              │

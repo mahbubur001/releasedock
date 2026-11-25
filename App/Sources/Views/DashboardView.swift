@@ -106,15 +106,6 @@ struct DashboardView: View {
                 .foregroundStyle(.orange)
                 .card(padding: 12)
         }
-        if model.updateChecker.isUpdateAvailable, let release = model.updateChecker.latestRelease {
-            HStack {
-                Label("ReleaseDock \(release.version) is available (you have \(AppModel.appVersion)).", systemImage: "arrow.down.circle.fill")
-                    .foregroundStyle(.blue)
-                Spacer()
-                Button("View") { model.selection = .updates }
-            }
-            .card(padding: 12)
-        }
     }
 
     private var emptyState: some View {
@@ -141,7 +132,7 @@ private struct ResumeCard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(spacing: 12) {
-                ProductGlyph(type: release.productType)
+                ProductGlyph(type: release.productType, productID: release.productID)
                 VStack(alignment: .leading, spacing: 1) {
                     Text("\(release.productName) \(release.version ?? "")").font(.headline)
                     Text(detail).font(.caption).foregroundStyle(.secondary)
@@ -249,7 +240,7 @@ private struct ProductCard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
             HStack(spacing: 12) {
-                ProductGlyph(type: product.type)
+                ProductGlyph(type: product.type, productID: product.id)
                 VStack(alignment: .leading, spacing: 1) {
                     Text(product.name).font(.headline)
                     Text("\(product.type.displayName) · \(product.slug)").font(.caption).foregroundStyle(.secondary)

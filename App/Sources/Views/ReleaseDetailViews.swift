@@ -34,7 +34,7 @@ struct ReleaseHeroCard: View {
 
     private var identity: some View {
         HStack(spacing: 16) {
-            ProductGlyph(type: record.productType, size: 52)
+            ProductGlyph(type: record.productType, size: 52, productID: record.productID)
             VStack(alignment: .leading, spacing: 3) {
                 Text(record.productName).font(.title2.weight(.semibold)).lineLimit(1)
                 Text(subtitle).foregroundStyle(.secondary).lineLimit(1).truncationMode(.middle)

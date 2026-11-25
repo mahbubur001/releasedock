@@ -4,6 +4,21 @@ All notable changes to ReleaseDock are documented here. The format follows [Keep
 
 ## [Unreleased]
 
+## [0.2.3] - 2026-11-25
+
+### Added
+- Products show their WordPress.org icon on Overview, Products, New Release and History, taken from the product's assets folder or the SVN working copy's `assets/` folder. Animated GIF icons use their most detailed frame.
+- When a new ReleaseDock version is found, **Update found** and an **Update** button appear at the top right of the toolbar. The update window lists what's new in every version since yours, grouped as New, Improved and Fixed, then downloads, verifies and relaunches with progress.
+- Settings is its own window, opened with ⌘, or the gear beside the app name at the bottom of the sidebar, with General, Subversion, Checks, Accounts, Updates and About tabs. Changes apply as you make them.
+
+### Changed
+- Update checks read the signed update feed instead of the GitHub API, so they no longer stop at GitHub's rate limit. The GitHub repository and token settings for app updates are gone.
+- The Updates and Settings sidebar items and the update banner on Overview are removed.
+- Updates that Sparkle downloads in the background can be installed right away from the toolbar instead of only on quit.
+
+### Fixed
+- The beta update channel is applied at launch, not only after changing it in Settings.
+
 ## [0.2.2] - 2026-11-24
 
 ### Added

@@ -94,7 +94,7 @@ private struct ProductRow: View {
     var body: some View {
         SelectableRow(isSelected: isSelected, action: action) {
             HStack(spacing: 10) {
-                ProductGlyph(type: product.type, size: 28)
+                ProductGlyph(type: product.type, size: 28, productID: product.id)
                 VStack(alignment: .leading, spacing: 2) {
                     Text(product.name).font(.callout.weight(.semibold)).lineLimit(1)
                     Text("\(product.type.displayName) · \(product.slug)").font(.caption).foregroundStyle(.secondary).lineLimit(1)
@@ -261,7 +261,7 @@ struct ProductDetailView: View {
 
     private var identity: some View {
         HStack(spacing: 14) {
-            ProductGlyph(type: product.type, size: 52)
+            ProductGlyph(type: product.type, size: 52, productID: product.id)
             VStack(alignment: .leading, spacing: 4) {
                 Text(product.name).font(.title2.weight(.bold)).lineLimit(1)
                 HStack(spacing: 6) {

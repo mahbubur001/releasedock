@@ -2,9 +2,11 @@ import AppKit
 import ReleaseDockCore
 import SwiftUI
 
-/// Native source-list sidebar: sections, badges, and the svn status and app identity footer.
+/// Native source-list sidebar: sections, badges, and the svn status and app identity
+/// footer with the Settings button.
 struct Sidebar: View {
     @Environment(AppModel.self) private var model
+    @Environment(\.openSettings) private var openSettings
 
     var body: some View {
         @Bindable var model = model
@@ -14,10 +16,6 @@ struct Sidebar: View {
                 row(.products)
                 row(.wizard)
                 row(.history)
-            }
-            Section("ReleaseDock") {
-                row(.updates)
-                row(.settings)
             }
         }
         .listStyle(.sidebar)
@@ -35,7 +33,6 @@ struct Sidebar: View {
         case .products: model.products.count
         case .wizard: model.releasesAwaitingApproval.count
         case .history: model.releases.filter { $0.state == .recoveryRequired }.count
-        case .updates: model.updateChecker.isUpdateAvailable ? 1 : 0
         default: 0
         }
     }
@@ -52,6 +49,19 @@ struct Sidebar: View {
                     Text("ReleaseDock").font(.callout.weight(.semibold))
                     Text("\(AppModel.appVersion) · WordPress.org releases").font(.caption).foregroundStyle(.secondary)
                 }
+                Spacer(minLength: 4)
+                Button {
+                    openSettings()
+                } label: {
+                    Image(systemName: "gearshape")
+                        .font(.system(size: 15))
+                        .frame(width: 28, height: 28)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.borderless)
+                .foregroundStyle(.secondary)
+                .help("Settings… (⌘,)")
+                .accessibilityLabel("Settings")
             }
         }
         .padding(.horizontal, 16)

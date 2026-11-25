@@ -51,6 +51,14 @@ struct ReleaseDockApp: App {
                 }
             }
         }
+
+        Settings {
+            if case .success(let model) = bootstrap {
+                SettingsView()
+                    .environment(model)
+                    .environment(updater)
+            }
+        }
     }
 }
 
@@ -71,6 +79,8 @@ struct StartupErrorView: View {
 
 struct RootView: View {
     @Environment(AppModel.self) private var model
+    @Environment(SparkleUpdateService.self) private var updater
+    @Environment(\.openSettings) private var openSettings
     @State private var columnVisibility = NavigationSplitViewVisibility.all
 
     var body: some View {
@@ -85,8 +95,6 @@ struct RootView: View {
             case .products: ProductsView()
             case .wizard: ReleaseWizardView()
             case .history: ReleaseHistoryView()
-            case .updates: GitHubUpdatesView()
-            case .settings: SettingsView()
             }
         }
         .toolbar {
@@ -99,8 +107,25 @@ struct RootView: View {
                 }
                 .help(columnVisibility == .detailOnly ? "Show Sidebar" : "Hide Sidebar")
             }
+            if updater.available != nil {
+                ToolbarItem(placement: .primaryAction) { UpdateToolbarButton() }
+            }
         }
-        .task { await model.start() }
+        .task {
+            updater.channel = model.settings.updateChannel
+            updater.onUpdateFound = { [weak model] update in model?.notifyAboutUpdate(update.version) }
+            await model.start()
+            updater.checkInBackground()
+            #if DEBUG
+            // UI verification: RELEASEDOCK_UI_TEST_SETTINGS=<tab> opens Settings; RELEASEDOCK_UI_TEST_UPDATE=1 the update window.
+            let environment = ProcessInfo.processInfo.environment
+            if environment["RELEASEDOCK_UI_TEST_SETTINGS"] != nil { openSettings() }
+            if environment["RELEASEDOCK_UI_TEST_UPDATE"] != nil {
+                try? await Task.sleep(for: .seconds(6))
+                updater.checkForUpdates()
+            }
+            #endif
+        }
         .onOpenURL { url in
             guard url.isFileURL else { return }
             model.pendingSource = url
@@ -133,5 +158,63 @@ struct SVNStatusFooter: View {
         }
         .font(.caption)
         .foregroundStyle(.secondary)
+    }
+}
+
+/// "Update found · 0.2.3" with an Update button, shown in the toolbar while a newer
+/// version is waiting; opens the Software Update window.
+struct UpdateToolbarButton: View {
+    @Environment(SparkleUpdateService.self) private var updater
+
+    var body: some View {
+        if let update = updater.available {
+            HStack(spacing: 8) {
+                Circle()
+                    .fill(.green)
+                    .frame(width: 7, height: 7)
+                    .background(Circle().fill(.green.opacity(0.25)).frame(width: 13, height: 13))
+                Text(status(update))
+                    .font(.callout)
+                    .foregroundStyle(.secondary)
+                    .monospacedDigit()
+                Button(isBusy ? "Show" : "Update") { updater.checkForUpdates() }
+                    .buttonStyle(.borderedProminent)
+                    .buttonBorderShape(.capsule)
+                    .controlSize(.small)
+            }
+            .padding(.leading, 10)
+            .fixedSize()
+            .help("ReleaseDock \(update.version) is available. You have \(AppModel.appVersion).")
+        }
+    }
+
+    private var isBusy: Bool {
+        switch updater.phase {
+        case .downloading, .extracting, .installing: true
+        default: false
+        }
+    }
+
+    private func status(_ update: AvailableUpdate) -> AttributedString {
+        var text: AttributedString
+        switch updater.phase {
+        case .downloading(let received, let expected) where expected > 0:
+            text = AttributedString("Downloading \(Int(Double(received) / Double(expected) * 100))%")
+        case .extracting, .installing:
+            text = AttributedString("Installing")
+        case .readyToInstall:
+            text = AttributedString("Ready to install · ")
+            var version = AttributedString(update.version)
+            version.font = .callout.weight(.semibold)
+            version.foregroundColor = .primary
+            text += version
+        default:
+            text = AttributedString("Update found · ")
+            var version = AttributedString(update.version)
+            version.font = .callout.weight(.semibold)
+            version.foregroundColor = .primary
+            text += version
+        }
+        return text
     }
 }

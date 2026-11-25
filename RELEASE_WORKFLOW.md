@@ -90,7 +90,9 @@ ZIP attached, then regenerates `updates/appcast.xml` (served from `raw.githubuse
 pushes it to `main`. Before tagging, it verifies the signature with the `SUPublicEDKey` built into the
 app and stops if it does not match, so an update signed with the wrong key is never published.
 Run it from an up-to-date `main`. The build number
-must increase every release. Installed copies show the update in **GitHub Updates** and install
+must increase every release. Release notes in the feed are the version's `CHANGELOG.md` section
+(`### Added/Changed/Fixed`, `- ` items), so write that entry before releasing; the app shows them
+grouped as New, Improved and Fixed. Installed copies show **Update found** in the toolbar and install
 it with Sparkle after verifying the signature. Because these builds are not notarized, the very
 first download needs **System Settings → Privacy & Security → Open Anyway**; in-app updates do not.
 

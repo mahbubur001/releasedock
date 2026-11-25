@@ -4,9 +4,7 @@ import ReleaseDockCore
 
 /// User preferences stored in the database settings table.
 struct AppSettings: Codable, Equatable {
-    var githubRepository: String = ""
     var updateChannel: ReleaseChannel = .stable
-    var checkGitHubOnLaunch: Bool = true
     var svnExecutablePath: String = ""
     var notificationsEnabled: Bool = true
     /// Local WordPress install with Plugin Check active; nil or empty turns Plugin Check off.
@@ -17,12 +15,10 @@ struct AppSettings: Codable, Equatable {
     static let defaultCommitTimeoutMinutes = 30
 
     static let key = "app.settings"
-    /// Former release repository (deleted); a saved value equal to it is replaced by the bundled default.
-    static let retiredGitHubRepository = "mahbubur001/releasedock-releases"
 }
 
 enum SidebarItem: String, CaseIterable, Identifiable, Hashable {
-    case dashboard, products, wizard, history, updates, settings
+    case dashboard, products, wizard, history
 
     var id: String { rawValue }
 
@@ -32,8 +28,6 @@ enum SidebarItem: String, CaseIterable, Identifiable, Hashable {
         case .products: "Products"
         case .wizard: "New Release"
         case .history: "History"
-        case .updates: "Updates"
-        case .settings: "Settings"
         }
     }
 
@@ -43,8 +37,6 @@ enum SidebarItem: String, CaseIterable, Identifiable, Hashable {
         case .products: "shippingbox"
         case .wizard: "paperplane"
         case .history: "clock.arrow.circlepath"
-        case .updates: "arrow.down.circle"
-        case .settings: "gearshape"
         }
     }
 }
@@ -61,10 +53,8 @@ final class AppModel {
     let productService: ProductService
     let repositorySetup: RepositorySetupService
     let pipeline: ReleasePipelineService
-    let github: GitHubServicing
     let notifications: NotificationServicing
     let diagnostics: DiagnosticsService
-    let updateChecker: AppUpdateChecker
     @ObservationIgnored private var directoryMonitor: Task<Void, Never>?
     @ObservationIgnored let codeCheckConfiguration = CodeCheckConfigurationStore()
 
@@ -112,7 +102,6 @@ final class AppModel {
         productService = ProductService(repository: store, paths: paths)
         repositorySetup = RepositorySetupService(svn: svn)
         notifications = UserNotificationService()
-        github = GitHubService()
         diagnostics = DiagnosticsService(products: store, releases: store, paths: paths)
         pipeline = ReleasePipelineService(dependencies: PipelineDependencies(
             products: store,
@@ -128,7 +117,6 @@ final class AppModel {
             githubReleaser: GitHubService(),
             generator: "ReleaseDock \(Self.appVersion) (\(Self.appBuild))"
         ))
-        updateChecker = AppUpdateChecker(github: github, store: store, keychain: keychain, notifications: notifications)
         #if DEBUG
         // UI verification: open a specific section, e.g. RELEASEDOCK_UI_TEST_SECTION=history.
         if let section = ProcessInfo.processInfo.environment["RELEASEDOCK_UI_TEST_SECTION"].flatMap(SidebarItem.init(rawValue:)) {
@@ -140,13 +128,6 @@ final class AppModel {
             selection = .wizard
         }
         #endif
-        // Releases used to be published from a separate repository; follow the move.
-        if settings.githubRepository.caseInsensitiveCompare(AppSettings.retiredGitHubRepository) == .orderedSame {
-            settings.githubRepository = ""
-        }
-        if settings.githubRepository.isEmpty, let bundled = Bundle.main.object(forInfoDictionaryKey: "RDGitHubRepository") as? String, !bundled.isEmpty {
-            settings.githubRepository = bundled
-        }
         wizard = ReleaseWizardModel(model: self)
     }
 
@@ -207,7 +188,20 @@ final class AppModel {
         await detectSVN()
         if settings.notificationsEnabled { _ = await notifications.requestAuthorization() }
         startDirectoryMonitor()
-        if settings.checkGitHubOnLaunch { await updateChecker.check(settings: settings, manual: false) }
+    }
+
+    /// Posts one notification per new ReleaseDock version found by a background check.
+    func notifyAboutUpdate(_ version: String) {
+        let key = "update.notifiedVersion"
+        guard settings.notificationsEnabled, (try? store.setting(String.self, forKey: key)) != version else { return }
+        try? store.setSetting(version, forKey: key)
+        Task {
+            await notifications.notify(
+                title: "ReleaseDock \(version) is available",
+                body: "You are running \(Self.appVersion). Click Update in the ReleaseDock toolbar to install it.",
+                identifier: "app-update-\(version)"
+            )
+        }
     }
 
     // MARK: WordPress.org directory

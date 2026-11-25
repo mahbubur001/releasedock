@@ -98,8 +98,8 @@ ReleaseDock is a native macOS app that does the whole release for you. It checks
 Download the latest `ReleaseDock-<version>.zip` from **[github.com/mahbubur001/releasedock/releases](https://github.com/mahbubur001/releasedock/releases)**, unzip it and move **ReleaseDock.app** to `/Applications`.
 
 - **First launch:** current builds are not yet notarized by Apple, so macOS may say it can't verify the developer. Open **System Settings → Privacy & Security** and click **Open Anyway** next to the ReleaseDock message. You only need to do this once.
-- **Updates:** new versions appear under **GitHub Updates** (and in **ReleaseDock → Check for Updates…**). **Install Update…** downloads the new version, verifies its EdDSA signature against the key built into the app, installs it and relaunches.
-- **Publishing a new version** (maintainers): `scripts/publish-github-release.sh <version> <build> --notes "…"` — see [RELEASE_WORKFLOW.md](RELEASE_WORKFLOW.md).
+- **Updates:** when a new version is out, **Update found** and an **Update** button appear at the top right of the toolbar (or use **ReleaseDock → Check for Updates…**). The update window shows what's new; **Install & Relaunch** downloads the new version, verifies its EdDSA signature against the key built into the app, installs it and relaunches.
+- **Publishing a new version** (maintainers): the **Release** GitHub Actions workflow (release notes come from the version's CHANGELOG.md section) — see [RELEASE_WORKFLOW.md](RELEASE_WORKFLOW.md).
 
 To build it yourself, see [Building from source](#building-from-source). To install your own build on this Mac, run `scripts/install-local.sh`.
 
@@ -168,7 +168,7 @@ See [ARCHITECTURE.md](ARCHITECTURE.md) for the services, the state machine and t
 └── Database/   SQLite database
 ```
 
-Credentials are never stored here; they are kept only in the macOS Keychain. **Settings → Export Diagnostics** writes a support bundle with secrets redacted.
+Credentials are never stored here; they are kept only in the macOS Keychain. **Settings → General → Diagnostics → Export…** writes a support bundle with secrets redacted.
 
 ## Troubleshooting
 

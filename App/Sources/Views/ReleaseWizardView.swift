@@ -492,7 +492,7 @@ private struct ProductPickerCard: View {
     var body: some View {
         HStack(spacing: 12) {
             if let selected {
-                ProductGlyph(type: selected.type)
+                ProductGlyph(type: selected.type, productID: selected.id)
                 VStack(alignment: .leading, spacing: 1) {
                     Text(selected.name).font(.headline).lineLimit(1)
                     Text("\(selected.type.displayName) · \(selected.slug) · \(selected.currentVersion.map { "live \($0)" } ?? "not released yet")")
@@ -625,7 +625,7 @@ private struct PublishConfirmation: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
-            ProductGlyph(type: record.productType, size: 52)
+            ProductGlyph(type: record.productType, size: 52, productID: record.productID)
             Text(record.kind == .readmeUpdate ? "Update the readme of \(record.productName) \(record.version ?? "") on WordPress.org?" : "Publish \(record.productName) \(record.version ?? "") to WordPress.org?")
                 .font(.headline)
             Text("This commits \(record.preview?.displayedChanges.count ?? 0) change(s) in a single revision. \(record.kind == .readmeUpdate ? "The released code is not touched." : "A released version can't be overwritten.")")
