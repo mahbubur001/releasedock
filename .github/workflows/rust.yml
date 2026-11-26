@@ -35,12 +35,12 @@ jobs:
       - name: Rust toolchain
         run: rustup toolchain install stable --profile minimal --component clippy,rustfmt && rustup default stable
 
-      - name: Subversion (integration tests skip without it)
+      - name: Subversion (integration tests skip without it) and D-Bus headers (Linux keychain)
         shell: bash
         run: |
           case "$RUNNER_OS" in
             macOS) brew install subversion ;;
-            Linux) sudo apt-get update -q && sudo apt-get install -y -q subversion ;;
+            Linux) sudo apt-get update -q && sudo apt-get install -y -q subversion libdbus-1-dev pkg-config ;;
             Windows) echo "No svn on Windows runners; SVN integration tests are skipped." ;;
           esac
 
