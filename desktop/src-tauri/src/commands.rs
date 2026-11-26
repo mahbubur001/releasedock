@@ -163,3 +163,33 @@ pub fn ui_test_release(state: State<'_, AppState>) -> Option<UiTestRelease> {
     let publish = local && std::env::var("RELEASEDOCK_UI_TEST_PUBLISH").as_deref() == Ok("1");
     Some(UiTestRelease { product_id, source_path, mode, publish })
 }
+
+/// Debug builds only: `RELEASEDOCK_UI_TEST_VIEW=<product id>|<tab>|<1 to open the transcript>`
+/// opens a product tab on launch. Used to check the UI.
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct UiTestView {
+    product_id: String,
+    tab: String,
+    transcript: bool,
+}
+
+#[tauri::command]
+pub fn ui_test_view() -> Option<UiTestView> {
+    if !cfg!(debug_assertions) {
+        return None;
+    }
+    let spec = std::env::var("RELEASEDOCK_UI_TEST_VIEW").ok()?;
+    let mut parts = spec.splitn(3, '|');
+    Some(UiTestView {
+        product_id: parts.next()?.to_owned(),
+        tab: parts.next().unwrap_or("overview").to_owned(),
+        transcript: parts.next() == Some("1"),
+    })
+}
+
+/// Errors from the web UI, written to the app's stderr so they show up in logs.
+#[tauri::command]
+pub fn log_ui_error(message: String) {
+    eprintln!("ReleaseDock UI error: {message}");
+}

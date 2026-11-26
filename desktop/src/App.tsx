@@ -6,6 +6,8 @@ import { RefreshIcon, TerminalIcon, UpdateIcon } from "./components/Icons";
 import { Overview } from "./screens/Overview";
 import { ProductTabs, ProductView, useProductTab } from "./screens/ProductView";
 import { History } from "./screens/History";
+import { ActivityTab, FilesTab, ReleasesTab } from "./screens/ProductTabs";
+import { TranscriptDrawer } from "./components/Transcript";
 import { NewRelease } from "./screens/NewRelease";
 import { ago } from "./screens/format";
 
@@ -26,6 +28,7 @@ export default function App() {
   const [tab, setTab] = useProductTab();
   const [, tick] = useState(0);
   const [autoRun, setAutoRun] = useState<UiTestRelease>();
+  const [transcriptOpen, setTranscriptOpen] = useState(false);
 
   const reload = useCallback(async () => {
     try {
@@ -43,6 +46,12 @@ export default function App() {
     api.appInfo().then(setInfo);
     api.svnStatus().then(setSvn);
     reload();
+    api.uiTestView().then((view) => {
+      if (!view) return;
+      setSelection({ kind: "product", id: view.productId });
+      setTab(view.tab as "overview" | "activity" | "releases" | "files");
+      setTranscriptOpen(view.transcript);
+    });
     api.uiTestRelease().then((test) => {
       if (!test) return;
       setAutoRun(test);
@@ -65,8 +74,8 @@ export default function App() {
           <span className="spacer" data-tauri-drag-region />
           <div className="tb-group">
             <button className="tb-btn" title="Refresh" onClick={reload}><RefreshIcon /></button>
-            {product && <button className="tb-btn" title="Update Working Copy"><UpdateIcon />Update</button>}
-            {product && <button className="tb-btn" title="Transcript"><TerminalIcon /></button>}
+            {product && <button className="tb-btn" title="Working copy" onClick={() => setTab("files")}><UpdateIcon />Files</button>}
+            {product && <button className={`tb-btn ${transcriptOpen ? "on" : ""}`} title="Transcript" onClick={() => setTranscriptOpen((o) => !o)}><TerminalIcon /></button>}
           </div>
           <button className="btn blue" onClick={() => setSelection({ kind: "newRelease", productId: product?.id })}>New Release…</button>
         </Toolbar>
@@ -77,8 +86,12 @@ export default function App() {
           {!error && selection.kind === "newRelease" && products.length > 0 && (
             <NewRelease key={selection.productId ?? "any"} products={products} initialProductId={selection.productId} onChanged={reload} autoRun={autoRun} />
           )}
-          {!error && product && <ProductView product={product} releases={releases.filter((r) => r.productId === product.id)} tab={tab} />}
+          {!error && product && tab === "overview" && <ProductView product={product} releases={releases.filter((r) => r.productId === product.id)} tab={tab} />}
+          {!error && product && tab === "activity" && <ActivityTab key={product.id} product={product} />}
+          {!error && product && tab === "releases" && <ReleasesTab key={product.id} product={product} />}
+          {!error && product && tab === "files" && <FilesTab key={product.id} product={product} onChanged={reload} />}
         </div>
+        <TranscriptDrawer productId={product?.id} open={transcriptOpen && !!product} onClose={() => setTranscriptOpen(false)} />
       </section>
     </div>
   );

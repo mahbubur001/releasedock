@@ -23,7 +23,7 @@ serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 thiserror = "2"
 base64 = "0.22"
-tokio = { version = "1", features = ["sync"] }
+tokio = { version = "1", features = ["sync", "macros"] }
 tauri-plugin-dialog = "2"
 rd-model = { path = "../../rust/crates/rd-model" }
 rd-records = { path = "../../rust/crates/rd-records" }
@@ -32,6 +32,7 @@ rd-svn = { path = "../../rust/crates/rd-svn" }
 rd-keychain = { path = "../../rust/crates/rd-keychain" }
 rd-integrations = { path = "../../rust/crates/rd-integrations" }
 rd-pipeline = { path = "../../rust/crates/rd-pipeline" }
+rd-versioning = { path = "../../rust/crates/rd-versioning" }
 
 [profile.release]
 codegen-units = 1

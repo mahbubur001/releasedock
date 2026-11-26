@@ -381,6 +381,15 @@ impl SvnService {
                             .collect()
                     })
                     .unwrap_or_default(),
+                changed_path_actions: entry
+                    .child("paths")
+                    .map(|p| {
+                        p.all("path")
+                            .into_iter()
+                            .map(|path| path.attribute("action").unwrap_or("M").to_owned())
+                            .collect()
+                    })
+                    .unwrap_or_default(),
             })
             .collect()
     }

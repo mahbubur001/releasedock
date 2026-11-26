@@ -1,0 +1,609 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ReleaseDock — Layout v2 Preview</title>
+<style>
+:root {
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --blue: #007aff; --green: #34c759; --orange: #ff9500; --red: #ff3b30; --purple: #af52de; --indigo: #5856d6; --gray: #8e8e93; --teal: #30b0c7;
+  --label: rgba(0,0,0,.86); --label-2: rgba(0,0,0,.54); --label-3: rgba(0,0,0,.30);
+  --separator: rgba(0,0,0,.09); --fill: rgba(0,0,0,.05); --fill-2: rgba(0,0,0,.08); --hover: rgba(0,0,0,.045);
+  --content: #ffffff; --sidebar: #ececf0; --group: #f5f5f7; --card: #ffffff;
+  --card-ring: 0 0 0 .5px rgba(0,0,0,.10), 0 1px 2px rgba(0,0,0,.05);
+  --toolbar: rgba(255,255,255,.86); --control: #ffffff;
+  --control-ring: 0 0 0 .5px rgba(0,0,0,.16), 0 .5px 1.5px rgba(0,0,0,.10);
+  --code: #f6f6f8; --sticky: rgba(255,255,255,.82);
+  --window-shadow: 0 0 0 .5px rgba(0,0,0,.22), 0 30px 80px rgba(0,0,0,.28), 0 8px 24px rgba(0,0,0,.12);
+  --wallpaper: radial-gradient(1200px 700px at 12% 8%, #8fb8ff 0%, transparent 60%), radial-gradient(900px 700px at 92% 18%, #f7a8d8 0%, transparent 55%), radial-gradient(1000px 800px at 60% 100%, #ffd39a 0%, transparent 60%), #dfe6f3;
+}
+[data-theme="dark"] {
+  --blue: #0a84ff; --green: #30d158; --orange: #ff9f0a; --red: #ff453a; --purple: #bf5af2; --indigo: #5e5ce6; --gray: #98989d; --teal: #40c8e0;
+  --label: rgba(255,255,255,.90); --label-2: rgba(255,255,255,.56); --label-3: rgba(255,255,255,.28);
+  --separator: rgba(255,255,255,.09); --fill: rgba(255,255,255,.06); --fill-2: rgba(255,255,255,.10); --hover: rgba(255,255,255,.06);
+  --content: #1e1e20; --sidebar: #29292d; --group: #262629; --card: #2a2a2d;
+  --card-ring: 0 0 0 .5px rgba(255,255,255,.08), 0 1px 2px rgba(0,0,0,.3);
+  --toolbar: rgba(30,30,32,.86); --control: rgba(255,255,255,.12);
+  --control-ring: 0 0 0 .5px rgba(255,255,255,.10), 0 .5px 1px rgba(0,0,0,.4);
+  --code: #161618; --sticky: rgba(30,30,32,.82);
+  --window-shadow: 0 0 0 .5px rgba(0,0,0,.8), inset 0 0 0 .5px rgba(255,255,255,.12), 0 30px 80px rgba(0,0,0,.55), 0 8px 24px rgba(0,0,0,.35);
+  --wallpaper: radial-gradient(1200px 700px at 12% 8%, #1d3a78 0%, transparent 60%), radial-gradient(900px 700px at 92% 18%, #5a1f52 0%, transparent 55%), radial-gradient(1000px 800px at 60% 100%, #6b3a12 0%, transparent 60%), #101218;
+}
+* { box-sizing: border-box; margin: 0; }
+[hidden] { display: none !important; }
+body { font: 13px/1.4 -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif; color: var(--label); background: var(--wallpaper); background-attachment: fixed; -webkit-font-smoothing: antialiased; min-height: 100vh; padding: 16px 20px 40px; display: flex; flex-direction: column; align-items: center; }
+button { font: inherit; color: inherit; cursor: default; }
+code, .mono { font-family: "SF Mono", ui-monospace, Menlo, monospace; font-size: 11.5px; }
+
+/* preview controls */
+.controls { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-bottom: 14px; padding: 6px; border-radius: 12px; background: rgba(0,0,0,.4); color: #fff; backdrop-filter: blur(20px); }
+.controls b { font-weight: 600; padding: 0 4px 0 8px; opacity: .65; font-size: 11px; text-transform: uppercase; letter-spacing: .4px; }
+.controls button { border: 0; background: transparent; color: #fff; padding: 5px 10px; border-radius: 8px; font-size: 12px; }
+.controls button.on { background: rgba(255,255,255,.2); }
+.controls .sep { width: 1px; height: 18px; background: rgba(255,255,255,.2); margin: 0 2px; }
+.notes { max-width: 1320px; width: 100%; margin-top: 18px; color: #fff; background: rgba(0,0,0,.45); backdrop-filter: blur(20px); border-radius: 14px; padding: 16px 20px; font-size: 13px; line-height: 1.55; }
+.notes h3 { font-size: 13px; margin-bottom: 6px; }
+.notes ul { padding-left: 18px; columns: 2; column-gap: 32px; }
+.notes li { break-inside: avoid; margin-bottom: 4px; }
+
+/* window */
+.window { width: 1320px; height: 820px; display: flex; border-radius: 12px; overflow: hidden; background: var(--content); box-shadow: var(--window-shadow); position: relative; }
+.sidebar { width: 264px; flex: none; background: var(--sidebar); display: flex; flex-direction: column; border-right: .5px solid var(--separator); }
+.traffic { display: flex; gap: 8px; padding: 18px 18px 12px; }
+.traffic i { width: 12px; height: 12px; border-radius: 50%; display: block; }
+.traffic i:nth-child(1) { background: #ff5f57; } .traffic i:nth-child(2) { background: #febc2e; } .traffic i:nth-child(3) { background: #28c840; }
+.side-scroll { flex: 1; overflow: auto; padding-bottom: 8px; }
+.side-head { display: flex; align-items: center; font-size: 11px; font-weight: 600; color: var(--label-3); padding: 12px 18px 4px; }
+.side-head span { margin-left: auto; font-weight: 500; }
+.nav { list-style: none; padding: 0 10px; }
+.nav li { display: flex; align-items: center; gap: 9px; padding: 5px 8px; border-radius: 7px; font-size: 13px; position: relative; }
+.nav li:hover { background: var(--hover); }
+.nav li > svg { width: 16px; height: 16px; color: var(--blue); flex: none; }
+.nav li.sel { background: var(--blue); color: #fff; } .nav li.sel > svg { color: #fff; }
+.nav li .count { margin-left: auto; font-size: 11px; color: var(--label-2); }
+.nav li.sel .count { color: rgba(255,255,255,.8); }
+.prod { padding: 4px 8px !important; }
+.prod img { width: 26px; height: 26px; border-radius: 6.5px; flex: none; box-shadow: 0 0 0 .5px var(--separator); }
+.prod .txt { min-width: 0; flex: 1; }
+.prod .n { font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.25; }
+.prod .s { font-size: 11px; color: var(--label-2); line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.nav li.sel .s { color: rgba(255,255,255,.75); }
+.pills { display: flex; gap: 3px; flex: none; }
+.pill { font-size: 10.5px; font-weight: 600; padding: 1px 6px; border-radius: 999px; font-variant-numeric: tabular-nums; }
+.pill.up { background: color-mix(in srgb, var(--orange) 22%, transparent); color: var(--orange); }
+.pill.down { background: color-mix(in srgb, var(--blue) 22%, transparent); color: var(--blue); }
+.pill.bad { background: color-mix(in srgb, var(--red) 22%, transparent); color: var(--red); }
+.nav li.sel .pill { background: rgba(255,255,255,.22); color: #fff; }
+.side-foot { border-top: .5px solid var(--separator); padding: 8px 10px 10px; }
+.svn { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--label-2); padding: 2px 6px 8px; }
+.svn i { width: 7px; height: 7px; border-radius: 50%; background: var(--green); }
+.foot-row { display: flex; align-items: center; gap: 4px; }
+.icon-btn { width: 28px; height: 28px; border: 0; border-radius: 7px; background: transparent; display: grid; place-items: center; color: var(--label-2); transition: background-color 150ms ease, color 150ms ease; }
+.icon-btn:hover { background: var(--fill-2); color: var(--label); }
+.icon-btn:active { transform: scale(.94); }
+.icon-btn svg { width: 16px; height: 16px; }
+.ident { display: flex; align-items: center; gap: 8px; margin-right: auto; padding-left: 4px; }
+.ident img { width: 22px; height: 22px; }
+.ident .t { font-size: 12px; font-weight: 600; line-height: 1.1; }
+.ident .v { font-size: 10.5px; color: var(--label-2); }
+
+.main { flex: 1; display: flex; flex-direction: column; min-width: 0; position: relative; }
+.toolbar { height: 54px; flex: none; display: flex; align-items: center; gap: 10px; padding: 0 14px 0 14px; border-bottom: .5px solid var(--separator); background: var(--toolbar); }
+.tb-title { min-width: 0; }
+.tb-title .t { font-size: 15px; font-weight: 600; line-height: 1.15; white-space: nowrap; }
+.tb-title .s { font-size: 11px; color: var(--label-2); display: flex; align-items: center; gap: 5px; white-space: nowrap; }
+.tb-title .s.stale { color: var(--orange); }
+.tb-title .s .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); }
+.tb-title .s.stale .dot { background: var(--orange); }
+.seg { display: flex; background: var(--fill); border-radius: 8px; padding: 2px; margin-left: 8px; box-shadow: inset 0 0 0 .5px var(--separator); }
+.seg button { border: 0; background: transparent; padding: 3px 12px; border-radius: 6px; font-size: 12.5px; color: var(--label-2); display: flex; align-items: center; gap: 5px; }
+.seg button.on { background: var(--control); color: var(--label); box-shadow: var(--control-ring); }
+.seg .badge { background: var(--blue); color: #fff; font-size: 10px; font-weight: 700; border-radius: 999px; padding: 0 5px; line-height: 15px; }
+.spacer { flex: 1; }
+.tb-group { display: flex; gap: 2px; background: var(--fill); border-radius: 999px; padding: 2px; box-shadow: inset 0 0 0 .5px var(--separator); }
+.tb-btn { height: 28px; min-width: 28px; padding: 0 9px; border: 0; border-radius: 999px; background: transparent; display: flex; align-items: center; justify-content: center; gap: 5px; color: var(--label-2); font-size: 12.5px; }
+.tb-btn:hover { background: var(--fill-2); color: var(--label); }
+.tb-btn.on { color: var(--blue); }
+.tb-btn svg { width: 15px; height: 15px; }
+.btn { border: 0; border-radius: 6px; padding: 4px 12px; background: var(--control); box-shadow: var(--control-ring); font-size: 13px; transition: transform 120ms ease; }
+.btn:active { transform: scale(.97); }
+.btn.blue { background: var(--blue); color: #fff; box-shadow: none; }
+.btn.sm { font-size: 12px; padding: 2px 9px; }
+.btn.danger { color: var(--red); }
+
+.content { flex: 1; overflow: auto; position: relative; }
+.pane { display: none; } .pane.on { display: block; animation: pane-in 180ms var(--ease-out); }
+@keyframes pane-in { from { opacity: 0; transform: translateY(3px); } }
+.pad { padding: 22px 28px 28px; }
+.card { background: var(--card); box-shadow: var(--card-ring); border-radius: 12px; padding: 14px 16px; }
+.grid2 { display: grid; grid-template-columns: 1.3fr 1fr; gap: 14px; }
+.h-sec { font-size: 13px; font-weight: 600; margin: 18px 2px 8px; display: flex; align-items: baseline; gap: 8px; }
+.h-sec .more { margin-left: auto; font-weight: 400; color: var(--blue); font-size: 12px; }
+.muted { color: var(--label-2); } .faint { color: var(--label-3); }
+.tag { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 600; padding: 1px 7px; border-radius: 999px; }
+.tag.green { background: color-mix(in srgb, var(--green) 16%, transparent); color: var(--green); }
+.tag.blue { background: color-mix(in srgb, var(--blue) 16%, transparent); color: var(--blue); }
+.tag.orange { background: color-mix(in srgb, var(--orange) 16%, transparent); color: var(--orange); }
+.tag.red { background: color-mix(in srgb, var(--red) 16%, transparent); color: var(--red); }
+.tag.gray { background: var(--fill-2); color: var(--label-2); }
+
+/* overview */
+.hero { display: flex; gap: 16px; align-items: center; }
+.hero img { width: 64px; height: 64px; border-radius: 15px; box-shadow: 0 0 0 .5px var(--separator), 0 2px 6px rgba(0,0,0,.15); }
+.hero h2 { font-size: 20px; font-weight: 700; letter-spacing: -.3px; }
+.hero .meta { display: flex; gap: 8px; align-items: center; margin-top: 4px; color: var(--label-2); font-size: 12px; }
+.big-ver { margin-left: auto; text-align: right; }
+.big-ver .v { font-size: 30px; font-weight: 700; letter-spacing: -.6px; line-height: 1; }
+.big-ver .l { font-size: 11px; color: var(--label-2); margin-top: 4px; }
+.next { display: flex; align-items: center; gap: 12px; margin-top: 14px; padding: 12px 14px; border-radius: 10px; background: color-mix(in srgb, var(--blue) 9%, transparent); box-shadow: inset 0 0 0 .5px color-mix(in srgb, var(--blue) 30%, transparent); }
+.next .ico { width: 30px; height: 30px; border-radius: 8px; background: var(--blue); color: #fff; display: grid; place-items: center; flex: none; }
+.next .ico svg { width: 16px; height: 16px; }
+.next .t { font-weight: 600; } .next .s { font-size: 12px; color: var(--label-2); }
+.next .btn { margin-left: auto; }
+.kv { display: grid; grid-template-columns: 120px 1fr; row-gap: 7px; font-size: 12.5px; }
+.kv dt { color: var(--label-2); } .kv dd { margin: 0; display: flex; align-items: center; gap: 6px; min-width: 0; }
+.mini-feed .row { display: flex; gap: 10px; padding: 8px 0; border-top: .5px solid var(--separator); }
+.mini-feed .row:first-child { border-top: 0; padding-top: 0; }
+.mini-feed .r { font-weight: 600; font-variant-numeric: tabular-nums; }
+
+/* activity */
+.feed-head { display: flex; align-items: center; gap: 10px; padding: 14px 28px 4px; }
+.search { display: flex; align-items: center; gap: 6px; white-space: nowrap; overflow: hidden; background: var(--fill); border-radius: 7px; padding: 4px 9px; width: 260px; color: var(--label-3); font-size: 12px; box-shadow: inset 0 0 0 .5px var(--separator); }
+.search svg { width: 12px; height: 12px; }
+.chip-filter { display: flex; gap: 6px; }
+.day { position: sticky; top: 0; z-index: 2; display: flex; align-items: baseline; gap: 8px; padding: 9px 28px 7px; background: var(--sticky); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-bottom: .5px solid var(--separator); font-weight: 600; font-size: 12.5px; }
+.day .sum { margin-left: auto; font-weight: 400; font-size: 11.5px; color: var(--label-2); }
+.day .chev { width: 10px; color: var(--label-3); transition: transform 150ms ease; }
+.commits { padding: 6px 28px 6px 44px; position: relative; }
+.commits::before { content: ""; position: absolute; left: 35px; top: 0; bottom: 0; width: 2px; background: color-mix(in srgb, var(--blue) 30%, transparent); border-radius: 1px; }
+.commit { position: relative; padding: 10px 0 12px 16px; }
+.commit::before { content: ""; position: absolute; left: -13px; top: 15px; width: 10px; height: 10px; border-radius: 50%; background: var(--content); box-shadow: 0 0 0 2px var(--blue); }
+.commit.release::before { background: var(--green); box-shadow: 0 0 0 2px var(--green), 0 0 0 5px color-mix(in srgb, var(--green) 25%, transparent); }
+.commit.unread .line1 .r::after { content: ""; display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--blue); margin-left: 6px; vertical-align: 1px; }
+.line1 { display: flex; align-items: center; gap: 7px; font-size: 12px; color: var(--label-2); }
+.line1 .r { color: var(--label); font-weight: 700; font-variant-numeric: tabular-nums; }
+.line1 .acts { margin-left: auto; display: flex; gap: 6px; opacity: 0; transition: opacity 120ms ease; }
+.commit:hover .line1 .acts { opacity: 1; }
+.msg { margin: 4px 0 7px; font-size: 13px; }
+.chips { display: flex; flex-wrap: wrap; gap: 5px; }
+.fchip { display: inline-flex; align-items: center; gap: 5px; padding: 2px 8px 2px 3px; border-radius: 6px; background: var(--fill); box-shadow: inset 0 0 0 .5px var(--separator); font-size: 11.5px; font-family: "SF Mono", ui-monospace, Menlo, monospace; }
+.fchip:hover { background: var(--fill-2); }
+.fchip i { width: 15px; height: 15px; border-radius: 4px; display: grid; place-items: center; font-style: normal; font-size: 9.5px; font-weight: 800; color: #fff; font-family: -apple-system, system-ui; }
+.fchip i.M { background: var(--blue); } .fchip i.A { background: var(--green); } .fchip i.D { background: var(--red); } .fchip i.R { background: var(--indigo); }
+.fchip.more { padding: 2px 8px; color: var(--label-2); font-family: inherit; }
+.feed-end { text-align: center; padding: 16px 0 28px; color: var(--label-3); font-size: 12px; }
+.feed-end .btn { margin-bottom: 8px; }
+
+/* tables */
+.table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+.table th { text-align: left; font-weight: 500; color: var(--label-2); font-size: 11.5px; padding: 6px 10px; border-bottom: .5px solid var(--separator); position: sticky; top: 0; background: var(--content); z-index: 1; }
+.table td { padding: 7px 10px; border-bottom: .5px solid var(--separator); white-space: nowrap; }
+.table tr:hover td { background: var(--hover); }
+.table tr.sel td { background: color-mix(in srgb, var(--blue) 14%, transparent); }
+.table .num { font-variant-numeric: tabular-nums; }
+.row-acts { opacity: 0; display: flex; gap: 6px; justify-content: flex-end; }
+.table tr:hover .row-acts, .table tr.sel .row-acts { opacity: 1; }
+.tbl-head { display: flex; align-items: center; gap: 10px; padding: 14px 28px 10px; }
+.tbl-wrap { padding: 0 18px; }
+.toggle2 { display: flex; background: var(--fill); border-radius: 999px; padding: 2px; box-shadow: inset 0 0 0 .5px var(--separator); }
+.toggle2 button { border: 0; background: transparent; padding: 2px 11px; border-radius: 999px; font-size: 12px; color: var(--label-2); }
+.toggle2 button.on { background: var(--control); color: var(--label); box-shadow: var(--control-ring); }
+.hidden-count { font-size: 11.5px; color: var(--label-2); }
+.st { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; }
+.st i { width: 14px; height: 14px; border-radius: 4px; display: grid; place-items: center; font-style: normal; font-size: 9px; font-weight: 800; color: #fff; }
+.st.M i { background: var(--blue); } .st.A i { background: var(--green); } .st.D i { background: var(--red); } .st.U i { background: var(--purple); } .st.In i { background: var(--teal); }
+.tree { display: inline-flex; align-items: center; gap: 6px; }
+.tree svg { width: 14px; height: 14px; color: var(--blue); flex: none; }
+.tree .tw { width: 10px; color: var(--label-3); }
+
+/* transcript */
+.drawer { flex: none; height: 0; overflow: hidden; border-top: .5px solid var(--separator); background: var(--code); transition: height 240ms var(--ease-out); display: flex; flex-direction: column; }
+.drawer.on { height: 230px; }
+.drawer-head { display: flex; align-items: center; gap: 10px; padding: 7px 14px; border-bottom: .5px solid var(--separator); font-size: 12px; }
+.drawer-head b { font-weight: 600; }
+.drawer-body { flex: 1; overflow: auto; padding: 8px 14px 12px; font-family: "SF Mono", ui-monospace, Menlo, monospace; font-size: 11.5px; line-height: 1.6; }
+.cmd { display: flex; gap: 10px; align-items: baseline; }
+.cmd .p { color: var(--label-3); }
+.cmd .c { color: var(--label); flex: 1; }
+.cmd .x { font-family: -apple-system, system-ui; font-size: 11px; }
+.out { color: var(--label-2); padding-left: 18px; white-space: pre; }
+.ok { color: var(--green); } .warn { color: var(--orange); } .err { color: var(--red); }
+
+/* review scene */
+.review { display: flex; height: 100%; }
+.steps { width: 190px; flex: none; border-right: .5px solid var(--separator); padding: 18px 12px; }
+.steps .st-i { display: flex; align-items: center; gap: 9px; padding: 7px 8px; border-radius: 7px; font-size: 13px; color: var(--label-2); }
+.steps .st-i .n { width: 20px; height: 20px; border-radius: 50%; display: grid; place-items: center; font-size: 11px; font-weight: 700; background: var(--fill-2); color: var(--label-2); }
+.steps .st-i.done .n { background: var(--green); color: #fff; }
+.steps .st-i.cur { background: var(--fill-2); color: var(--label); font-weight: 600; }
+.steps .st-i.cur .n { background: var(--blue); color: #fff; }
+.review-main { flex: 1; overflow: auto; padding: 20px 24px 28px; }
+.compare { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.compare figure { margin: 0; }
+.compare .imgbox { border-radius: 10px; overflow: hidden; background: repeating-conic-gradient(var(--fill-2) 0 25%, transparent 0 50%) 0 0/16px 16px; box-shadow: 0 0 0 .5px var(--separator); aspect-ratio: 772/250; }
+.compare img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.compare figcaption { display: flex; align-items: center; gap: 8px; margin-top: 7px; font-size: 12px; white-space: nowrap; }
+.compare figcaption .w { margin-left: auto; }
+.diffbox { margin-top: 10px; border-radius: 10px; overflow: hidden; box-shadow: 0 0 0 .5px var(--separator); font-family: "SF Mono", ui-monospace, Menlo, monospace; font-size: 11.5px; }
+.diffbox .fh { display: flex; align-items: center; gap: 8px; padding: 7px 12px; background: var(--group); border-bottom: .5px solid var(--separator); font-family: -apple-system, system-ui; font-size: 12px; }
+.diffbox .ln { display: grid; grid-template-columns: 40px 40px 1fr; padding: 0 0; line-height: 1.7; }
+.diffbox .ln span { padding: 0 8px; color: var(--label-3); text-align: right; }
+.diffbox .ln code { white-space: pre; padding-left: 10px; }
+.diffbox .ln.add { background: color-mix(in srgb, var(--green) 13%, transparent); }
+.diffbox .ln.del { background: color-mix(in srgb, var(--red) 13%, transparent); }
+.filelist { margin-top: 8px; }
+.filelist .f { display: flex; align-items: center; gap: 9px; padding: 6px 10px; border-radius: 7px; font-size: 12.5px; }
+.filelist .f.sel { background: color-mix(in srgb, var(--blue) 14%, transparent); }
+.filelist .f .p { font-family: "SF Mono", ui-monospace, Menlo, monospace; font-size: 11.5px; }
+.filelist .f .sz { margin-left: auto; color: var(--label-2); font-size: 11.5px; }
+
+/* states */
+.states { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; padding: 22px 28px; }
+.state { text-align: center; padding: 34px 20px 26px; }
+.state .ic { width: 56px; height: 56px; margin: 0 auto 12px; border-radius: 16px; display: grid; place-items: center; }
+.state .ic svg { width: 28px; height: 28px; }
+.state h4 { font-size: 15px; font-weight: 700; }
+.state p { color: var(--label-2); font-size: 12.5px; margin: 5px auto 14px; max-width: 280px; }
+.callout { outline: 2px dashed var(--orange); outline-offset: 3px; border-radius: 8px; }
+</style>
+</head>
+<body>
+
+<div class="controls">
+  <b>Scene</b>
+  <button data-scene="product" class="on">Product</button>
+  <button data-scene="review">Release review</button>
+  <button data-scene="states">Empty &amp; error states</button>
+  <span class="sep"></span>
+  <button id="staleBtn">Stale data</button>
+  <button id="transcriptBtn">Transcript</button>
+  <button id="calloutBtn">Show what's new</button>
+  <span class="sep"></span>
+  <button data-theme-btn="dark" class="on">Dark</button>
+  <button data-theme-btn="light">Light</button>
+</div>
+
+<div class="window">
+  <!-- ───────────── Sidebar ───────────── -->
+  <aside class="sidebar">
+    <div class="traffic"><i></i><i></i><i></i></div>
+    <div class="side-scroll">
+      <ul class="nav">
+        <li data-go="overview-all"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="2" y="2" width="5" height="5" rx="1"/><rect x="9" y="2" width="5" height="5" rx="1"/><rect x="2" y="9" width="5" height="5" rx="1"/><rect x="9" y="9" width="5" height="5" rx="1"/></svg>Overview</li>
+        <li><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M14 2 7 9M14 2l-4.5 12L7 9 2 6.5z"/></svg>New Release</li>
+        <li><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="8" cy="8" r="6"/><path d="M8 4.5V8l2.5 1.5"/></svg>History</li>
+      </ul>
+      <div class="side-head">Products <span>7</span></div>
+      <ul class="nav callout-target" id="prodList">
+        <li class="prod sel"><img src="img/radius-booking.png" alt=""><div class="txt"><div class="n">Radius Booking</div><div class="s">1.0.24 · live</div></div></li>
+        <li class="prod"><img src="img/classified-listing.gif" alt=""><div class="txt"><div class="n">Classified Listing</div><div class="s">6.3.1 · 2 local changes</div></div><div class="pills"><span class="pill up">↑2</span></div></li>
+        <li class="prod"><img src="img/classified-listing-toolkits.png" alt=""><div class="txt"><div class="n">Classified Listing Toolkits</div><div class="s">1.4.1 · live</div></div></li>
+        <li class="prod"><img src="img/shopbuilder.png" alt=""><div class="txt"><div class="n">ShopBuilder</div><div class="s">3.4.4 · 1 new commit</div></div><div class="pills"><span class="pill down">↓1</span></div></li>
+        <li class="prod"><img src="img/the-post-grid.gif" alt=""><div class="txt"><div class="n">The Post Grid</div><div class="s">SVN login failed</div></div><div class="pills"><span class="pill bad">!</span></div></li>
+        <li class="prod"><img src="img/tlp-team.gif" alt=""><div class="txt"><div class="n">Team</div><div class="s">5.0.8 · live</div></div></li>
+        <li class="prod"><img src="img/tlp-portfolio.gif" alt=""><div class="txt"><div class="n">Radius Portfolio</div><div class="s">4.0.1 · 3 local · 1 new</div></div><div class="pills"><span class="pill up">↑3</span><span class="pill down">↓1</span></div></li>
+      </ul>
+    </div>
+    <div class="side-foot">
+      <div class="svn"><i></i>svn 1.14.5 · WordPress.org reachable</div>
+      <div class="foot-row">
+        <div class="ident"><img src="../App/Resources/Assets.xcassets/AppIcon.appiconset/icon_128x128.png" alt=""><div><div class="t">ReleaseDock</div><div class="v">0.3.0</div></div></div>
+        <button class="icon-btn" title="Add Product… ⇧⌘N"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M8 3v10M3 8h10"/></svg></button>
+        <button class="icon-btn" title="Settings… ⌘,"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="10" cy="10" r="2.6"/><circle cx="10" cy="10" r="5.4"/><path d="M10 1.8v2.1M10 16.1v2.1M18.2 10h-2.1M3.9 10H1.8M15.8 4.2l-1.5 1.5M5.7 14.3l-1.5 1.5M15.8 15.8l-1.5-1.5M5.7 5.7 4.2 4.2"/></svg></button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ───────────── Main ───────────── -->
+  <section class="main">
+    <!-- Product scene toolbar -->
+    <div class="toolbar" id="tbProduct">
+      <div class="tb-title">
+        <div class="t">Radius Booking</div>
+        <div class="s" id="fresh"><span class="dot"></span><span id="freshTxt">Refreshed 3 minutes ago · r3822482</span></div>
+      </div>
+      <div class="seg callout-target" id="tabs">
+        <button data-tab="overview" class="on">Overview</button>
+        <button data-tab="activity">Activity <span class="badge">2</span></button>
+        <button data-tab="releases">Releases</button>
+        <button data-tab="files">Files</button>
+      </div>
+      <span class="spacer"></span>
+      <div class="tb-group">
+        <button class="tb-btn" title="Refresh ⌘R"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M13.5 8a5.5 5.5 0 1 1-1.6-3.9M13.5 2.5v3h-3"/></svg></button>
+        <button class="tb-btn" title="Update Working Copy ⌥⌘U"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 2.5v9M4.5 8 8 11.5 11.5 8M3 13.5h10"/></svg>Update</button>
+        <button class="tb-btn callout-target" id="tbTranscript" title="Transcript ⌥⌘0"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2.5" width="12" height="11" rx="2"/><path d="m5 6 2 2-2 2M8.5 10.5H11"/></svg></button>
+      </div>
+      <button class="btn blue">New Release…</button>
+    </div>
+    <!-- Review scene toolbar -->
+    <div class="toolbar" id="tbReview" hidden>
+      <div class="tb-title"><div class="t">New Release · Radius Booking 1.0.25</div><div class="s"><span class="dot"></span>Checks passed 1 minute ago · working copy at r3822482</div></div>
+      <span class="spacer"></span>
+      <button class="btn">Back</button>
+      <button class="btn blue">Continue to Publish…</button>
+    </div>
+    <!-- States scene toolbar -->
+    <div class="toolbar" id="tbStates" hidden>
+      <div class="tb-title"><div class="t">Empty &amp; error states</div><div class="s">One icon, one sentence, one action</div></div>
+    </div>
+
+    <div class="content" id="content">
+      <!-- ── Overview ── -->
+      <div class="pane on" data-pane="overview">
+        <div class="pad">
+          <div class="card">
+            <div class="hero">
+              <img src="img/radius-booking.png" alt="">
+              <div>
+                <h2>Radius Booking – AI-Powered Appointment &amp; Service Booking</h2>
+                <div class="meta"><span>Plugin · radius-booking</span><span class="tag green">● Live on WordPress.org</span><span class="tag gray">Stable tag 1.0.24</span></div>
+              </div>
+              <div class="big-ver"><div class="v">1.0.24</div><div class="l">Released yesterday · r3822482</div></div>
+            </div>
+            <div class="next callout-target">
+              <div class="ico"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M14 2 7 9M14 2l-4.5 12L7 9 2 6.5z"/></svg></div>
+              <div><div class="t">Next: release 1.0.25</div><div class="s">Development folder is at 1.0.25 · 14 files changed since 1.0.24</div></div>
+              <button class="btn blue">Start Release…</button>
+            </div>
+          </div>
+          <div class="grid2" style="margin-top:14px">
+            <div>
+              <div class="h-sec">Recent activity <span class="more" data-goto="activity">Show All</span></div>
+              <div class="card mini-feed">
+                <div class="row"><span class="r">r3822482</span><div><div>Release 1.0.24 <span class="tag green">tags/1.0.24</span></div><div class="muted" style="font-size:11.5px">techlabpro1 · yesterday 15:59 · via ReleaseDock</div></div></div>
+                <div class="row"><span class="r">r3816115</span><div><div>Release New version 1.0.23 <span class="tag green">tags/1.0.23</span></div><div class="muted" style="font-size:11.5px">techlabpro1 · 22 Nov 11:05</div></div></div>
+                <div class="row"><span class="r">r3781629</span><div><div>Release New version 1.0.22</div><div class="muted" style="font-size:11.5px">techlabpro1 · 3 Nov 16:54</div></div></div>
+              </div>
+            </div>
+            <div>
+              <div class="h-sec">Working copy</div>
+              <div class="card">
+                <dl class="kv">
+                  <dt>State</dt><dd><span class="tag green">Clean</span> at r3822482</dd>
+                  <dt>Server</dt><dd>Up to date <span class="faint">· checked 3 min ago</span></dd>
+                  <dt>Folder</dt><dd class="mono">~/svn/radius-booking</dd>
+                  <dt>Checkout</dt><dd>trunk · assets · tags (names only)</dd>
+                  <dt>Account</dt><dd>techlabpro1 <span class="faint">· password in Keychain</span></dd>
+                </dl>
+              </div>
+              <div class="h-sec">Directory</div>
+              <div class="card">
+                <dl class="kv">
+                  <dt>Offered version</dt><dd>1.0.24 <span class="tag green">matches</span></dd>
+                  <dt>Tested up to</dt><dd>7.1 <span class="faint">· WordPress 7.1.5 is current</span></dd>
+                  <dt>Assets</dt><dd><span class="tag orange">1 warning</span> banner size</dd>
+                </dl>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Activity ── -->
+      <div class="pane" data-pane="activity">
+        <div class="feed-head">
+          <div class="search"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="5" cy="5" r="3.5"/><path d="m8 8 2.5 2.5"/></svg>Search messages, authors, paths, r-numbers</div>
+          <div class="toggle2"><button class="on">All</button><button>Releases</button><button>Assets</button><button>Readme</button></div>
+          <span class="spacer"></span>
+          <span class="muted" style="font-size:12px">2 unread</span>
+          <button class="btn sm">Mark All Read</button>
+        </div>
+        <div class="day"><svg class="chev" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m2 3.5 3 3 3-3"/></svg>Tuesday, 25 Nov 2026<span class="sum">1 commit · 1 release</span></div>
+        <div class="commits">
+          <div class="commit release unread">
+            <div class="line1"><span class="r">r3822482</span> by techlabpro1 · 15:59 <span class="tag green">tags/1.0.24</span><span class="tag blue">ReleaseDock</span><span class="acts"><button class="btn sm">Compare All</button><button class="btn sm">Copy Revision</button></span></div>
+            <div class="msg">Release Radius Booking - AI-Powered Appointment &amp; Service Booking 1.0.24</div>
+            <div class="chips"><span class="fchip"><i class="M">M</i>trunk/radius-booking.php</span><span class="fchip"><i class="M">M</i>trunk/readme.txt</span><span class="fchip"><i class="M">M</i>trunk/app/Controllers/BookingController.php</span><span class="fchip"><i class="A">A</i>tags/1.0.24/</span><span class="fchip more">+ 11 files</span></div>
+          </div>
+        </div>
+        <div class="day"><svg class="chev" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m2 3.5 3 3 3-3"/></svg>Sunday, 22 Nov 2026<span class="sum">1 commit · 1 release</span></div>
+        <div class="commits">
+          <div class="commit release unread">
+            <div class="line1"><span class="r">r3816115</span> by techlabpro1 · 11:05 <span class="tag green">tags/1.0.23</span><span class="acts"><button class="btn sm">Compare All</button><button class="btn sm">Copy Revision</button></span></div>
+            <div class="msg">Release New version 1.0.23</div>
+            <div class="chips"><span class="fchip"><i class="M">M</i>trunk/radius-booking.php</span><span class="fchip"><i class="M">M</i>trunk/readme.txt</span><span class="fchip"><i class="A">A</i>tags/1.0.23/</span><span class="fchip more">+ 8 files</span></div>
+          </div>
+        </div>
+        <div class="day"><svg class="chev" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m2 3.5 3 3 3-3"/></svg>November 2026, earlier<span class="sum">2 commits · 2 releases</span></div>
+        <div class="commits">
+          <div class="commit release">
+            <div class="line1"><span class="r">r3781629</span> by techlabpro1 · 3 Nov 16:54 <span class="tag green">tags/1.0.22</span></div>
+            <div class="msg">Release New version 1.0.22</div>
+            <div class="chips"><span class="fchip"><i class="M">M</i>trunk/readme.txt</span><span class="fchip"><i class="A">A</i>tags/1.0.22/</span><span class="fchip more">+ 6 files</span></div>
+          </div>
+          <div class="commit release">
+            <div class="line1"><span class="r">r3777824</span> by techlabpro1 · 1 Nov 16:11 <span class="tag green">tags/1.0.21</span></div>
+            <div class="msg">Release New version 1.0.21</div>
+          </div>
+        </div>
+        <div class="day"><svg class="chev" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m2 3.5 3 3 3-3"/></svg>September 2026<span class="sum">4 commits · assets, readme</span></div>
+        <div class="commits">
+          <div class="commit">
+            <div class="line1"><span class="r">r3715346</span> by techlabpro1 · 27 Sep 16:41</div>
+            <div class="msg">Update assets</div>
+            <div class="chips"><span class="fchip"><i class="M">M</i>assets/banner-772x250.png</span><span class="fchip"><i class="M">M</i>assets/banner-1544x500.png</span><span class="fchip"><i class="M">M</i>assets/screenshot-2.png</span></div>
+          </div>
+          <div class="commit">
+            <div class="line1"><span class="r">r3700016</span> by techlabpro1 · 17 Sep 16:00</div>
+            <div class="msg">Update banner</div>
+            <div class="chips"><span class="fchip"><i class="M">M</i>assets/banner-772x250.png</span></div>
+          </div>
+          <div class="commit">
+            <div class="line1"><span class="r">r3675366</span> by techlabpro1 · 1 Sep 11:57</div>
+            <div class="msg">Update Readme file</div>
+            <div class="chips"><span class="fchip"><i class="M">M</i>trunk/readme.txt</span><span class="fchip"><i class="M">M</i>tags/1.0.19/readme.txt</span></div>
+          </div>
+        </div>
+        <div class="feed-end"><button class="btn sm">Load More</button><div>Showing commits to /radius-booking only · cached locally</div></div>
+      </div>
+
+      <!-- ── Releases ── -->
+      <div class="pane" data-pane="releases">
+        <div class="tbl-head">
+          <div class="search"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="5" cy="5" r="3.5"/><path d="m8 8 2.5 2.5"/></svg>Filter versions</div>
+          <span class="muted" style="font-size:12px">24 releases · newest first</span>
+          <span class="spacer"></span>
+          <button class="btn sm">Restore Older Version…</button>
+        </div>
+        <div class="tbl-wrap">
+          <table class="table">
+            <thead><tr><th>Version</th><th>Released</th><th>Revision</th><th>By</th><th>Tested up to</th><th>Size</th><th></th></tr></thead>
+            <tbody>
+              <tr class="sel"><td><b>1.0.24</b> <span class="tag green">Stable · Live</span></td><td>25 Nov 2026, 15:59</td><td class="num">r3822482</td><td>techlabpro1 <span class="tag blue">ReleaseDock</span></td><td>7.1</td><td class="num">1.9 MB</td><td><div class="row-acts"><button class="btn sm">Compare with 1.0.23</button><button class="btn sm">Compare with trunk</button><button class="btn sm">Open on Trac ↗</button></div></td></tr>
+              <tr><td><b>1.0.23</b></td><td>22 Nov 2026, 11:05</td><td class="num">r3816115</td><td>techlabpro1</td><td>7.1</td><td class="num">1.9 MB</td><td><div class="row-acts"><button class="btn sm">Compare with 1.0.22</button><button class="btn sm">Restore…</button></div></td></tr>
+              <tr><td><b>1.0.22</b></td><td>3 Nov 2026, 16:54</td><td class="num">r3781629</td><td>techlabpro1</td><td>7.0</td><td class="num">1.8 MB</td><td><div class="row-acts"><button class="btn sm">Compare</button><button class="btn sm">Restore…</button></div></td></tr>
+              <tr><td><b>1.0.21</b></td><td>1 Nov 2026, 16:11</td><td class="num">r3777824</td><td>techlabpro1</td><td>7.0</td><td class="num">1.8 MB</td><td><div class="row-acts"><button class="btn sm">Compare</button><button class="btn sm">Restore…</button></div></td></tr>
+              <tr><td><b>1.0.20</b></td><td>13 Oct 2026, 15:35</td><td class="num">r3743396</td><td>techlabpro1</td><td>7.0</td><td class="num">1.8 MB</td><td><div class="row-acts"><button class="btn sm">Compare</button><button class="btn sm">Restore…</button></div></td></tr>
+              <tr><td><b>1.0.9</b></td><td>23 Apr 2026</td><td class="num">r3513473</td><td>techlabpro1</td><td>6.9</td><td class="num">1.4 MB</td><td><div class="row-acts"><button class="btn sm">Compare</button><button class="btn sm">Restore…</button></div></td></tr>
+              <tr><td><b>1.0.8</b></td><td>16 Apr 2026</td><td class="num">r3508066</td><td>techlabpro1</td><td>6.9</td><td class="num">1.4 MB</td><td><div class="row-acts"><button class="btn sm">Compare</button><button class="btn sm">Restore…</button></div></td></tr>
+              <tr><td><b>1.0.7</b></td><td>16 Apr 2026</td><td class="num">r3507956</td><td>techlabpro1</td><td>6.9</td><td class="num">1.4 MB</td><td><div class="row-acts"><button class="btn sm">Compare</button><button class="btn sm">Restore…</button></div></td></tr>
+            </tbody>
+          </table>
+          <p class="faint" style="font-size:11.5px; margin:10px 10px 24px">Versions are read from <code>tags/</code> and sorted with PHP's version_compare. The Stable tag comes from trunk/readme.txt.</p>
+        </div>
+      </div>
+
+      <!-- ── Files ── -->
+      <div class="pane" data-pane="files">
+        <div class="tbl-head">
+          <div class="toggle2"><button>All</button><button class="on">Changed</button></div>
+          <div class="search"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="5" cy="5" r="3.5"/><path d="m8 8 2.5 2.5"/></svg>Filter by name</div>
+          <span class="hidden-count">1,284 unchanged files hidden</span>
+          <span class="spacer"></span>
+          <button class="btn sm">Reveal in Finder</button><button class="btn sm">Open in Terminal</button>
+        </div>
+        <div class="tbl-wrap">
+          <table class="table">
+            <thead><tr><th style="width:40%">Name</th><th>Local</th><th>Server</th><th>Revision</th><th>Last changed</th><th>By</th></tr></thead>
+            <tbody>
+              <tr><td><span class="tree"><svg class="tw" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m2 3.5 3 3 3-3"/></svg><svg viewBox="0 0 16 16" fill="currentColor"><path d="M1.5 4.5A1.5 1.5 0 0 1 3 3h3l1.5 1.5H13A1.5 1.5 0 0 1 14.5 6v6A1.5 1.5 0 0 1 13 13.5H3A1.5 1.5 0 0 1 1.5 12z" opacity=".85"/></svg><b>trunk</b></span></td><td><span class="muted">2 changes</span></td><td></td><td class="num">3822482</td><td>25 Nov</td><td>techlabpro1</td></tr>
+              <tr><td style="padding-left:52px">radius-booking.php</td><td><span class="st M"><i>M</i>Modified</span></td><td></td><td class="num">3822482</td><td>25 Nov</td><td>techlabpro1</td></tr>
+              <tr><td style="padding-left:52px">app/Services/SlotService.php</td><td><span class="st M"><i>M</i>Modified</span></td><td></td><td class="num">3816115</td><td>22 Nov</td><td>techlabpro1</td></tr>
+              <tr><td style="padding-left:52px">app/Services/ReminderService.php</td><td><span class="st U"><i>?</i>Unversioned</span></td><td></td><td class="faint">—</td><td class="faint">—</td><td class="faint">—</td></tr>
+              <tr><td><span class="tree"><svg class="tw" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m2 3.5 3 3 3-3"/></svg><svg viewBox="0 0 16 16" fill="currentColor"><path d="M1.5 4.5A1.5 1.5 0 0 1 3 3h3l1.5 1.5H13A1.5 1.5 0 0 1 14.5 6v6A1.5 1.5 0 0 1 13 13.5H3A1.5 1.5 0 0 1 1.5 12z" opacity=".85"/></svg><b>assets</b></span></td><td></td><td><span class="muted">1 incoming</span></td><td class="num">3715346</td><td>27 Sep</td><td>techlabpro1</td></tr>
+              <tr><td style="padding-left:52px">screenshot-5.png</td><td></td><td><span class="st In"><i>↓</i>Added on server</span></td><td class="num">3822519</td><td>today</td><td>techlabpro1</td></tr>
+              <tr><td><span class="tree"><svg class="tw" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5" style="transform:rotate(-90deg)"><path d="m2 3.5 3 3 3-3"/></svg><svg viewBox="0 0 16 16" fill="currentColor"><path d="M1.5 4.5A1.5 1.5 0 0 1 3 3h3l1.5 1.5H13A1.5 1.5 0 0 1 14.5 6v6A1.5 1.5 0 0 1 13 13.5H3A1.5 1.5 0 0 1 1.5 12z" opacity=".85"/></svg><b>tags</b> <span class="faint">24 versions · names only</span></span></td><td></td><td></td><td class="num">3822482</td><td>25 Nov</td><td>techlabpro1</td></tr>
+            </tbody>
+          </table>
+          <p class="faint" style="font-size:11.5px; margin:10px 10px 24px">Status covers trunk, assets and the tag names only, so large plugins stay fast.</p>
+        </div>
+      </div>
+
+      <!-- ── Release review scene ── -->
+      <div class="pane" data-pane="review" style="height:100%">
+        <div class="review">
+          <div class="steps">
+            <div class="st-i done"><span class="n">✓</span>Package</div>
+            <div class="st-i done"><span class="n">✓</span>Checks</div>
+            <div class="st-i cur"><span class="n">3</span>Review</div>
+            <div class="st-i"><span class="n">4</span>Publish</div>
+            <div style="margin-top:22px; font-size:11.5px" class="muted">Steps that don't apply (build, assets) are hidden.</div>
+          </div>
+          <div class="review-main">
+            <div class="h-sec" style="margin-top:0">Assets <span class="tag orange">1 warning</span><span class="more">3 changed</span></div>
+            <div class="card">
+              <div class="filelist" style="margin-top:0">
+                <div class="f sel"><span class="st M"><i>M</i></span><span class="p">assets/banner-772x250.png</span><span class="sz">2.4 MB → 496 KB</span></div>
+                <div class="f"><span class="st M"><i>M</i></span><span class="p">assets/banner-1544x500.png</span><span class="sz">612 KB → 498 KB</span></div>
+                <div class="f"><span class="st A"><i>A</i></span><span class="p">assets/screenshot-5.png</span><span class="sz">204 KB</span></div>
+              </div>
+              <div class="compare callout-target" style="margin-top:12px">
+                <figure><div class="imgbox"><img src="img/banner-old.png" alt="Current banner on WordPress.org"></div><figcaption><b>Live</b><span class="muted">r3700016 · 3088×1000 · 2.4 MB</span><span class="w tag orange">not 772×250</span></figcaption></figure>
+                <figure><div class="imgbox"><img src="img/banner-new.png" alt="New banner"></div><figcaption><b>New</b><span class="muted">1544×500 · 496 KB</span><span class="w tag orange">not 772×250</span></figcaption></figure>
+              </div>
+              <p class="muted" style="font-size:12px; margin-top:10px">WordPress.org shows <code>banner-772x250</code> at 772×250. Use a 772×250 image here, and the 1544×500 one as <code>banner-1544x500.png</code>.</p>
+            </div>
+            <div class="h-sec">Code <span class="more">14 files · +212 −38</span></div>
+            <div class="diffbox">
+              <div class="fh"><span class="st M"><i>M</i></span><b class="mono">trunk/radius-booking.php</b><span class="muted" style="margin-left:auto">+2 −2</span></div>
+              <div class="ln"><span>3</span><span>3</span><code> * Plugin Name: Radius Booking - AI-Powered Appointment &amp; Service Booking</code></div>
+              <div class="ln del"><span>6</span><span></span><code>- * Version: 1.0.24</code></div>
+              <div class="ln add"><span></span><span>6</span><code>+ * Version: 1.0.25</code></div>
+              <div class="ln"><span>7</span><span>7</span><code> * Requires PHP: 7.4</code></div>
+              <div class="ln del"><span>24</span><span></span><code>-define( 'RADIUS_BOOKING_VERSION', '1.0.24' );</code></div>
+              <div class="ln add"><span></span><span>24</span><code>+define( 'RADIUS_BOOKING_VERSION', '1.0.25' );</code></div>
+            </div>
+            <div class="h-sec">Commit message</div>
+            <div class="card" style="display:flex; align-items:center; gap:10px">
+              <span class="mono" style="flex:1">Release Radius Booking 1.0.25</span>
+              <button class="btn sm">History ▾</button><button class="btn sm">Templates ▾</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── States scene ── -->
+      <div class="pane" data-pane="states">
+        <div class="states">
+          <div class="card state"><div class="ic" style="background:color-mix(in srgb,var(--orange) 16%,transparent);color:var(--orange)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 7.5A2 2 0 0 1 5 5.5h4l2 2h8a2 2 0 0 1 2 2V17a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="m10 11 4 4M14 11l-4 4"/></svg></div><h4>Working copy folder is missing</h4><p>~/svn/radius-booking was moved or deleted. Locate it, or check it out again.</p><button class="btn blue">Locate…</button> <button class="btn">Check Out Again</button></div>
+          <div class="card state"><div class="ic" style="background:color-mix(in srgb,var(--red) 16%,transparent);color:var(--red)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="8.5"/><path d="M4 12h16M12 3.5c2.5 2.5 3.5 5.5 3.5 8.5S14.5 18 12 20.5M12 3.5C9.5 6 8.5 9 8.5 12s1 6 3.5 8.5"/><path d="m4 4 16 16"/></svg></div><h4>Can't reach plugins.svn.wordpress.org</h4><p>Your Mac is offline or the server isn't answering. Nothing was changed.</p><button class="btn blue">Try Again</button></div>
+          <div class="card state"><div class="ic" style="background:color-mix(in srgb,var(--red) 16%,transparent);color:var(--red)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8.5" cy="12" r="4"/><path d="M12.5 12H21M18 12v3M21 12v2.5"/></svg></div><h4>SVN password rejected</h4><p>WordPress.org didn't accept the password for techlabpro1. SVN passwords are set in your WordPress.org profile.</p><button class="btn blue">Enter Password…</button> <button class="btn">Open Profile ↗</button></div>
+          <div class="card state"><div class="ic" style="background:var(--fill-2);color:var(--label-2)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M7 4h10l3 5-8 11L4 9z"/></svg></div><h4>No releases yet</h4><p>Release this plugin once and its versions show up here.</p><button class="btn blue">New Release…</button></div>
+          <div class="card state"><div class="ic" style="background:var(--fill-2);color:var(--label-2)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg></div><h4>No activity in 90 days</h4><p>Commits to trunk, tags and assets will appear here, newest first.</p><button class="btn">Load Older</button></div>
+          <div class="card state"><div class="ic" style="background:color-mix(in srgb,var(--orange) 16%,transparent);color:var(--orange)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3.5 21 19.5H3z"/><path d="M12 10v4M12 16.8v.2"/></svg></div><h4>Subversion isn't installed</h4><p>ReleaseDock uses the svn command. Install it with Homebrew, then check again.</p><button class="btn blue">Copy “brew install subversion”</button></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Transcript drawer -->
+    <div class="drawer" id="drawer">
+      <div class="drawer-head"><b>Transcript</b><span class="muted">Update working copy · today 14:02 · 3 commands · 2.4 s</span><span class="spacer"></span><button class="btn sm">Copy</button><button class="btn sm" id="closeDrawer">Close</button></div>
+      <div class="drawer-body">
+        <div class="cmd"><span class="p">$</span><span class="c">svn info --xml ~/svn/radius-booking</span><span class="x ok">exit 0 · 0.3 s</span></div>
+        <div class="cmd"><span class="p">$</span><span class="c">svn update --non-interactive --set-depth infinity ~/svn/radius-booking/trunk</span><span class="x ok">exit 0 · 1.6 s</span></div>
+        <div class="out">Updating 'trunk':
+At revision 3822519.</div>
+        <div class="cmd"><span class="p">$</span><span class="c">svn update --non-interactive --set-depth infinity ~/svn/radius-booking/assets</span><span class="x ok">exit 0 · 0.5 s</span></div>
+        <div class="out">A    assets/screenshot-5.png
+Updated to revision 3822519.</div>
+        <div class="cmd"><span class="p">$</span><span class="c">svn commit --username techlabpro1 --password-from-stdin ‹password hidden› -m "Release…"</span><span class="x faint">not run · dry run</span></div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<div class="notes">
+  <h3>What's new in this layout</h3>
+  <ul>
+    <li><b>Products in the sidebar</b> with their WordPress.org icon, version and a short state line. Pills show ↑ local changes, ↓ new commits on the server, or ! for a problem (e.g. SVN login failed).</li>
+    <li><b>Freshness under the title:</b> "Refreshed 3 minutes ago · r3822482". It turns orange with <i>Refresh required</i> when stale (try "Stale data").</li>
+    <li><b>Four tabs per product:</b> Overview (next action, working copy, directory status), Activity, Releases, Files.</li>
+    <li><b>Activity</b>: commits to this plugin only, grouped by day with sticky headers, a timeline rail, file chips, release tag chips and unread dots. The data is Radius Booking's real SVN log.</li>
+    <li><b>Releases</b>: every tag, with the Stable tag marked and Compare / Restore on each row.</li>
+    <li><b>Files</b>: trunk, assets and tag names with local and server status. Only changed files are shown by default, with a hidden count.</li>
+    <li><b>Transcript</b> (toolbar button, ⌥⌘0): the exact svn commands with exit codes and timings; passwords are never shown.</li>
+    <li><b>Release review</b>: a step list, side-by-side image compare for assets, an inline code diff and message History/Templates. The banner warning is real: Radius Booking's banner-772x250.png is 1544×500.</li>
+    <li><b>Empty and error states</b>: one icon, one sentence, one action.</li>
+    <li>Overview, New Release and History stay at the top of the sidebar; the Products page becomes the product list itself.</li>
+  </ul>
+</div>
+
+<script>
+const $ = s => document.querySelector(s), $$ = s => document.querySelectorAll(s);
+function showPane(name) { $$('.pane').forEach(p => p.classList.toggle('on', p.dataset.pane === name)); $('#content').scrollTop = 0; }
+$$('#tabs button').forEach(b => b.onclick = () => { $$('#tabs button').forEach(x => x.classList.toggle('on', x === b)); showPane(b.dataset.tab); });
+$$('[data-goto]').forEach(el => el.onclick = () => $(`#tabs [data-tab="${el.dataset.goto}"]`).click());
+$$('[data-scene]').forEach(b => b.onclick = () => {
+  $$('[data-scene]').forEach(x => x.classList.toggle('on', x === b));
+  const s = b.dataset.scene;
+  $('#tbProduct').hidden = s !== 'product'; $('#tbReview').hidden = s !== 'review'; $('#tbStates').hidden = s !== 'states';
+  if (s === 'product') showPane($('#tabs button.on').dataset.tab); else showPane(s);
+  if (s !== 'product') { $('#drawer').classList.remove('on'); }
+});
+$('#staleBtn').onclick = function () {
+  this.classList.toggle('on');
+  const stale = this.classList.contains('on');
+  $('#fresh').classList.toggle('stale', stale);
+  $('#freshTxt').textContent = stale ? 'Refresh required · last refreshed 2 days ago' : 'Refreshed 3 minutes ago · r3822482';
+};
+function toggleDrawer() { const on = $('#drawer').classList.toggle('on'); $('#transcriptBtn').classList.toggle('on', on); $('#tbTranscript').classList.toggle('on', on); }
+$('#transcriptBtn').onclick = toggleDrawer; $('#tbTranscript').onclick = toggleDrawer; $('#closeDrawer').onclick = toggleDrawer;
+$('#calloutBtn').onclick = function () { this.classList.toggle('on'); $$('.callout-target').forEach(el => el.classList.toggle('callout', this.classList.contains('on'))); };
+$$('#prodList li').forEach(li => li.onclick = () => { $$('.nav li').forEach(x => x.classList.remove('sel')); li.classList.add('sel'); });
+$$('[data-theme-btn]').forEach(b => b.onclick = () => { document.documentElement.dataset.theme = b.dataset.themeBtn; $$('[data-theme-btn]').forEach(x => x.classList.toggle('on', x === b)); });
+document.addEventListener('keydown', e => { if (e.altKey && e.metaKey && e.key === '0') toggleDrawer(); });
+</script>
+</body>
+</html>

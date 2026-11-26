@@ -167,6 +167,8 @@ pub struct SvnLogEntry {
     pub date: Option<String>,
     pub message: String,
     pub changed_paths: Vec<String>,
+    /// The action for each changed path, in the same order: `A`, `M`, `D` or `R`.
+    pub changed_path_actions: Vec<String>,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]

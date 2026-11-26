@@ -103,9 +103,9 @@ Low effort, immediately useful, and specified once so they port easily:
 - ✅ Credentials through `keyring`; `svn` discovery per platform (Homebrew/MacPorts, SlikSVN/TortoiseSVN CLI/`svn.exe` on PATH, distro packages).
 - ✅ CI: `cargo test` on macOS, Windows and Linux runners (`.github/workflows/rust.yml`).
 
-### Phase 4: Tauri app with Layout v2 ⬜
-- ⬜ Shell: sidebar, toolbar, Settings window, update window (Tauri updater with a static `latest.json` on GitHub).
-- ⬜ Screens in order: Overview → Products → New Release → History → Activity → Releases → Files → Transcript → asset compare.
+### Phase 4: Tauri app with Layout v2 🟡
+- 🟡 Shell: sidebar, toolbar ✅ (`desktop/`); Settings window, update window (Tauri updater with a static `latest.json` on GitHub) ⬜.
+- 🟡 Screens in order: Overview ✅ → Products (page ✅, add/edit ⬜) → New Release ✅ (verified end to end on a local repository) → History ✅ → Activity, Releases, Files, Transcript (written, verification pending; see docs/HANDOFF.md §5) → asset compare ⬜.
 - ⬜ Activity and Releases backed by a **per-plugin-path log cache** (never the whole shared repository).
 - ⬜ Accessibility: keyboard navigation, text status labels besides colour, and the macOS cursor convention.
 

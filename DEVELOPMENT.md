@@ -1,5 +1,7 @@
 # Development
 
+> **Continuing the work?** Start with [docs/HANDOFF.md](docs/HANDOFF.md): current state, setup for macOS, Windows and Linux, and the exact next steps. The cross-platform rewrite lives in `rust/` (core) and `desktop/` (Tauri app).
+
 ## Prerequisites
 
 - macOS 14+, Xcode 16 or newer (developed with Xcode 27.2 / Swift 6.4)

@@ -54,6 +54,7 @@ export const api = {
   releases: (productId?: string) => invoke<ReleaseRow[]>("releases", { productId }),
   svnStatus: () => invoke<SvnStatus>("svn_status"),
   uiTestRelease: () => invoke<UiTestRelease | null>("ui_test_release"),
+  uiTestView: () => invoke<{ productId: string; tab: string; transcript: boolean } | null>("ui_test_view"),
 };
 
 /** Seconds since 2001-01-01 (Swift `Date`) to a JavaScript Date. */
@@ -147,3 +148,60 @@ export interface UiTestRelease {
   mode: ReleaseMode;
   publish: boolean;
 }
+
+// MARK: Product tabs
+
+export interface ActivityEntry {
+  revision: number;
+  author?: string;
+  date?: number;
+  message: string;
+  paths: { action: string; path: string }[];
+  tag?: string;
+  byReleaseDock: boolean;
+}
+
+export interface TagRow {
+  version: string;
+  revision?: number;
+  date?: number;
+  author?: string;
+  byReleaseDock: boolean;
+}
+
+export interface WorkingCopyChange {
+  path: string;
+  status: string;
+  isConflict: boolean;
+  isTreeConflict: boolean;
+}
+
+export interface WorkingCopyState {
+  exists: boolean;
+  revision?: number;
+  changes: WorkingCopyChange[];
+}
+
+export interface TranscriptEntry {
+  id: string;
+  date: string;
+  productID: string;
+  releaseID?: string;
+  operation: string;
+  command: string;
+  exitCode?: number;
+  duration: number;
+  output: string;
+  failure?: string;
+}
+
+export const productTabs = {
+  activity: (productId: string, limit = 50) => invoke<ActivityEntry[]>("activity", { productId, limit }),
+  releasedVersions: (productId: string) => invoke<{ tags: TagRow[]; stableTag?: string }>("released_versions", { productId }),
+  workingCopy: (productId: string) => invoke<WorkingCopyState>("working_copy", { productId }),
+  update: (productId: string) => invoke<WorkingCopyState>("update_working_copy", { productId }),
+  revert: (productId: string) => invoke<string | null>("revert_working_copy", { productId }),
+  resolve: (productId: string, paths: string[], keeping: "server" | "mine") =>
+    invoke<WorkingCopyState>("resolve_conflicts", { productId, paths, keeping }),
+  transcript: (productId: string, releaseId?: string) => invoke<TranscriptEntry[]>("transcript", { productId, releaseId }),
+};

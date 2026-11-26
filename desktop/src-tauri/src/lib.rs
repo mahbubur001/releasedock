@@ -3,6 +3,7 @@
 //! turns results into JSON for the UI.
 
 mod commands;
+mod product_tabs;
 mod release;
 mod state;
 
@@ -30,6 +31,8 @@ pub fn run() {
             commands::releases,
             commands::svn_status,
             commands::ui_test_release,
+            commands::ui_test_view,
+            commands::log_ui_error,
             release::release,
             release::source_kind,
             release::prepare_release,
@@ -37,6 +40,13 @@ pub fn run() {
             release::cancel_release,
             release::recover_release,
             release::store_credentials,
+            product_tabs::activity,
+            product_tabs::released_versions,
+            product_tabs::working_copy,
+            product_tabs::update_working_copy,
+            product_tabs::revert_working_copy,
+            product_tabs::resolve_conflicts,
+            product_tabs::transcript,
         ])
         .run(tauri::generate_context!())
         .expect("error while running ReleaseDock");

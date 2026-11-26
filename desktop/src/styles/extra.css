@@ -61,3 +61,5 @@ details.card summary { cursor: default; font-weight: 600; }
 .scrim { position: fixed; inset: 0; background: rgba(0,0,0,.35); display: grid; place-items: center; z-index: 10; }
 .sheet { width: 420px; display: flex; flex-direction: column; gap: 10px; }
 .sheet h3 { font-size: 15px; }
+.wc-head { display: flex; align-items: center; gap: 10px; }
+.fchip i.A { background: var(--green); } .fchip i.D { background: var(--red); } .fchip i.R { background: var(--indigo); }

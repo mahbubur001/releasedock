@@ -62,7 +62,8 @@ pub struct RepositorySnapshot {
 }
 
 /// One local change in a product's working copy.
-#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct WorkingCopyChange {
     /// Relative to the working-copy root.
     pub path: String,
@@ -87,7 +88,8 @@ impl WorkingCopyChange {
 }
 
 /// A product's working copy as the Products page shows it.
-#[derive(Clone, Debug, PartialEq, Eq, Hash, Default)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash, Serialize, Default)]
+#[serde(rename_all = "camelCase")]
 pub struct WorkingCopyState {
     pub exists: bool,
     pub revision: Option<i64>,

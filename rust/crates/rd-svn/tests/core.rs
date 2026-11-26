@@ -266,6 +266,7 @@ fn log_and_list_xml_parsing() {
         entries[0].changed_paths,
         vec!["/sample/trunk/readme.txt", "/sample/tags/1.2.0"]
     );
+    assert_eq!(entries[0].changed_path_actions, vec!["M", "A"]);
     assert_eq!((entries[1].author.clone(), entries[1].message.as_str()), (None, ""));
 
     let list = r#"<?xml version="1.0" encoding="UTF-8"?>

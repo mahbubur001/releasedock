@@ -3458,6 +3458,7 @@ dependencies = [
  "rd-records",
  "rd-store",
  "rd-svn",
+ "rd-versioning",
  "serde",
  "serde_json",
  "tauri",
