@@ -8,7 +8,9 @@ use common::{Harness, LocalSvnRepository, StubGit, TempDir, fixtures, product};
 use rd_integrations::BuildService;
 use rd_model::ProductType;
 use rd_pipeline::ReleasePipelineService;
-use rd_records::{ApprovalKind, ReleaseKind, ReleaseSource, ReleaseState};
+#[cfg(unix)]
+use rd_records::ApprovalKind;
+use rd_records::{ReleaseKind, ReleaseSource, ReleaseState};
 use rd_store::{AppPaths, ProductRepository, ReleaseRepository, Store};
 use rd_svn::SvnService;
 use std::sync::Arc;
