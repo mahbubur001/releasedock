@@ -1137,6 +1137,32 @@ dependencies = [
 ]
 
 [[package]]
+name = "rd-pipeline"
+version = "0.1.0"
+dependencies = [
+ "async-trait",
+ "flate2",
+ "log",
+ "rd-inspection",
+ "rd-integrations",
+ "rd-keychain",
+ "rd-model",
+ "rd-records",
+ "rd-store",
+ "rd-support",
+ "rd-svn",
+ "rd-validation",
+ "rd-versioning",
+ "regex",
+ "serde",
+ "serde_json",
+ "tempfile",
+ "thiserror",
+ "tokio",
+ "which",
+]
+
+[[package]]
 name = "rd-records"
 version = "0.1.0"
 dependencies = [

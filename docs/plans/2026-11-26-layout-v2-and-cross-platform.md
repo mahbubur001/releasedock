@@ -91,17 +91,17 @@ Low effort, immediately useful, and specified once so they port easily:
 - ✅ Designed error states with a fix for working copy and Subversion problems (P1 #8).
 - ✅ Release 0.3.0.
 
-### Phase 3: Rust core (Tauri) ⬜
-- ⬜ Workspace: `releasedock-core` crate (no UI), `src-tauri` app, `ui/` (React + TypeScript + Vite).
-- ⬜ Port the tests first, then the modules:
+### Phase 3: Rust core (Tauri) ✅
+- ✅ Workspace `rust/` with 11 crates (`rd-support`, `rd-model`, `rd-versioning`, `rd-inspection`, `rd-svn`, `rd-keychain`, `rd-records`, `rd-store`, `rd-validation`, `rd-integrations`, `rd-pipeline`); Tauri app in `desktop/`.
+- ✅ Port the tests first, then the modules (373 Rust tests):
   - `PHPVersionCompare`, WordPress headers, readme parser;
   - ZIP and folder inspection;
   - validation rules;
   - the SVN service (process runner, XML parsing, stdin credentials);
   - staging, the pipeline and its state machine, manifests, recovery;
   - SQLite store and migrations.
-- ⬜ Credentials through `keyring`; `svn` discovery per platform (Homebrew/MacPorts, SlikSVN/TortoiseSVN CLI/`svn.exe` on PATH, distro packages).
-- ⬜ CI: `cargo test` on macOS, Windows and Linux runners.
+- ✅ Credentials through `keyring`; `svn` discovery per platform (Homebrew/MacPorts, SlikSVN/TortoiseSVN CLI/`svn.exe` on PATH, distro packages).
+- ✅ CI: `cargo test` on macOS, Windows and Linux runners (`.github/workflows/rust.yml`).
 
 ### Phase 4: Tauri app with Layout v2 ⬜
 - ⬜ Shell: sidebar, toolbar, Settings window, update window (Tauri updater with a static `latest.json` on GitHub).

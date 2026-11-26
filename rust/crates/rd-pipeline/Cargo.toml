@@ -1,0 +1,39 @@
+[package]
+name = "rd-pipeline"
+description = "The release pipeline: staging, SVN-side release strategies, and the orchestrating ReleasePipelineService"
+version = "0.1.0"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+rd-support = { path = "../rd-support" }
+rd-model = { path = "../rd-model" }
+rd-versioning = { path = "../rd-versioning" }
+rd-inspection = { path = "../rd-inspection" }
+rd-svn = { path = "../rd-svn" }
+rd-keychain = { path = "../rd-keychain" }
+rd-records = { path = "../rd-records" }
+rd-store = { path = "../rd-store" }
+rd-validation = { path = "../rd-validation" }
+rd-integrations = { path = "../rd-integrations" }
+thiserror.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+tokio = { version = "1", features = ["sync", "macros", "rt"] }
+async-trait = "0.1"
+log = "0.4"
+# Raw DEFLATE for the GitHub release ZIP (Swift runs /usr/bin/ditto, which is macOS-only).
+flate2 = "1"
+
+[dev-dependencies]
+tempfile.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+tokio = { version = "1", features = ["sync", "macros", "rt", "rt-multi-thread"] }
+which = "8"
+regex.workspace = true
+
+[lints]
+workspace = true

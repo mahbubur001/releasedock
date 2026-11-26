@@ -68,7 +68,7 @@ Adapted tests:
 - `CodeCheckReport.findings(_ tool:)` is `findings_for(tool)`; `StagedCandidate.rootURL` is `root_dir()`;
   `GitRepositoryState.notARepository` is `not_a_repository()`.
 
-## Not ported (ported later with the pipeline or their service)
+## Not ported (ported in rd-pipeline or their service)
 
 - `DirectoryStatusTests`: `testParsesDirectoryListing` (`WordPressOrgService.parseListing`, WordPress.org
   service crate); `testPendingThenLiveNotifiesOnce`, `testRefreshAwaitingSkipsUntrackedAndFinishedReleases`,
