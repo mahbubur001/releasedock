@@ -7,6 +7,7 @@ pub mod inspection;
 pub mod iso8601;
 pub mod product;
 pub mod svn_status;
+pub mod swift_json;
 pub mod time;
 pub mod validation;
 

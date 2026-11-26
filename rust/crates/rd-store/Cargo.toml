@@ -1,0 +1,29 @@
+[package]
+name = "rd-store"
+description = "SQLite persistence (schema shared with the Swift app), data folder layout, product service and diagnostics"
+version = "0.1.0"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+rd-support = { path = "../rd-support" }
+rd-model = { path = "../rd-model" }
+rd-versioning = { path = "../rd-versioning" }
+rd-records = { path = "../rd-records" }
+thiserror.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+# SQLite compiled in, so Windows and Linux need no system library. 0.40 is the newest release
+# without a rust-version above the workspace's 1.85.
+rusqlite = { version = "0.40", features = ["bundled"] }
+# Platform data folder (%APPDATA%, ~/.local/share, ~/Library/Application Support) and home folder.
+dirs = "6"
+log = "0.4"
+
+[dev-dependencies]
+tempfile.workspace = true
+
+[lints]
+workspace = true

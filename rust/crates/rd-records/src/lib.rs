@@ -17,7 +17,6 @@ pub mod release;
 pub mod repository_snapshot;
 pub mod staging;
 pub mod state_machine;
-mod swift_json;
 pub mod wordpress_org;
 
 pub use automation_gate::AutomationGate;

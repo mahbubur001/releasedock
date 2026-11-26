@@ -2,7 +2,6 @@
 
 use crate::release::{ReleaseKind, ReleaseRecord, ReleaseState};
 use crate::staging::StagedCandidate;
-use crate::swift_json;
 use rd_model::iso8601;
 use rd_model::{Id, ProductType, ReleaseMode, SourceKind, SwiftDate, ValidationResult};
 use serde::{Deserialize, Serialize};
@@ -125,6 +124,6 @@ impl ReleaseManifest {
     /// `JSONEncoder` output; dates are ISO 8601.
     pub fn encoded(&self) -> Result<Vec<u8>, ManifestError> {
         let value = serde_json::to_value(self)?;
-        Ok(swift_json::to_pretty_sorted(&value).into_bytes())
+        Ok(rd_model::swift_json::to_pretty_unescaped_slashes(&value).into_bytes())
     }
 }
