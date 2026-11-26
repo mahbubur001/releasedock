@@ -4,11 +4,14 @@
 //! uppercase UUID strings ([`Id`]), and absent optionals omitted.
 
 pub mod inspection;
+pub mod iso8601;
 pub mod product;
+pub mod svn_status;
 pub mod time;
 pub mod validation;
 
 pub use inspection::*;
 pub use product::*;
+pub use svn_status::SvnItemStatus;
 pub use time::{Id, SwiftDate};
 pub use validation::*;

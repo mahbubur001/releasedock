@@ -2,7 +2,6 @@
 //! `svn --xml` output, the SVN models and service, and the command transcript.
 //! Ported from `ReleaseDockCore/SVN`, `Support/ProcessRunner.swift` and `Support/XMLTree.swift`.
 
-mod iso8601;
 pub mod models;
 pub mod process_runner;
 pub mod service;

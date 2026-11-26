@@ -1,0 +1,950 @@
+{
+ "candidate": {
+  "entries": [
+   {
+    "kind": "file",
+    "path": "README.txt",
+    "sha256": "a9f22dce584796cb9b242b19de98277b3e136d3ca12fa6eb4dfe0aed1cfe633b",
+    "size": 8652
+   },
+   {
+    "kind": "directory",
+    "path": "assets",
+    "size": 0
+   },
+   {
+    "kind": "directory",
+    "path": "assets/images",
+    "size": 0
+   },
+   {
+    "kind": "file",
+    "path": "assets/images/cl-logo.svg",
+    "sha256": "a91b7585c57fef96d4eee698a43bf26fb13c51b5d0de2a86528b51567d4ba2b4",
+    "size": 4593
+   },
+   {
+    "kind": "directory",
+    "path": "assets/images/el-layout",
+    "size": 0
+   },
+   {
+    "kind": "file",
+    "path": "assets/images/el-layout/grid-style-02.png",
+    "sha256": "cf6acbce9b30903cf7b071479c9435e1cf396e389bb4ed24b74f0cabe9e7c4ea",
+    "size": 967
+   },
+   {
+    "kind": "file",
+    "path": "assets/images/el-layout/grid-style-03.png",
+    "sha256": "2fc5436ff2dc2a5ada6ffc82af71c3464a16f01198e7c2ef02294f723892138e",
+    "size": 950
+   },
+   {
+    "kind": "file",
+    "path": "assets/images/el-layout/grid-style-04.png",
+    "sha256": "d578a194df1ad78e3e9e0fcbfd09f28b873b3a92f8970fc8651a433d402a7b0d",
+    "size": 948
+   },
+   {
+    "kind": "file",
+    "path": "assets/images/el-layout/grid-style-05.png",
+    "sha256": "5f944f8d99569235f3cb1c2b26db93afd24ee7aae404700cbf252aad742c2105",
+    "size": 1067
+   },
+   {
+    "kind": "file",
+    "path": "assets/images/el-layout/list-style-02.png",
+    "sha256": "04376d392ec908030874b8c65eeaa5ef3922d82048f81691790bc9f52de961a6",
+    "size": 1062
+   },
+   {
+    "kind": "file",
+    "path": "assets/images/el-layout/list-style-03.png",
+    "sha256": "b9a29f2c24f8a9734c423e2983acfea4938751a0f47252d4a6ad43c8c5d46cba",
+    "size": 1174
+   },
+   {
+    "kind": "file",
+    "path": "assets/images/el-layout/list-style-04.png",
+    "sha256": "444619795bd34046609a685f265d735a860abb48fedfd6d0276ed87ae1506693",
+    "size": 1136
+   },
+   {
+    "kind": "file",
+    "path": "assets/images/el-layout/list-style-05.png",
+    "sha256": "8a002bcf629bee9403b7a9d05bea7fdc777dfa5c214febc50304fc6fd99a356d",
+    "size": 991
+   },
+   {
+    "kind": "directory",
+    "path": "assets/js",
+    "size": 0
+   },
+   {
+    "kind": "file",
+    "path": "assets/js/rtcl-equal-height.js",
+    "sha256": "541b2b8cef2e627d1674374a00f7a3405ae355530bbdf1e49cd5a11d9827041c",
+    "size": 612
+   },
+   {
+    "kind": "directory",
+    "path": "build",
+    "size": 0
+   },
+   {
+    "kind": "file",
+    "path": "build/divi-element.asset.php",
+    "sha256": "ef8b320bee6a76b5118881b187454a8b2be22abe533cb9b3065d5750f36337e3",
+    "size": 91
+   },
+   {
+    "kind": "file",
+    "path": "build/divi-element.js",
+    "sha256": "379db7bb3fcddf71bb9dd83a6e6328d8f763073a5e7c67828a0fff57de491403",
+    "size": 89914
+   },
+   {
+    "kind": "file",
+    "path": "build/divi-frontend-element.asset.php",
+    "sha256": "ecf4aca945b34444f7304efd7a540a458f656893e110200fdf8fec842660d6e5",
+    "size": 84
+   },
+   {
+    "kind": "file",
+    "path": "build/divi-frontend-element.css",
+    "sha256": "b3ccebc9d4bbaeb7aec05da7af8ec638857c4e729702b48eda0de2dad2825ea2",
+    "size": 56283
+   },
+   {
+    "kind": "file",
+    "path": "build/divi-frontend-element.js",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "size": 0
+   },
+   {
+    "kind": "file",
+    "path": "build/elementor-widget.asset.php",
+    "sha256": "176f8199b5e8e58813771c888432e501dda2d938c619772affcf71d6bd283742",
+    "size": 84
+   },
+   {
+    "kind": "file",
+    "path": "build/elementor-widget.css",
+    "sha256": "d00f977b11e02773482973cd5193d61f4d21e63cd87f078355a668eb23dd8abc",
+    "size": 49372
+   },
+   {
+    "kind": "file",
+    "path": "build/elementor-widget.js",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "size": 0
+   },
+   {
+    "kind": "file",
+    "path": "build/index.asset.php",
+    "sha256": "93acead8aa1ae718c7ba943b0aaf25f1c6b77278116a494de4f9665a9531e663",
+    "size": 129
+   },
+   {
+    "kind": "file",
+    "path": "build/index.css",
+    "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+    "size": 1
+   },
+   {
+    "kind": "file",
+    "path": "build/index.js",
+    "sha256": "79feff528a3492823531c4ee00016ac7bcccde33b320f02da2e8b83f012a438b",
+    "size": 23125
+   },
+   {
+    "kind": "file",
+    "path": "classified-listing-toolkits.php",
+    "sha256": "c953df8b077a4028d79f676c5f407e4aab4b81c351aa564c022a906610081d9a",
+    "size": 10815
+   },
+   {
+    "kind": "directory",
+    "path": "includes",
+    "size": 0
+   },
+   {
+    "kind": "directory",
+    "path": "includes/Abstracts",
+    "size": 0
+   },
+   {
+    "kind": "file",
+    "path": "includes/Abstracts/DBMigrator.php",
+    "sha256": "2aaf3c45333174c020784f2dacdbeadbbb7390af717fbdb56e4188ee7e23c6ac",
+    "size": 324
+   },
+   {
+    "kind": "file",
+    "path": "includes/Abstracts/ElListingsWidgetBase.php",
+    "sha256": "898113aa2feb2524937f5a0befa25e7e3f565aa3765a34e7e3af1247831d402e",
+    "size": 1549
+   },
+   {
+    "kind": "file",
+    "path": "includes/Abstracts/ElementorWidgetBase.php",
+    "sha256": "5b6f98d0f6798df0f1dcc7014719994c3022ac3a362208db90c4aa977f5e29a4",
+    "size": 11985
+   },
+   {
+    "kind": "file",
+    "path": "includes/Abstracts/ElementorWidgetBaseV2.php",
+    "sha256": "680c461a6daf978c86260c841f7f456a91e87c90590a24ba6557563bff89b797",
+    "size": 7937
+   },
+   {
+    "kind": "file",
+    "path": "includes/Abstracts/RESTController.php",
+    "sha256": "8631890b7290ddf7234ea0668b9aa3204a01c2e2d5ad29b397c06b799ccbeaa2",
+    "size": 704
+   },
+   {
+    "kind": "directory",
+    "path": "includes/Admin",
+    "size": 0
+   },
+   {
+    "kind": "file",
+    "path": "includes/Admin/DiviController.php",
+    "sha256": "1c654f62e97b655b8bb940ca5342fee89c3c1501ae353ff1dfce4b9e52e52480",
+    "size": 4521
+   },
+   {
+    "kind": "directory",
+    "path": "includes/Admin/DiviModule",
+    "size": 0
+   },
+   {
+    "kind": "directory",
+    "path": "includes/Admin/DiviModule/AllLocation",
+    "size": 0
+   },
+   {
+    "kind": "file",
+    "path": "includes/Admin/DiviModule/AllLocation/AllLocation.php",
+    "sha256": "7ebd85fa7f91890469f71219dedb636519406f3e916cd571ac0e24952b42246c",
+    "size": 16441
+   }
+  ],
+  "rootPath": "/Users/me/Library/Application Support/ReleaseDock/ReleaseDockData/Staging/7B129E3F-70D3-44A1-BB79-058E525CDE3B/candidate",
+  "treeDigest": "c9864dae3ea19a1c4651fa80944cdde9f212f6c249515f8eef3965db00a5d2a8"
+ },
+ "codeChecks": {
+  "findings": [],
+  "lintedFiles": 233,
+  "phpVersion": "8.5.7",
+  "pluginCheckRan": false,
+  "pluginCheckSkipped": "Not set up: choose a local WordPress install with Plugin Check in Settings"
+ },
+ "createdAt": 817207332.01578,
+ "detected": {
+  "headers": {
+   "Author": "RadiusTheme",
+   "Author URI": "https://me.com",
+   "Description": "Classified Listing Toolkits which features several Elementor widgets and Divi modules to help you elegantly display listings in diverse layouts.",
+   "Domain Path": "/languages",
+   "License": "GPL-2.0+",
+   "License URI": "http://www.gnu.org/licenses/gpl-2.0.txt",
+   "Plugin Name": "Classified Listing Toolkits",
+   "Plugin URI": "https://wordpress.org/plugins/classified-listing-toolkits/",
+   "Requires PHP": "7.4",
+   "Requires Plugins": "classified-listing",
+   "Requires at least": "6",
+   "Text Domain": "classified-listing-toolkits",
+   "Version": "1.4.1"
+  },
+  "mainFile": "classified-listing-toolkits.php",
+  "name": "Classified Listing Toolkits",
+  "problems": [],
+  "readme": {
+   "byteCount": 8652,
+   "fields": {
+    "contributors": "alice, mamunnu",
+    "license": "GPLv2 or later",
+    "license uri": "https://www.gnu.org/licenses/gpl-2.0.html",
+    "requires at least": "5.6",
+    "requires php": "7.4",
+    "stable tag": "1.4.1",
+    "tags": "classified listing, Elementor, Divi, listing plugin, WordPress builder support",
+    "tested up to": "7.0"
+   },
+   "name": "Classified Listing Toolkits",
+   "sections": {
+    "changelog": "= 1.4.1 ( Nov 24, 2026 ) =\n* Added: Listing Showcase \"Archive Style\" layout, matching the listings archive page card in grid and list\n* Fixed: Security - Divi slider preview no longer passes unsanitized data-options to Swiper\n\n= 1.4.0 ( Oct 18, 2026 ) =\n* Added: Exclude Job switch in Listing Showcase, Listing Slider and Divi listing modules, on by default\n* Added: \"Highlight Promoted Listings\" switch in Showcase, Slider and Divi listing modules, off by default\n* Added: Divi Listings Grid and Slider now offer five styles matching the Listing Showcase cards\n* Fixed: Pricing Table, Listing Items and Category Box layout 3 crashed with older Classified Listing\n* Fixed: Category Box widget ignored column settings saved before the latest update\n* Fixed: \"Undefined array key\" warning when a listing type no longer exists\n* Fixed: List layout image now stays aligned to the top of the listing card\n* Improved: Listing Slider layouts 1-5 now match the Listing Showcase grid card design\n* Improved: Divi Listings List styles 1 and 2 now match the Elementor list layouts\n\n= 1.3.2 ( Sep 22, 2026 ) =\n* Added: Job Listings Elementor widget with list and grid views (needs Job Manager).\n\n= 1.3.1 =\n* Added: Translation file for 15 languages\n\n= 1.3.0 =\n* Added: Modules for Divi_5 page builder\n\n= 1.2.4 =\n* Fixed: Search widget responsive issue\n\n= 1.2.3 =\n* Fixed: Accessibility issues\n* Added: Location image compatibility\n\n= 1.2.2 =\n* Added: AI Semantic Search compatibility\n* Added: Directory filter in listings showcases widget\n\n= 1.2.1 =\n* Fixed: Elementor widgets functionality improved and extended\n* Fixed: Some RTL issue fixed for Elementor widgets\n* Compatibility: Classified Listing From builder compatibility\n* Fixed: Wrong text-domain fixed\n\n= 1.2.0 =\n* Fixed: Search form button style issue\n\n= 1.1.4 =\n* Added: New settings compatibility\n\n= 1.1.3 =\n* Fixed: Builder addon store dependency issue\n\n= 1.1.2 =\n* Fixed: Compatibility with Store old version\n\n= 1.1.1 =\n* Fixed: Pagination issue\n* Fixed: Responsive column issue\n\n= 1.1.0 =\n* Stable version release",
+    "description": "We launched Classified Listing Toolkits, which features several Elementor widgets and Divi modules to help you elegantly display listings in diverse layouts.\n\nThis plugin is an extension of the **[Classified Listing \u2013 Classified ads & Business Directory Plugin](https://wordpress.org/plugins/classified-listing/)**, adding additional flexibility and customization options across multiple page builders.\n\nWhen you use this Toolkits with our **[Archive & Single Page Builder](https://www.me.com/downloads/classified-listing-elementor-builder/)** pro addon, you can easily build professional archive and single pages inside Gutenberg, Elementor, and Divi editors and on your directory websites.",
+    "divi modules": "Take a look at all the Divi modules that Classified Listing Toolkits offers:\n\n* **Listing Categories:** The Listing Categories element allows you to showcase listing categories on your preferred page using the Divi editor. It also has settings to control column number, content visibility, and other options.\n* **Listing Location:** This Divi element, powered by Classified Listing, enables you to showcase all listing locations with their ad counts. It also lets you determine the column number, show or hide description, and more.\n* **Listing Single Location:** Use this element to exhibit a particular listing location with its listing count. You can also use it to work on content visibility and include a link to your preferred page.\n* **Listings Grid:** This Divi element lets you display listings in grid format with diverse grid styles. It also enables you to showcase listings by their types and categories. You can work on other settings, such as determining listings per page.\n* **Listings List:** Display ads in list format and help users easily navigate listings. This element has several list layouts to let you professionally showcase ads.\n* **Listings Slider:** This element showcases listings in a slider using one of several slider layouts. You can control slider functionality and enhance your ads\u2019 visual appeal.\n* **Listing Search Form:** The Listing Search Form element helps you add a powerful search form to a page. You get to present a search form with diverse styles attractively.\n* **Listing Store:** This Divi element enables you to present listing stores in either grid or list layouts. It also has options to help you set the post number, show or hide store pagination, and so on.",
+    "elementor widgets": "Let\u2019s learn about each Elementor widget you\u2019ll get with Classified Listing Toolkits:\n\n* **Listing Category:** The Listing Category widget lets you display listing categories in 2 different styles. This widget helps you display listings by a specific category. Plus, you can showcase ad count, listing description, and other things.\n* **Category Slider:** The Category Slider lets you include the listing category in a slider with 2 layout styles. This widget also offers settings to control the category limit, listing count, category description, etc.\n* **Single Location:** Single Location helps you display a particular location and its ad count in different layouts. It also has settings to customize its appearance and control the ad count and link visibility.\n* **All Locations:** This widget allows you to display all listing locations in grid or list format. It also lets you show each location's ad count and reorder locations by title, ID, date, or other elements.\n* **Listing Showcase:** It enables you to display the listings in grid or list format, and each format has multiple layouts! This widget has some settings to let you select column number, number of ads, category, and location, and display ads as you wish.\n* **Listing Slider:** This widget helps you showcase listings in a slider with several styles. It also has settings to control diverse listing options, such as the number of listings displayed, show or hide listing content, and more.\n* **Header Buttons:** This widget helps you add some buttons like **\u2018Compare,\u2019 \u2018Favourites,\u2019 \u2018Chat,\u2019 \u2018My Account,\u2019** and more at the top of the page to ensure easy navigation.\n* **Search Form:** As you can guess from the title, the Search Form widget allows you to include a search form in a page. It has different search form styles and settings to present the search form uniquely.\n* **Search Form\u2014Sortable [Pro]:** This widget works the same as the Search Form widget but has some extra features. You can include or exclude search form fields, customize the search button text, add an icon, and do much more.\n* **Pricing Table:** The Pricing Table widget allows you to include a stunning pricing table in diverse styles. Not only this, but it also lets you insert your checkout page link into a CTA button inside the pricing table.\n* **Listing Store:** This widget helps you display listing stores on a page in grid and list layouts. It also has settings to control content visibility, items per page, pagination, etc.",
+    "frequently asked questions": "= Does this plugin work with all themes? =\nYes! The plugin is designed to be compatible with most WordPress themes.\n\n= How can I report security bugs? =\nYou can report security bugs through the Patchstack Vulnerability Disclosure Program. The Patchstack team help validate, triage and handle any security vulnerabilities. [Report a security vulnerability.](https://patchstack.com/database/vdp/classified-listing-toolkits)",
+    "installation": "1. Download the plugin from the WordPress Plugin Directory.\n2. Upload the plugin files to the `/wp-content/plugins/classified-listing-toolkits/` directory or install via WordPress.\n3. Activate the plugin through the 'Plugins' menu in WordPress.\n4. Start using the available widgets, elements within your preferred page builder.",
+    "screenshots": "01. Categories Elementor Widget\n02. Divi Modules\n03. Listings Elementor Widget \n04. Listings Grid Divi Module\n05. Listings Slider Divi Module\n06. Listings Slider Elementor Widget\n07. Single Location Elementor Widget",
+    "upgrade notice": "= 1.0.0 =\nInitial release. No upgrade necessary."
+   },
+   "shortDescription": "Enhance your Classified Listing plugin with **Elementor, Divi** support. Seamlessly create and manage listings using intuitive widgets, and elements."
+  },
+  "readmeFile": "README.txt",
+  "textDomain": "classified-listing-toolkits",
+  "type": "plugin",
+  "version": "1.4.1"
+ },
+ "errors": [],
+ "guidance": [],
+ "id": "7B129E3F-70D3-44A1-BB79-058E525CDE3B",
+ "inspection": {
+  "archiveRootName": "classified-listing-toolkits",
+  "excludedPaths": [],
+  "includedEntries": [
+   {
+    "kind": "file",
+    "path": "README.txt",
+    "size": 8652
+   },
+   {
+    "kind": "directory",
+    "path": "assets",
+    "size": 0
+   },
+   {
+    "kind": "directory",
+    "path": "assets/images",
+    "size": 0
+   },
+   {
+    "kind": "file",
+    "path": "assets/images/cl-logo.svg",
+    "size": 4593
+   },
+   {
+    "kind": "directory",
+    "path": "assets/images/el-layout",
+    "size": 0
+   },
+   {
+    "kind": "file",
+    "path": "assets/images/el-layout/grid-style-02.png",
+    "size": 967
+   },
+   {
+    "kind": "file",
+    "path": "assets/images/el-layout/grid-style-03.png",
+    "size": 950
+   },
+   {
+    "kind": "file",
+    "path": "assets/images/el-layout/grid-style-04.png",
+    "size": 948
+   },
+   {
+    "kind": "file",
+    "path": "assets/images/el-layout/grid-style-05.png",
+    "size": 1067
+   },
+   {
+    "kind": "file",
+    "path": "assets/images/el-layout/list-style-02.png",
+    "size": 1062
+   },
+   {
+    "kind": "file",
+    "path": "assets/images/el-layout/list-style-03.png",
+    "size": 1174
+   },
+   {
+    "kind": "file",
+    "path": "assets/images/el-layout/list-style-04.png",
+    "size": 1136
+   },
+   {
+    "kind": "file",
+    "path": "assets/images/el-layout/list-style-05.png",
+    "size": 991
+   },
+   {
+    "kind": "directory",
+    "path": "assets/js",
+    "size": 0
+   },
+   {
+    "kind": "file",
+    "path": "assets/js/rtcl-equal-height.js",
+    "size": 612
+   },
+   {
+    "kind": "directory",
+    "path": "build",
+    "size": 0
+   },
+   {
+    "kind": "file",
+    "path": "build/divi-element.asset.php",
+    "size": 91
+   },
+   {
+    "kind": "file",
+    "path": "build/divi-element.js",
+    "size": 89914
+   },
+   {
+    "kind": "file",
+    "path": "build/divi-frontend-element.asset.php",
+    "size": 84
+   },
+   {
+    "kind": "file",
+    "path": "build/divi-frontend-element.css",
+    "size": 56283
+   },
+   {
+    "kind": "file",
+    "path": "build/divi-frontend-element.js",
+    "size": 0
+   },
+   {
+    "kind": "file",
+    "path": "build/elementor-widget.asset.php",
+    "size": 84
+   },
+   {
+    "kind": "file",
+    "path": "build/elementor-widget.css",
+    "size": 49372
+   },
+   {
+    "kind": "file",
+    "path": "build/elementor-widget.js",
+    "size": 0
+   },
+   {
+    "kind": "file",
+    "path": "build/index.asset.php",
+    "size": 129
+   },
+   {
+    "kind": "file",
+    "path": "build/index.css",
+    "size": 1
+   },
+   {
+    "kind": "file",
+    "path": "build/index.js",
+    "size": 23125
+   },
+   {
+    "kind": "file",
+    "path": "classified-listing-toolkits.php",
+    "size": 10815
+   },
+   {
+    "kind": "directory",
+    "path": "includes",
+    "size": 0
+   },
+   {
+    "kind": "directory",
+    "path": "includes/Abstracts",
+    "size": 0
+   },
+   {
+    "kind": "file",
+    "path": "includes/Abstracts/DBMigrator.php",
+    "size": 324
+   },
+   {
+    "kind": "file",
+    "path": "includes/Abstracts/ElListingsWidgetBase.php",
+    "size": 1549
+   },
+   {
+    "kind": "file",
+    "path": "includes/Abstracts/ElementorWidgetBase.php",
+    "size": 11985
+   },
+   {
+    "kind": "file",
+    "path": "includes/Abstracts/ElementorWidgetBaseV2.php",
+    "size": 7937
+   },
+   {
+    "kind": "file",
+    "path": "includes/Abstracts/RESTController.php",
+    "size": 704
+   },
+   {
+    "kind": "directory",
+    "path": "includes/Admin",
+    "size": 0
+   },
+   {
+    "kind": "file",
+    "path": "includes/Admin/DiviController.php",
+    "size": 4521
+   },
+   {
+    "kind": "directory",
+    "path": "includes/Admin/DiviModule",
+    "size": 0
+   },
+   {
+    "kind": "directory",
+    "path": "includes/Admin/DiviModule/AllLocation",
+    "size": 0
+   },
+   {
+    "kind": "file",
+    "path": "includes/Admin/DiviModule/AllLocation/AllLocation.php",
+    "size": 16441
+   }
+  ],
+  "inspectedAt": 817207332.045757,
+  "issues": [
+   {
+    "excluded": false,
+    "kind": "zeroByteFile",
+    "message": "Zero-byte file",
+    "path": "build/divi-frontend-element.js",
+    "severity": "warning"
+   },
+   {
+    "excluded": false,
+    "kind": "zeroByteFile",
+    "message": "Zero-byte file",
+    "path": "build/elementor-widget.js",
+    "severity": "warning"
+   },
+   {
+    "excluded": false,
+    "kind": "zeroByteFile",
+    "message": "Zero-byte file",
+    "path": "includes/divi-5/assets/js/rtcl-divi5-frontend.js",
+    "severity": "warning"
+   }
+  ],
+  "sha256": "b6bcede4ab3a85ec39a3f0dae7fd20ad67a983a71eb70de37df89c78353fd709",
+  "sourceKind": "zip",
+  "sourcePath": "/Users/me/Downloads/classified-listing-toolkits.1.4.1.zip",
+  "totalUncompressedSize": 3616763
+ },
+ "manifestPath": "/Users/me/Library/Application Support/ReleaseDock/ReleaseDockData/Releases/classified-listing-toolkits/1.4.1-7B129E3F/manifest.json",
+ "mode": "assisted",
+ "preview": {
+  "changes": [
+   {
+    "isCopy": true,
+    "isDirectory": true,
+    "kind": "added",
+    "path": "tags/1.4.1"
+   },
+   {
+    "isCopy": false,
+    "isDirectory": false,
+    "kind": "modified",
+    "path": "tags/1.4.1/README.txt"
+   },
+   {
+    "isCopy": false,
+    "isDirectory": false,
+    "kind": "modified",
+    "path": "tags/1.4.1/build/divi-element.asset.php"
+   },
+   {
+    "isCopy": false,
+    "isDirectory": false,
+    "kind": "modified",
+    "path": "tags/1.4.1/build/divi-element.js"
+   },
+   {
+    "isCopy": false,
+    "isDirectory": false,
+    "kind": "modified",
+    "path": "tags/1.4.1/build/elementor-widget.asset.php"
+   },
+   {
+    "isCopy": false,
+    "isDirectory": false,
+    "kind": "modified",
+    "path": "tags/1.4.1/build/elementor-widget.css"
+   },
+   {
+    "isCopy": false,
+    "isDirectory": false,
+    "kind": "modified",
+    "path": "tags/1.4.1/classified-listing-toolkits.php"
+   },
+   {
+    "isCopy": false,
+    "isDirectory": false,
+    "kind": "modified",
+    "path": "tags/1.4.1/includes/Admin/Elementor/WidgetSettings/ListingItemsSettings.php"
+   },
+   {
+    "isCopy": false,
+    "isDirectory": false,
+    "kind": "modified",
+    "path": "tags/1.4.1/includes/Admin/Elementor/Widgets/ListingItems.php"
+   },
+   {
+    "isCopy": false,
+    "isDirectory": false,
+    "kind": "modified",
+    "path": "tags/1.4.1/includes/divi-5/assets/js/rtcl-toolkits-divi5.js"
+   },
+   {
+    "isCopy": false,
+    "isDirectory": false,
+    "kind": "added",
+    "path": "tags/1.4.1/templates/elementor/listing-ads/archive.php"
+   },
+   {
+    "isCopy": false,
+    "isDirectory": false,
+    "kind": "modified",
+    "path": "tags/1.4.1/vendor/composer/installed.php"
+   },
+   {
+    "isCopy": false,
+    "isDirectory": false,
+    "kind": "modified",
+    "path": "trunk/README.txt"
+   },
+   {
+    "isCopy": false,
+    "isDirectory": false,
+    "kind": "modified",
+    "path": "trunk/build/divi-element.asset.php"
+   },
+   {
+    "isCopy": false,
+    "isDirectory": false,
+    "kind": "modified",
+    "path": "trunk/build/divi-element.js"
+   },
+   {
+    "isCopy": false,
+    "isDirectory": false,
+    "kind": "modified",
+    "path": "trunk/build/elementor-widget.asset.php"
+   },
+   {
+    "isCopy": false,
+    "isDirectory": false,
+    "kind": "modified",
+    "path": "trunk/build/elementor-widget.css"
+   },
+   {
+    "isCopy": false,
+    "isDirectory": false,
+    "kind": "modified",
+    "path": "trunk/classified-listing-toolkits.php"
+   },
+   {
+    "isCopy": false,
+    "isDirectory": false,
+    "kind": "modified",
+    "path": "trunk/includes/Admin/Elementor/WidgetSettings/ListingItemsSettings.php"
+   },
+   {
+    "isCopy": false,
+    "isDirectory": false,
+    "kind": "modified",
+    "path": "trunk/includes/Admin/Elementor/Widgets/ListingItems.php"
+   },
+   {
+    "isCopy": false,
+    "isDirectory": false,
+    "kind": "modified",
+    "path": "trunk/includes/divi-5/assets/js/rtcl-toolkits-divi5.js"
+   },
+   {
+    "isCopy": false,
+    "isDirectory": false,
+    "kind": "added",
+    "path": "trunk/templates/elementor/listing-ads/archive.php"
+   },
+   {
+    "isCopy": false,
+    "isDirectory": false,
+    "kind": "modified",
+    "path": "trunk/vendor/composer/installed.php"
+   }
+  ],
+  "commitMessage": "Release Classified Listing Toolkits 1.4.1\n\nReleaseDock-Release-ID: 7B129E3F-70D3-44A1-BB79-058E525CDE3B\n",
+  "createdAt": 817207346.211345,
+  "diffExcerpt": "Index: /Users/me/svn/classified-listing-toolkits/tags/1.4.1/README.txt\n===================================================================\n--- /Users/me/svn/classified-listing-toolkits/tags/1.4.1/README.txt\t(revision 3820138)\n+++ /Users/me/svn/classified-listing-toolkits/tags/1.4.1/README.txt\t(working copy)\n@@ -4,7 +4,7 @@\n Requires at least: 5.6\n Tested up to: 7.0\n Requires PHP: 7.4\n-Stable tag: 1.4.0\n+Stable tag: 1.4.1\n License: GPLv2 or later\n License URI: https://www.gnu.org/licenses/gpl-2.0.html\n \n@@ -72,6 +72,10 @@\n \n == Changelog ==\n \n+= 1.4.1 ( Nov 24, 2026 ) =\n+* Added: Listing Showcase \"Archive Style\" layout, matching the listings archive page card in grid and list\n+* Fixed: Security - Divi slider preview no longer passes unsanitized data-options to Swiper\n+\n = 1.4.0 ( Oct 18, 2026 ) =\n * Added: Exclude Job switch in Listing Showcase, Listing Slider and Divi listing modules, on by default\n * Added: \"Highlight Promoted Listings\" switch in Showcase, Slider and Divi listing modules, off by default\nIndex: /Users/me/svn/classified-listing-toolkits/tags/1.4.1/assets/images/cl-logo.svg\n===================================================================\nIndex: /Users/me/svn/classified-listing-toolkits/tags/1.4.1/assets/images/el-layout/grid-style-02.png\n===================================================================\nCannot display: file marked as a binary type.\nsvn:mime-type = application/octet-stream\nIndex: /Users/me/svn/classified-listing-toolkits/tags/1.4.1/assets/images/el-layout/grid-style-03.png\n===================================================================\nCannot display: file marked as a binary type.\nsvn:mime-type = application/octet-stream\nIndex: /Users/me/svn/classified-listing-toolkits/tags/1.4.1/assets/images/el-layout/grid-style-04.png\n===================================================================\nCannot display: file marked as a binary type.\nsvn:mime-type = application/octet-stream\nIndex: /Users/me/svn/classified-listing-toolkits/tags/1",
+  "diffTruncated": true,
+  "fingerprint": "2320eace259512efdbfa475f71e4983912c284c9a63aadfacc22241178a711a5",
+  "workingCopyRevision": 3820138
+ },
+ "previousVersion": "1.4.0",
+ "productID": "E741A507-7BCC-4B66-8D6D-744ED501D0A3",
+ "productName": "Classified Listing Toolkits",
+ "productSlug": "classified-listing-toolkits",
+ "productType": "plugin",
+ "releaseKind": "version",
+ "repository": {
+  "authentication": "cachedBySVN",
+  "currentVersion": "1.4.0",
+  "currentVersionSource": "trunk readme Stable tag",
+  "existingVersions": [
+   "1.0.0",
+   "1.1.0",
+   "1.1.1",
+   "1.1.2",
+   "1.1.3",
+   "1.1.4",
+   "1.2.0",
+   "1.2.1",
+   "1.2.2",
+   "1.2.3",
+   "1.2.4",
+   "1.3.0",
+   "1.3.1",
+   "1.3.2",
+   "1.4.0"
+  ],
+  "latestWordPressVersion": "7.1.5",
+  "notes": [],
+  "outOfDatePaths": [],
+  "readmeTitle": "Classified Listing Toolkits",
+  "releasePathExists": false,
+  "remoteRevision": 3752668,
+  "repositoryExists": true,
+  "structureProblems": [],
+  "svnVersion": "1.14.5",
+  "workingCopyChanges": [],
+  "workingCopyExists": true,
+  "workingCopyRevision": 3820138
+ },
+ "source": {
+  "zip": {
+   "path": "/Users/me/Downloads/classified-listing-toolkits.1.4.1.zip"
+  }
+ },
+ "sourceSHA256": "b6bcede4ab3a85ec39a3f0dae7fd20ad67a983a71eb70de37df89c78353fd709",
+ "stagingPath": "/Users/me/Library/Application Support/ReleaseDock/ReleaseDockData/Staging/7B129E3F-70D3-44A1-BB79-058E525CDE3B",
+ "state": "cancelled",
+ "svnURL": "https://plugins.svn.wordpress.org/classified-listing-toolkits",
+ "transitions": [
+  {
+   "at": 817207332.01578,
+   "to": "detected"
+  },
+  {
+   "at": 817207332.147703,
+   "from": "detected",
+   "note": "Inspected 304 files; version 1.4.1",
+   "to": "inspected"
+  },
+  {
+   "at": 817207345.250761,
+   "from": "inspected",
+   "note": "All required checks passed (5 warning(s))",
+   "to": "validated"
+  },
+  {
+   "at": 817207346.032492,
+   "from": "validated",
+   "note": "Staged 304 files into tags/1.4.1",
+   "to": "staged"
+  },
+  {
+   "at": 817207346.213271,
+   "from": "staged",
+   "note": "Preview: 2 added, 20 modified, 0 deleted",
+   "to": "previewed"
+  },
+  {
+   "at": 817208453.72889,
+   "from": "previewed",
+   "note": "Interrupted by an app restart",
+   "to": "cancelled"
+  }
+ ],
+ "updatedAt": 817208453.72889,
+ "validation": {
+  "blockOnWarnings": false,
+  "results": [
+   {
+    "check": "sourceIntegrity",
+    "message": "ZIP SHA-256 b6bcede4ab3a85ec\u2026, 304 files",
+    "name": "Source integrity",
+    "severity": "info",
+    "status": "passed"
+   },
+   {
+    "check": "packageStructure",
+    "message": "Package structure is safe",
+    "name": "Package structure",
+    "severity": "info",
+    "status": "passed"
+   },
+   {
+    "check": "forbiddenFiles",
+    "message": "No forbidden files in the release candidate",
+    "name": "Forbidden files",
+    "severity": "info",
+    "status": "passed"
+   },
+   {
+    "check": "productIdentity",
+    "message": "Plugin Name \"Classified Listing Toolkits\" matches",
+    "name": "Product identity",
+    "severity": "info",
+    "status": "passed"
+   },
+   {
+    "check": "versionValidity",
+    "message": "Version 1.4.1",
+    "name": "Version validity",
+    "severity": "info",
+    "status": "passed"
+   },
+   {
+    "check": "versionIncrease",
+    "message": "1.4.1 is newer than 1.4.0",
+    "name": "Version increase",
+    "severity": "info",
+    "status": "passed"
+   },
+   {
+    "check": "existingTag",
+    "message": "tags/1.4.1 does not exist yet",
+    "name": "Existing release tag",
+    "severity": "info",
+    "status": "passed"
+   },
+   {
+    "check": "metadataValidity",
+    "message": "Stable tag 1.4.1 matches the plugin version",
+    "name": "Metadata validity",
+    "severity": "info",
+    "status": "passed"
+   },
+   {
+    "check": "metadataValidity",
+    "filePath": "classified-listing-toolkits.php",
+    "message": "Requires at least is 6 in classified-listing-toolkits.php but 5.6 in the readme; the plugin file wins",
+    "name": "Metadata validity",
+    "severity": "warning",
+    "status": "warning"
+   },
+   {
+    "check": "changelogEntry",
+    "message": "Changelog has an entry for 1.4.1",
+    "name": "Changelog entry",
+    "severity": "info",
+    "status": "passed"
+   },
+   {
+    "check": "requiredFiles",
+    "message": "Main plugin file classified-listing-toolkits.php is at the package root",
+    "name": "Required files",
+    "severity": "info",
+    "status": "passed"
+   },
+   {
+    "check": "requiredFiles",
+    "message": "README.txt present",
+    "name": "Required files",
+    "severity": "info",
+    "status": "passed"
+   },
+   {
+    "check": "svnConnectivity",
+    "message": "Connected (svn 1.14.5, r3752668)",
+    "name": "SVN connectivity",
+    "severity": "info",
+    "status": "passed"
+   },
+   {
+    "check": "workingCopyClean",
+    "message": "Working copy is clean",
+    "name": "Working copy cleanliness",
+    "severity": "info",
+    "status": "passed"
+   },
+   {
+    "check": "remoteFreshness",
+    "message": "Working copy is up to date (r3820138)",
+    "name": "Remote repository freshness",
+    "severity": "info",
+    "status": "passed"
+   },
+   {
+    "check": "authentication",
+    "message": "svn has cached credentials for this repository",
+    "name": "Authentication",
+    "severity": "info",
+    "status": "passed"
+   },
+   {
+    "check": "releaseDiff",
+    "message": "2 added, 20 modified, 0 deleted; creates tags/1.4.1",
+    "name": "Release diff",
+    "severity": "info",
+    "status": "passed"
+   },
+   {
+    "check": "packageSize",
+    "message": "Package size 3.6 MB",
+    "name": "Package size",
+    "severity": "info",
+    "status": "passed"
+   },
+   {
+    "check": "portableFilenames",
+    "filePath": "build/divi-frontend-element.js",
+    "message": "Zero-byte file",
+    "name": "Portable file names",
+    "severity": "warning",
+    "status": "warning"
+   },
+   {
+    "check": "portableFilenames",
+    "filePath": "build/elementor-widget.js",
+    "message": "Zero-byte file",
+    "name": "Portable file names",
+    "severity": "warning",
+    "status": "warning"
+   },
+   {
+    "check": "portableFilenames",
+    "filePath": "includes/divi-5/assets/js/rtcl-divi5-frontend.js",
+    "message": "Zero-byte file",
+    "name": "Portable file names",
+    "severity": "warning",
+    "status": "warning"
+   },
+   {
+    "check": "testedUpTo",
+    "filePath": "README.txt",
+    "message": "Tested up to 7.0 is behind the current WordPress release 7.1.5; WordPress.org's Plugin Check reports it as outdated",
+    "name": "Tested up to",
+    "severity": "warning",
+    "status": "warning",
+    "suggestion": "Test with WordPress 7.1, then set \"Tested up to: 7.1\"."
+   },
+   {
+    "check": "phpSyntax",
+    "message": "233 PHP file(s) parse with PHP 8.5.7",
+    "name": "PHP syntax",
+    "severity": "info",
+    "status": "passed"
+   },
+   {
+    "check": "pluginCheck",
+    "message": "Not set up: choose a local WordPress install with Plugin Check in Settings",
+    "name": "Plugin Check",
+    "severity": "info",
+    "status": "skipped"
+   }
+  ]
+ },
+ "verifiedNotCommitted": false,
+ "version": "1.4.1",
+ "workingCopyModified": false
+}

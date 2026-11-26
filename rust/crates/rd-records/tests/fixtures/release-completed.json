@@ -1,0 +1,1061 @@
+{
+ "approval": {
+  "at": 817293378.675667,
+  "kind": "user",
+  "previewFingerprint": "293fdbbbb7a45588e06fb5a47aa6bbd8bb19459cb94d1c8ad5292769f6a01592"
+ },
+ "candidate": {
+  "entries": [
+   {
+    "kind": "file",
+    "path": "README.md",
+    "sha256": "6e1dadd610bec4a80ee0fee3caa82e897cc764ea447f0002850c0db66450d2a9",
+    "size": 1185
+   },
+   {
+    "kind": "directory",
+    "path": "assets",
+    "size": 0
+   },
+   {
+    "kind": "directory",
+    "path": "assets/icon",
+    "size": 0
+   },
+   {
+    "kind": "file",
+    "path": "assets/icon/calendar.svg",
+    "sha256": "6c2868198660d0ad706e83431241729b765eab4a725da5408cb9d360517c7b54",
+    "size": 3844
+   },
+   {
+    "kind": "directory",
+    "path": "assets/js",
+    "size": 0
+   },
+   {
+    "kind": "file",
+    "path": "assets/js/auth.js",
+    "sha256": "2efa869eb8555c18199efeaaf2a0f835929e06d1beb69e80ca32d7fcb7bcc1ab",
+    "size": 9831
+   },
+   {
+    "kind": "file",
+    "path": "assets/js/cl-booking.js",
+    "sha256": "49f59d84ea0d695b04b8c0f9d95a688309a5e76a38f5932e8116a2a90403ed75",
+    "size": 3161
+   },
+   {
+    "kind": "file",
+    "path": "assets/js/cl-listing-form.js",
+    "sha256": "cbed3f4e4301c2a004a9f64b570d49c21fc2215a5c5ce66314240c84d06f160f",
+    "size": 10589
+   },
+   {
+    "kind": "directory",
+    "path": "build",
+    "size": 0
+   },
+   {
+    "kind": "directory",
+    "path": "build/assets",
+    "size": 0
+   },
+   {
+    "kind": "directory",
+    "path": "build/assets/css",
+    "size": 0
+   },
+   {
+    "kind": "file",
+    "path": "build/assets/css/chatbot-D7zChmpF.css",
+    "sha256": "1fff356f661d136ccbf4e6721a1de6b7fd3065a3bfe1a23d5f4bbeb9173b7be4",
+    "size": 12672
+   },
+   {
+    "kind": "file",
+    "path": "build/assets/css/employeeList-B6d7qszk.css",
+    "sha256": "5573b121a5bf2fe7dfcb0416265ff4836d18bfec05880d1665a70854796cc8a9",
+    "size": 7482
+   },
+   {
+    "kind": "file",
+    "path": "build/assets/css/eventBooking-SboTGNwl.css",
+    "sha256": "fda25538256b9b661d2b4918783508e4f61feaf5612b4b1f6136e03219c3d745",
+    "size": 1725
+   },
+   {
+    "kind": "file",
+    "path": "build/assets/css/frontend-index-BKqkfWO6.css",
+    "sha256": "c0408182c35078b9c5bdb82dfe37542386dd5ce9a6b2adbdb450fbbbde0d732a",
+    "size": 213194
+   },
+   {
+    "kind": "file",
+    "path": "build/assets/css/index-DsSfl2xt.css",
+    "sha256": "2dd2adfe4974e79d9a2b527b56017d717732b30bfb345f9f7d63c8cddf2fa116",
+    "size": 220943
+   },
+   {
+    "kind": "file",
+    "path": "build/assets/css/serviceList-z6w0H8Ds.css",
+    "sha256": "eb487be1185ff6fc55c82b11179336210ed89ca5bba3e014433293e30b8cea47",
+    "size": 1262
+   },
+   {
+    "kind": "directory",
+    "path": "build/assets/js",
+    "size": 0
+   },
+   {
+    "kind": "file",
+    "path": "build/assets/js/ActionButton-BWgK_oi2.js",
+    "sha256": "b8d097da498f402a8f71f0adac3d7449b1858f1b9dea03bf7c30fcdc7de0cfd2",
+    "size": 1359
+   },
+   {
+    "kind": "file",
+    "path": "build/assets/js/AddLocationForm-C-SoeNwK.js",
+    "sha256": "16001e6e35160dff937f98a8c027e3e1c263067b48d8398400e7a97161b53484",
+    "size": 5140
+   },
+   {
+    "kind": "file",
+    "path": "build/assets/js/Analytics-CAm9bJfR.js",
+    "sha256": "b6728089ed66f2753632906015858e992629ad0fff809ce856cd267c4b50aad5",
+    "size": 28552
+   },
+   {
+    "kind": "file",
+    "path": "build/assets/js/AppointmentDetails-T57ITNXs.js",
+    "sha256": "59440b85c464da030669163fdacc1681f6599f3ee751284abcf9de8575b48970",
+    "size": 54688
+   },
+   {
+    "kind": "file",
+    "path": "build/assets/js/AppointmentIcon-Dm0VK57O.js",
+    "sha256": "bd266b86eb83a2e39f57dfabe415ba1c9f5e1127f1b880c3a0e537a254eb34d7",
+    "size": 28617
+   },
+   {
+    "kind": "file",
+    "path": "build/assets/js/ArrowLeftIcon-CIooSw3G.js",
+    "sha256": "0cd42f2d0294891241cad76efa55c86dc63854ea7d35477094961d67f68141f2",
+    "size": 507
+   },
+   {
+    "kind": "file",
+    "path": "build/assets/js/ArrowRightIcon-DTYNQqD9.js",
+    "sha256": "42bf964eba65660dda677fd852d9fa5228f119a4693a8428c66126b1a0530d4e",
+    "size": 498
+   },
+   {
+    "kind": "file",
+    "path": "build/assets/js/BookingModal-BouxC4y3.js",
+    "sha256": "9268c16e43474a120d6af385e9023799f3501d48362575d124c4f8da052b528f",
+    "size": 12312
+   },
+   {
+    "kind": "file",
+    "path": "build/assets/js/Button-TOLGE_cE.js",
+    "sha256": "287c9fb4c9095dcd1cbed3b389c14b37c9c49f70070bdabecd2561025655bc00",
+    "size": 26664
+   },
+   {
+    "kind": "file",
+    "path": "build/assets/js/Calendar-Bpji-5qS.js",
+    "sha256": "fadb9f80c283507404c8f8f5a6b186de7ab2a3e5dbfc4e7e60efc50e4fd9b64b",
+    "size": 56278
+   },
+   {
+    "kind": "file",
+    "path": "build/assets/js/Calender-B4O1uEtB.js",
+    "sha256": "45f6e08bdeca72a9d2f31d2ca0f8ced155ec6a47aaa877dad05a44129bd0949c",
+    "size": 1271
+   },
+   {
+    "kind": "file",
+    "path": "build/assets/js/CalenderCheck-CevJHj-q.js",
+    "sha256": "c6caac04f007bb124420f1a470710206b45a38e60b7c07ee0b6823eeda5d9f10",
+    "size": 5604
+   },
+   {
+    "kind": "file",
+    "path": "build/assets/js/CategorySelect-CMbo4Mwf.js",
+    "sha256": "b93bd1325752ffc2dd67544f2cb32b88b202cbea9e7532808af8934ed8e11fba",
+    "size": 3826
+   },
+   {
+    "kind": "file",
+    "path": "build/assets/js/Clock-BVs0LH9I.js",
+    "sha256": "e2a4725e12a1ace56136705cf7c340372fe46477f3a59ce47e746c8b433172b4",
+    "size": 1878
+   },
+   {
+    "kind": "file",
+    "path": "build/assets/js/Cogs-CWPdrtEh.js",
+    "sha256": "14839f93a52e123965ebe496dcecd187a1d948dbcc07e334cd9125e9987deddf",
+    "size": 2419
+   },
+   {
+    "kind": "file",
+    "path": "build/assets/js/Combination-D2eFdUBf.js",
+    "sha256": "4ba20bbea84d5771b3415090a644e34c0bf6b2aa9bcea971132f32e1246d4537",
+    "size": 26360
+   },
+   {
+    "kind": "file",
+    "path": "build/assets/js/ConfirmDialog-DiDRvvSz.js",
+    "sha256": "4f5443b0abfe2ce1b440aec0e0eed6f6d421e910e3716e45e0beb33f666aed86",
+    "size": 727
+   },
+   {
+    "kind": "file",
+    "path": "build/assets/js/CountCard-C7Lbl32D.js",
+    "sha256": "ba3fec7e44e9c64199d1191ada057b80fbecf635d6b5192fea6970f4660dc3d3",
+    "size": 767
+   },
+   {
+    "kind": "file",
+    "path": "build/assets/js/CreditCard-BD4-10Fk.js",
+    "sha256": "921be42bfe85a80d071ba7e471a45ebfeb8f13c7a6be5803aa50b39014ddcc78",
+    "size": 1463
+   },
+   {
+    "kind": "file",
+    "path": "build/assets/js/CrudLayout-DcxS6-zH.js",
+    "sha256": "5b3ef5681a5b2ac6b3fad21a8691e860032c90a1d760f6a5087852880bdbc166",
+    "size": 1101
+   },
+   {
+    "kind": "file",
+    "path": "build/assets/js/CustomFieldAnswersChip-VwQuBm_9.js",
+    "sha256": "e6c8601dc761a0a043fddee2d838fd07a2a20d0d9e5ff8ac144eaa598d9e944f",
+    "size": 724
+   },
+   {
+    "kind": "file",
+    "path": "build/assets/js/CustomFieldsBlock-YQL-iDtw.js",
+    "sha256": "4ad8c5b754ee3883fbb13de0bf5c602a1a148c9d550427bb2c6094c59b0f9b2e",
+    "size": 2803
+   }
+  ],
+  "rootPath": "/Users/me/Library/Application Support/ReleaseDock/ReleaseDockData/Staging/34629C18-132D-4671-9B07-748F19721D10/candidate",
+  "treeDigest": "aa1c342960eb9679f1bc2d9b74f69eb11acb10f6df58d38a2ddfca57049c9e2e"
+ },
+ "codeChecks": {
+  "findings": [],
+  "lintedFiles": 453,
+  "phpVersion": "8.5.7",
+  "pluginCheckRan": false,
+  "pluginCheckSkipped": "Not set up: choose a local WordPress install with Plugin Check in Settings"
+ },
+ "committedRevision": 3822482,
+ "createdAt": 817293326.03244,
+ "detected": {
+  "headers": {
+   "Author": "RadiusTheme",
+   "Description": "Radius Booking is an intelligent, AI-powered booking ecosystem for WordPress. Designed for Service Bookings (Salons, HVAC, Cleaning), Healthcare (Medical Clinics), Meeting and Events. Radius Booking transforms your website into a 24/7 autonomous booking engine that boosts conversion through intelligent, real-time customer interaction.",
+   "Domain Path": "/languages",
+   "License": "GPLv2",
+   "Plugin Name": "Radius Booking - Al-Powered Appointment & Service Booking",
+   "Plugin URI": "https://radiusbooking.co",
+   "Requires PHP": "7.4",
+   "Text Domain": "radius-booking",
+   "Version": "1.0.24"
+  },
+  "mainFile": "radius-booking.php",
+  "name": "Radius Booking - Al-Powered Appointment & Service Booking",
+  "problems": [],
+  "readme": {
+   "byteCount": 27196,
+   "fields": {
+    "contributors": "alice, mamunnu",
+    "license": "GPLv3",
+    "license uri": "http://www.gnu.org/licenses/gpl-3.0.html",
+    "requires at least": "5.8",
+    "requires php": "7.4",
+    "stable tag": "1.0.24",
+    "tags": "appointment booking, booking calendar, scheduling, appointment, booking",
+    "tested up to": "7.1"
+   },
+   "name": "Radius Booking \u2013 Appointment Booking Calendar & Scheduling for Services & Events",
+   "sections": {
+    "changelog": "= 1.0.24 (25 Nov, 2026) =\n* Added: \"Customize Colors\" tab in Notifications \u2192 Emails.\n* Improved: Duration and buffer time options follow the \"Default Time Duration Step\" schedule setting.\n* Improved: Buffer time now keeps the staff member free between appointments of any service.\n* Fixed: Event dates showing one day earlier in the date picker for users in timezones behind UTC.\n* Fixed: \"Minimum time before booking\" and \"Period available for booking in advance\" are now applied to the booking calendar and time slots.\n* Fixed: Per-service booking advance period no longer overrides the global setting unless it is changed.\n* Fixed: Editing an appointment showed its own time slot as unavailable.\n* Fixed: Day-off dates in the admin appointment form could be shifted by one day in some timezones.\n\n= 1.0.23 (19 Nov, 2026) =\n* Improved: Booking totals are now calculated and validated on the server for more accurate pricing.\n* Improved: Online payment verification, including deposits, recurring bookings and currency handling.\n* Improved: Payment method validation for service, meeting and event bookings.\n* Improved: REST API permission handling and access control.\n* Improved: Data handling in the customer and employee dashboards.\n* Improved: Customer data handling for public bookings.\n* Improved: Cross-origin (CORS) request handling for the REST API.\n* Improved: Staff status validation.\n* Fixed: PayPal payments were not always marked as paid after successful verification.\n* Fixed: An error when viewing a staff member in the employee dashboard.\n\n= 1.0.22 =\n* Improved: Strengthened REST API endpoint access control.\n* Improved: Enhanced payment gateway validation to ensure only enabled methods are accepted.\n* Improved: Hardened PayPal payment processing with duplicate transaction detection.\n* Improved: Added currency verification for PayPal transactions.\n\n= 1.0.21 =\n* Fixed: Event ticket type id change issue after updating an event.\n* Fixed: Event registration status mismatch issue.\n* Improved: Strengthened input validation and data sanitization\n* Improved: Enhanced payment verification process\n* Improved: Strengthened access control on REST API endpoints\n* Improved: Enhanced event registration validation\n\n= 1.0.20 =\n* Fixed: PayPal payment stale closure bug\n* Fixed: Price formatter number display issue\n* Added: Service extras compatibility.\n* Improved: Access control in customer/employee panel (Thanks to Ali Hidayat)\n* Improved: Input sanitization in REST API (Thanks to kta1kri)\n\n= 1.0.19 =\n* Fixed: Service disappear issue\n\n= 1.0.18 =\n* Fixed: Database migration error after plugin update\n* Improved: Booking form styling\n\n= 1.0.17 =\n* New: Added Service First booking flow\n* New: Added Staff First booking flow\n* New: Added Roles & Permissions management\n\n* Fix: Improved Loco Translate compatibility for all plugin language files\n* Fix: Added individual settings reset option\n* Fix: Various bug fixes and performance improvements\n\n= 1.0.16 =\n* Improvement: Custom Fields Data in Email Notifications\n* Improvement: Added Customer/Employee phone number in email notifications\n\n= 1.0.15 =\n* Compatibility: Medilink Theme Compatibility\n* Compatibility: Verified compatibility with WordPress 7.0\n* Improvement: Booking form staff and service loading performance.\n\n= 1.0.14 =\n* Improvement: ClDoctor Theme Compatibility\n* Improvement: Display Booking Button in Classified Listing archived page.\n\n\n= 1.0.13 =\n* New: Added conditional logic support for custom fields (Service, Meeting, and Event based)\n* Improvement: Enhanced calendar timeline view UI/style\n* Improvement: Improved tax module structure and behavior\n* Improvement: Enhanced payment filtering experience\n* Improvement: Improved booking form usability\n* Improvement: Improved backend booking workflow\n* New: Added required * mark for meeting booking fields\n* New: Added payment type filter in Payments page for Service, Event, and Meeting\n* Fix: Category delete loading issue\n* Fix: Multiple service delete issue at the same time\n\n= 1.0.12 =\n* New: All Strings Translatable\n* New: Added new filters and actions for developers\n* Fix: Classified Listing Payout and Commission Staff name issue\n\n= 1.0.12 =\n* New: All Strings Translatable\n* New: Added new filters and actions for developers\n* Fix: Classified Listing Payout and Commission Staff name issue\n\n= 1.0.11 =\n* Fix: Plugin URL issue\n\n= 1.0.10 =\n* Fix: Classified Listing Integration\n* Fix: Meeting Booking Date & time\n* Fix: Event Booking Ticket Price\n* Fix: Event Booking Time duration\n* Fix: Coupon Applied with Tax and Without Tax\n* Fix: Dynamic Discount tracking in Appoitment\n* Fix: Classified Listing Seller Payout\n* Fix: Classified Listing Seller Staff management\n* Fix: Admin email price issue when meeting and event boooked.\n* Fix: Theme compatibility issue\n\n= 1.0.9 =\n* Fix: Booking form loading issue\n\n= 1.0.8 =\n* New: Implemented Meeting Booking and Event Booking.\n* New: Compatibility with Classified Listing.\n* New: Compatibility with Radius Booking Pro.\n\n\n= 1.0.7 =\n* Fix: Compatibility with theme\n\n= 1.0.6 =\n* Feature: Export/Import Radius Booking Data\n\n= 1.0.5 =\n* Integration with Classified Listing\n* Fix: Appointment Form AI issue\n\n= 1.0.4 =\n* Initial release\n* Appointment booking calendar\n* Service and staff management\n* Email notifications\n* Booking form builder\n* Custom fields support\n* Basic analytics dashboard\n* Google Calendar sync\n* Multi-location support\n* Shortcode and block editor support\n* Mobile-responsive design",
+    "description": "Radius Booking is an appointment booking calendar and scheduling plugin for WordPress. It lets customers book service appointments, register for events and schedule meetings from your website, while you manage staff, availability, customers and payments from one admin panel.\n\nThe free version includes the full appointment booking system: unlimited services and staff, a real-time booking calendar, email notifications, a customer portal, PayPal payments, Google Calendar sync and Google Meet links. Radius Booking Pro adds Stripe, WooCommerce checkout, deposits, coupons, dynamic pricing, recurring appointments, multi-location support, staff payouts, WhatsApp reminders, advanced analytics and a conversational AI booking assistant.\n\n\ud83d\udc49 [Plugin Demo](https://radiusbooking.co/live-demo/) | [Documentation](https://radiusbooking.co/docs/) | [Get Pro](https://radiusbooking.co/pricing/)  \ud83d\udc48\n\n\n**Video Tutorial**\n\n[youtube https://www.youtube.com/watch?v=1cibe5CPILQ]\n\n\n### Appointment Booking Calendar for Any Service Business\n\nRadius Booking replaces phone calls and back-and-forth emails with an online booking calendar that shows your real availability. Customers pick a service, choose a staff member, select an open time slot and confirm, with or without paying online. Every booking appears in your admin calendar, syncs to Google Calendar and triggers email notifications to the customer, the assigned staff member and the site admin.\n\nIt is built for salons and spas, clinics and healthcare practices, consultants, tutors, coaches, cleaning and home service companies, fitness studios and anyone who takes appointments.\n\n### Three Booking Types in One Plugin\n\nMost appointment plugins handle one kind of booking. Radius Booking includes three modules that can be turned on or off independently:\n\n* **Service appointments** \u2013 service-first or staff-first booking flows, real-time availability, buffer times, capacity limits and guest checkout.\n* **Meeting scheduling** \u2013 define meeting types with fixed durations (15, 30, 60 minutes), set availability windows per staff member, control notice periods and daily limits, require approval if needed, and auto-generate Google Meet links. Works like a personal scheduling link for consultations, discovery calls and demos.\n* **Event registration** \u2013 create events with multiple sessions and ticket types, set capacity, sale windows and registration deadlines, enable a waitlist, and manage registrations and check-ins.\n\n### \ud83c\udf1f Who Uses Radius Booking\n\n**Salons, spas and barbershops** \u2013 Clients choose their preferred stylist or therapist, book an open slot and pay online. Buffer times give staff room between appointments.\n\n**Clinics and healthcare providers** \u2013 Doctors, dentists, chiropractors and therapists use automated confirmations and reminders, keep patient booking history in the customer database, and collect intake details with custom fields (Pro).\n\n**Home and cleaning services** \u2013 Plumbers, electricians, HVAC technicians and cleaning companies let homeowners request service visits from the website and capture job details up front.\n\n**Tutors and educators** \u2013 Music teachers, language instructors and academic coaches manage student sessions, with recurring bookings (Pro) for weekly lessons.\n\n**Fitness and wellness** \u2013 Personal trainers, yoga and pilates studios handle one-on-one sessions and class bookings across multiple staff calendars.\n\n**Consultants and professional services** \u2013 Lawyers, accountants, financial advisors and agencies use meeting booking with Google Meet or Zoom (Pro) for virtual consultations.\n\n**Event organizers** \u2013 Workshop hosts, trainers and community groups sell tickets, track capacity and manage attendance from the same plugin.\n\n\n### \u2705 Classified Listing Integration\n\nRadius Booking integrates with our [Classified Listing](https://wordpress.org/plugins/classified-listing/) directory plugin. Listings sync as bookable services, listing owners become staff members, booking forms pre-fill with listing details, and a Book Now button appears on listing pages, turning a business directory into a service marketplace with built-in booking.",
+    "free features": "**Appointment Booking System**\nCustomers browse services, select a staff member, pick a date and time from the live booking calendar and confirm. Choose a service-first or staff-first flow. A multi-step form with a progress indicator and running summary keeps the process clear on desktop and mobile. Guest checkout is supported, with optional account creation.\n\n**Booking Calendar and Availability**\nSet business hours, multiple working periods per day, named breaks, special days with custom hours, and days off or vacation ranges with optional annual recurrence. Special days override weekday schedules, which override global defaults. Time periods can be scoped to specific services and locations.\n\n**Meeting Scheduling**\nCreate meeting types with their own duration, price and color. Each staff member sets weekly availability windows, with buffer time before and after slots and date overrides for specific days. Set minimum notice, maximum advance booking days and maximum bookings per day. Meetings can be online, in person or hybrid, and can require admin approval. Customers reschedule through a unique link without logging in.\n\n**Event Registration and Ticketing**\nCreate events with multiple sessions, each with its own date, time, speaker, capacity and location. Offer multiple ticket types (paid, free or early-bird) with sale windows and minimum or maximum tickets per order. Capacity is enforced in real time, with an optional waitlist, registration deadline and featured flag. Manage registrations, check-ins and event status from draft to completed.\n\n**Admin Calendar View**\nSee all appointments, events and meetings in month and day views. Filter by service, staff member or customer to find openings and busy periods.\n\n**Appointment Management**\nView, filter and search bookings by date, staff, service or status (pending, confirmed, completed, cancelled). Assign or reassign staff and keep a full booking history.\n\n**Service Management**\n* Unlimited services with descriptions, images, duration and pricing\n* Service categories\n* Buffer time before and after each appointment, set separately\n* Minimum and maximum customers per slot\n* Extra guests with per-service limits and flat or per-person pricing\n* Per-customer booking limits (for example, three bookings per month)\n* Visible, hidden or disabled service states\n* Automatic staff assignment by price or workload\n\n**Staff Management**\n* Unlimited staff members with profiles, photos and contact details\n* Assign services to each staff member with optional custom pricing and capacity\n* Individual working hours, breaks, special days and days off\n* Staff dashboard to view appointments, customer details and edit assigned services\n* Dedicated staff role with granular permissions\n\n**Customer Management and Portal**\nA central customer database with contact details, booking history, internal notes, search and filtering. Optionally create WordPress user accounts when customers book. Customers get their own portal to view upcoming and past bookings with payment details and manage their profile and password.\n\n**Email Notifications**\nCustomizable email templates for every booking event, sent to customers, staff and admins. Merge tags insert customer name, service, date, time, price, booking ID, staff details, phone numbers, confirmation or cancellation links and custom fields. Set the sender name, address and reply-to. One appointment reminder can be scheduled before each booking.\n\n**Payments and Pricing**\nAccept PayPal payments at booking time, or offer pay-later and offline options such as cash or bank transfer. Set fixed, variable or per-staff pricing. A transaction ledger records every payment and refund with status tracking.\n\n**Google Calendar, Google Meet and Google Maps**\nTwo-way Google Calendar sync creates, updates and deletes calendar events and blocks busy times. Google Meet links are generated automatically for meeting bookings. Google Maps geolocation detects customer location for location-aware booking.\n\n**AI Chat Widget**\nA floating chat widget with a configurable bot name, colors, position, icon and welcome message, shown on all pages or selected ones. Live conversational booking requires Pro.\n\n**Dashboard**\nAn overview of today's appointments, revenue, recent activity and upcoming bookings with appointment and revenue charts.\n\n**Elementor, Gutenberg and Shortcodes**\nElementor widgets and Gutenberg blocks for the booking form, service list, staff list, meeting list, event list and event registration, with layout, filtering and styling options. Shortcodes are available for every component:\n\n* `[radius_booking_form]` \u2013 appointment booking form\n* `[rtrb_service_list]` \u2013 service catalog\n* `[rtrb_employee_list]` \u2013 staff directory\n* `[rtrb_my_booking]` \u2013 customer portal\n* `[rtrb_meeting_list]` and `[rtrb_meeting_booking]` \u2013 meeting types and booking form\n* `[rtrb_event_list]` and `[rtrb_event_registration]` \u2013 events and registration form\n\n**Appearance Settings**\nCustomize colors, typography, layout, field labels and placeholder text. The front end is fully responsive and styled with CSS variables for easy theming.\n\n**Import and Export**\nExport and import services, categories, staff, locations, customers, appointments and settings in batches, with relationships preserved.\n\n**Translation Ready and Multisite**\nShips with translation files for 33 languages, supports right-to-left scripts and works with Loco Translate. Supports WordPress Multisite with per-site configuration and network activation.",
+    "frequently asked questions": "= How do I add an appointment booking form to my WordPress site? =\n\nInstall and activate Radius Booking, run the setup wizard, add at least one service and one staff member, then place the form on a page using the `[radius_booking_form]` shortcode, the Radius Booking Gutenberg block or the Elementor widget.\n\n= Is Radius Booking free? =\n\nYes. The free version includes unlimited services and staff, the booking calendar, meeting and event booking, email notifications, a customer portal, PayPal payments and Google Calendar sync. Pro adds Stripe, WooCommerce, deposits, coupons, dynamic pricing, recurring appointments, multi-location support, payouts, WhatsApp notifications, advanced analytics and the AI booking assistant.\n\n= Can customers pay when they book? =\n\nYes. The free version supports PayPal and offline or pay-later options. Pro adds Stripe, WooCommerce checkout and deposit payments.\n\n= Does it support multiple staff members with their own schedules? =\n\nYes. Add unlimited staff, assign services to each, and set individual working hours, breaks, special days and days off. Customers can book with a specific staff member, or the plugin can assign one automatically.\n\n= Can I use it as a salon booking plugin? =\n\nYes. Staff profiles, per-staff services and pricing, buffer times and a staff-first booking flow cover the needs of salons, spas and barbershops.\n\n= Does it work for clinics and healthcare scheduling? =\n\nYes. Automated confirmations and reminders, a customer database with booking history and notes, and custom intake fields (Pro) are used by clinics, dentists, therapists and other practices.\n\n= Does Radius Booking support event registration? =\n\nYes. Create events with multiple sessions and ticket types, set capacity and sale windows, enable a waitlist and manage registrations and check-ins.\n\n= Can I use it for meeting scheduling? =\n\nYes. Define meeting types with fixed durations, set availability per staff member, require approval if needed and auto-generate Google Meet links. Zoom is available in Pro.\n\n= Does it sync with Google Calendar? =\n\nYes. Two-way Google Calendar sync is included in the free version. Apple Calendar and Outlook support is available in Pro.\n\n= Can customers cancel or reschedule their own bookings? =\n\nCustomers can view their bookings in the portal in the free version. Self-service cancellation and rescheduling within policies you define are Pro features.\n\n= Are recurring appointments supported? =\n\nYes, in Pro. Customers can book a series of daily, weekly, monthly or custom-interval appointments.\n\n= Can I manage multiple business locations? =\n\nYes, in Pro. Create locations with their own details, assign staff and set per-location pricing.\n\n= How does the AI booking assistant work? =\n\nThe chat widget is included in the free version. Live conversational booking is a Pro feature: you connect your own OpenAI or Google Gemini API key. Customers describe what they need in the chat widget, and the assistant checks availability and completes, reschedules or cancels bookings. You pay your AI provider for usage; the plugin does not charge per booking.\n\n= Can I pay staff commissions? =\n\nYes, in Pro. Set commission rates per staff member, let staff request payouts from their dashboard and approve them from the admin, with a full payout ledger.\n\n= Can I send WhatsApp notifications? =\n\nYes, in Pro. Connect Twilio or the Meta WhatsApp Cloud API to send confirmations, reminders and cancellation notices for appointments, meetings and events.\n\n= Is it compatible with WooCommerce? =\n\nYes, in Pro. Bookings can go through the WooCommerce cart and checkout, so you can use any WooCommerce payment gateway and keep appointment and order statuses in sync.\n\n= Is it compatible with Elementor and Gutenberg? =\n\nYes. Dedicated Elementor widgets and Gutenberg blocks are included, along with shortcodes for use anywhere.\n\n= Is the plugin translation ready? =\n\nYes. Translation files for 33 languages are included, and the plugin works with Loco Translate and other translation tools.\n\n= How can I report security bugs? =\n\nYou can report security bugs through the Patchstack Vulnerability Disclosure Program. The Patchstack team help validate, triage and handle any security vulnerabilities. [Report a security vulnerability.]( https://patchstack.com/database/vdp/a1bce917-dc8d-4229-87aa-d8ed2de7367e )",
+    "installation": "= From the WordPress dashboard =\n\n1. Go to **Plugins > Add New**.\n2. Search for \"Radius Booking\".\n3. Click **Install Now**, then **Activate**.\n\n= Manual installation =\n\n1. Upload the plugin folder to `/wp-content/plugins/radius-booking/`, or upload the zip file from **Plugins > Add New > Upload Plugin**.\n2. Activate the plugin from the **Plugins** screen.\n\n= After activation =\n\n1. Follow the setup wizard to enter your business details and hours.\n2. Add services and staff members.\n3. Place the booking form on any page with the `[radius_booking_form]` shortcode, the Gutenberg block or the Elementor widget.",
+    "screenshots": "1. Booking calendar front-end view \u2014 Clean interface for customers to select appointments\n2. Admin dashboard \u2014 Overview of your bookings and key metrics\n3. Service management \u2014 Create and organize your business services\n4. Staff management \u2014 Add team members and set their availability\n5. Booking form builder \u2014 Customize forms to collect the right information\n6. Analytics dashboard \u2014 Track your booking performance over time\n7. Settings panel \u2014 Configure your booking system preferences\n8. Email notification settings \u2014 Customize your automated messages\n9. Multi-location management \u2014 Organize bookings across different offices\n10. Mobile booking view \u2014 Responsive design for smartphone users",
+    "support and documentation": "* [Documentation](https://radiusbooking.co/docs/)\n* [Video Tutorials](https://www.youtube.com/@RadiusTheme)\n* [Support Ticket](https://www.me.com/ticket-support/)\n* [Facebook Community](https://www.facebook.com/groups/me)\n\n\n### \ud83d\udd25 More WordPress Plugins by RadiusTheme\n\nIf you find Radius Booking helpful, check out our other WordPress plugins:\n\n* [Classified Listing](https://wordpress.org/plugins/classified-listing/) \u2013 Best Classified ads and Directory WordPress Plugin\n* [Variation Swatches](https://wordpress.org/plugins/woo-product-variation-swatches/) \u2013 WooCommerce Variation Swatches plugin converts variation select fields into radio, images, colors, and labels.\n* [Variation Gallery](https://wordpress.org/plugins/woo-product-variation-gallery/) \u2013 WooCommerce Variation Gallery plugin allows adding additional images for each product variation.\n* [ShopBuilder](https://wordpress.org/plugins/shopbuilder/) \u2013 Elementor WooCommerce Builder Addons with 84+ widgets and 10+ modules.\n* [Food Menu](https://wordpress.org/plugins/tlp-food-menu/) \u2013 Restaurant Menu & Online Ordering using WooCommerce.",
+    "\ud83d\udc8e pro features": "[Radius Booking Pro](https://radiusbooking.co/pricing/) extends the free plugin with:\n\n**AI Booking Assistant**\nThe chat widget becomes a working booking assistant. Connect your own OpenAI or Google Gemini API key and choose the model. Through natural conversation the assistant can list services and staff, check availability, create bookings, retrieve booking details, and reschedule or cancel appointments. It handles multi-step conversations, shows structured cards alongside text and answers questions from a custom knowledge base of Q&A entries organized by category. You pay your AI provider directly; the plugin adds no per-booking fees.\n\n**How to configure the AI Booking Assistant**\n\n[youtube https://www.youtube.com/watch?v=Yfo19sfL6AE]\n\n**Payment Gateways**\n\n*Stripe Payment Gateway: Accept credit card payments securely with Stripe. Provide a seamless checkout experience supporting all major credit cards, PCI-compliant processing, automatic payment confirmations, and refund management.\n\n* WooCommerce checkout: route bookings through the WooCommerce cart, sync appointment status with order status, cancel on refund, hold unpaid slots for a set time and use any WooCommerce payment gateway\n\n*Deposit Payments: Secure bookings with upfront partial payments. Set deposit amounts as a percentage or fixed amount, reduce no-shows through financial commitment, improve cash flow predictability, and collect remaining balances at service time.\n\n**Pricing and Promotions**\n* Dynamic pricing rules by time of day, day of week, date range, season or slot availability, with percentage or fixed adjustments and first-match-wins ordering\n* Per-location pricing for the same service\n* Coupons and discount codes with percentage or fixed discounts, usage limits, minimum order amounts, maximum discount caps, expiry dates, per-service scoping and auto-apply\n* Tax rates (inclusive or exclusive) with custom labels, reflected in invoices\n\n**PDF Invoices**\nGenerate invoices with line items for services, staff, dates, prices, dynamic pricing adjustments, coupon discounts, taxes and totals. Email invoices to customers and set your own numbering scheme.\n\n**Team Management**\n* Staff edit their own working hours, days off and special days\n* Staff create and delete their own services\n* Sub-staff hierarchy: staff create and manage sub-staff and control their permissions\n* Multi-staff bookings for services that need more than one person, with simultaneous availability checks\n* No-staff booking flow with staff assigned later\n\n**Scheduling**\n* Recurring appointments (daily, weekly, monthly, yearly or custom intervals), with the option to charge the whole series upfront, charge only the first appointment or make follow-ups free, plus per-instance date overrides\n* Multi-location management with addresses, contact details and staff assignment\n* Per-service booking rules that override global defaults for minimum notice, cancellation windows, reschedule notice and advance booking period\n* Self-service cancellation with reason capture and self-service rescheduling with availability re-validation, within policies you define\n\n**Notifications**\n* Multiple appointment reminders at different intervals (for example, 24 hours and 1 hour before)\n* WhatsApp notifications via Twilio or the Meta WhatsApp Cloud API for appointment, meeting and event confirmations, reminders, rescheduling and cancellations, with a connection test and delivery log\n\n**Custom Fields and Roles**\n* Custom fields scoped to individual services, meetings or events, with conditional logic\n* Custom admin roles with a capabilities matrix editor\n\n**Advanced Analytics**\nKPI summary of total revenue, appointments, new customers, average revenue per appointment and cancellation rate, each compared with the previous period. Revenue trends and sources, appointment volume and status breakdown, staff earnings and bookings, service profitability, and customer repeat rates and lifetime value. Filter by any date range and export to CSV.\n\n**Integrations**\n* Zoom meetings created automatically for service and meeting bookings, with links in confirmation emails and configurable password and waiting room settings\n* Apple Calendar and Outlook via ICS download, a direct add-to-Outlook link and a live calendar feed with embedded reminders\n\n**Data and Updates**\n* Import and export coupons, custom fields, dynamic pricing rules and payouts\n* License activation with automatic updates"
+   },
+   "shortDescription": "Appointment booking calendar and scheduling plugin for services, events and meetings, with staff management, online payments and Google Calendar sync."
+  },
+  "readmeFile": "readme.txt",
+  "textDomain": "radius-booking",
+  "type": "plugin",
+  "version": "1.0.24"
+ },
+ "directoryStatus": {
+  "checkedAt": 817293751.176556,
+  "listedVersion": "1.0.24",
+  "liveSince": 817293751.176556,
+  "state": "live"
+ },
+ "errors": [],
+ "guidance": [
+  "WordPress.org holds new releases for a security review period (currently about 6 hours) before offering the update to sites. ReleaseDock checks the directory and notifies you when 1.0.24 is live.",
+  "If Release Confirmation is enabled for Radius Booking - Al-Powered Appointment & Service Booking, every committer receives a \"Pending release\" email. Confirm version 1.0.24 at https://wordpress.org/plugins/developers/releases/ \u2014 users stay on the previous version until it is confirmed.",
+  "Do not modify tags/1.0.24 after it is confirmed; changes require confirming again."
+ ],
+ "id": "34629C18-132D-4671-9B07-748F19721D10",
+ "inspection": {
+  "archiveRootName": "radius-booking",
+  "excludedPaths": [],
+  "includedEntries": [
+   {
+    "kind": "file",
+    "path": "README.md",
+    "size": 1185
+   },
+   {
+    "kind": "directory",
+    "path": "assets",
+    "size": 0
+   },
+   {
+    "kind": "directory",
+    "path": "assets/icon",
+    "size": 0
+   },
+   {
+    "kind": "file",
+    "path": "assets/icon/calendar.svg",
+    "size": 3844
+   },
+   {
+    "kind": "directory",
+    "path": "assets/js",
+    "size": 0
+   },
+   {
+    "kind": "file",
+    "path": "assets/js/auth.js",
+    "size": 9831
+   },
+   {
+    "kind": "file",
+    "path": "assets/js/cl-booking.js",
+    "size": 3161
+   },
+   {
+    "kind": "file",
+    "path": "assets/js/cl-listing-form.js",
+    "size": 10589
+   },
+   {
+    "kind": "directory",
+    "path": "build",
+    "size": 0
+   },
+   {
+    "kind": "directory",
+    "path": "build/assets",
+    "size": 0
+   },
+   {
+    "kind": "directory",
+    "path": "build/assets/css",
+    "size": 0
+   },
+   {
+    "kind": "file",
+    "path": "build/assets/css/chatbot-D7zChmpF.css",
+    "size": 12672
+   },
+   {
+    "kind": "file",
+    "path": "build/assets/css/employeeList-B6d7qszk.css",
+    "size": 7482
+   },
+   {
+    "kind": "file",
+    "path": "build/assets/css/eventBooking-SboTGNwl.css",
+    "size": 1725
+   },
+   {
+    "kind": "file",
+    "path": "build/assets/css/frontend-index-BKqkfWO6.css",
+    "size": 213194
+   },
+   {
+    "kind": "file",
+    "path": "build/assets/css/index-DsSfl2xt.css",
+    "size": 220943
+   },
+   {
+    "kind": "file",
+    "path": "build/assets/css/serviceList-z6w0H8Ds.css",
+    "size": 1262
+   },
+   {
+    "kind": "directory",
+    "path": "build/assets/js",
+    "size": 0
+   },
+   {
+    "kind": "file",
+    "path": "build/assets/js/ActionButton-BWgK_oi2.js",
+    "size": 1359
+   },
+   {
+    "kind": "file",
+    "path": "build/assets/js/AddLocationForm-C-SoeNwK.js",
+    "size": 5140
+   },
+   {
+    "kind": "file",
+    "path": "build/assets/js/Analytics-CAm9bJfR.js",
+    "size": 28552
+   },
+   {
+    "kind": "file",
+    "path": "build/assets/js/AppointmentDetails-T57ITNXs.js",
+    "size": 54688
+   },
+   {
+    "kind": "file",
+    "path": "build/assets/js/AppointmentIcon-Dm0VK57O.js",
+    "size": 28617
+   },
+   {
+    "kind": "file",
+    "path": "build/assets/js/ArrowLeftIcon-CIooSw3G.js",
+    "size": 507
+   },
+   {
+    "kind": "file",
+    "path": "build/assets/js/ArrowRightIcon-DTYNQqD9.js",
+    "size": 498
+   },
+   {
+    "kind": "file",
+    "path": "build/assets/js/BookingModal-BouxC4y3.js",
+    "size": 12312
+   },
+   {
+    "kind": "file",
+    "path": "build/assets/js/Button-TOLGE_cE.js",
+    "size": 26664
+   },
+   {
+    "kind": "file",
+    "path": "build/assets/js/Calendar-Bpji-5qS.js",
+    "size": 56278
+   },
+   {
+    "kind": "file",
+    "path": "build/assets/js/Calender-B4O1uEtB.js",
+    "size": 1271
+   },
+   {
+    "kind": "file",
+    "path": "build/assets/js/CalenderCheck-CevJHj-q.js",
+    "size": 5604
+   },
+   {
+    "kind": "file",
+    "path": "build/assets/js/CategorySelect-CMbo4Mwf.js",
+    "size": 3826
+   },
+   {
+    "kind": "file",
+    "path": "build/assets/js/Clock-BVs0LH9I.js",
+    "size": 1878
+   },
+   {
+    "kind": "file",
+    "path": "build/assets/js/Cogs-CWPdrtEh.js",
+    "size": 2419
+   },
+   {
+    "kind": "file",
+    "path": "build/assets/js/Combination-D2eFdUBf.js",
+    "size": 26360
+   },
+   {
+    "kind": "file",
+    "path": "build/assets/js/ConfirmDialog-DiDRvvSz.js",
+    "size": 727
+   },
+   {
+    "kind": "file",
+    "path": "build/assets/js/CountCard-C7Lbl32D.js",
+    "size": 767
+   },
+   {
+    "kind": "file",
+    "path": "build/assets/js/CreditCard-BD4-10Fk.js",
+    "size": 1463
+   },
+   {
+    "kind": "file",
+    "path": "build/assets/js/CrudLayout-DcxS6-zH.js",
+    "size": 1101
+   },
+   {
+    "kind": "file",
+    "path": "build/assets/js/CustomFieldAnswersChip-VwQuBm_9.js",
+    "size": 724
+   },
+   {
+    "kind": "file",
+    "path": "build/assets/js/CustomFieldsBlock-YQL-iDtw.js",
+    "size": 2803
+   }
+  ],
+  "inspectedAt": 817293326.082611,
+  "issues": [],
+  "sha256": "ea68bee9f613e9fd4bc85ee0708ffe942557747435e24448a2bab04477963db4",
+  "sourceKind": "zip",
+  "sourcePath": "/Users/me/Downloads/radius-booking.1.0.24.zip",
+  "totalUncompressedSize": 13279983
+ },
+ "manifestPath": "/Users/me/Library/Application Support/ReleaseDock/ReleaseDockData/Releases/radius-booking/1.0.24-34629C18/manifest.json",
+ "mode": "assisted",
+ "preview": {
+  "changes": [
+   {
+    "isCopy": true,
+    "isDirectory": true,
+    "kind": "added",
+    "path": "tags/1.0.24"
+   },
+   {
+    "isCopy": false,
+    "isDirectory": false,
+    "kind": "added",
+    "path": "tags/1.0.24/build/assets/css/frontend-index-BKqkfWO6.css"
+   },
+   {
+    "isCopy": false,
+    "isDirectory": false,
+    "kind": "deleted",
+    "path": "tags/1.0.24/build/assets/css/frontend-index-EJwj0RKB.css"
+   },
+   {
+    "isCopy": false,
+    "isDirectory": false,
+    "kind": "added",
+    "path": "tags/1.0.24/build/assets/css/index-DsSfl2xt.css"
+   },
+   {
+    "isCopy": false,
+    "isDirectory": false,
+    "kind": "deleted",
+    "path": "tags/1.0.24/build/assets/css/index-KtBZAB7-.css"
+   },
+   {
+    "isCopy": false,
+    "isDirectory": false,
+    "kind": "added",
+    "path": "tags/1.0.24/build/assets/js/ActionButton-BWgK_oi2.js"
+   },
+   {
+    "isCopy": false,
+    "isDirectory": false,
+    "kind": "deleted",
+    "path": "tags/1.0.24/build/assets/js/ActionButton-D2cY0plR.js"
+   },
+   {
+    "isCopy": false,
+    "isDirectory": false,
+    "kind": "deleted",
+    "path": "tags/1.0.24/build/assets/js/AddLocationForm-BVouNMTX.js"
+   },
+   {
+    "isCopy": false,
+    "isDirectory": false,
+    "kind": "added",
+    "path": "tags/1.0.24/build/assets/js/AddLocationForm-C-SoeNwK.js"
+   },
+   {
+    "isCopy": false,
+    "isDirectory": false,
+    "kind": "added",
+    "path": "tags/1.0.24/build/assets/js/Analytics-CAm9bJfR.js"
+   },
+   {
+    "isCopy": false,
+    "isDirectory": false,
+    "kind": "deleted",
+    "path": "tags/1.0.24/build/assets/js/Analytics-FJ1W0oKc.js"
+   },
+   {
+    "isCopy": false,
+    "isDirectory": false,
+    "kind": "deleted",
+    "path": "tags/1.0.24/build/assets/js/AppointmentDetails-9Xprc6Qb.js"
+   },
+   {
+    "isCopy": false,
+    "isDirectory": false,
+    "kind": "added",
+    "path": "tags/1.0.24/build/assets/js/AppointmentDetails-T57ITNXs.js"
+   },
+   {
+    "isCopy": false,
+    "isDirectory": false,
+    "kind": "added",
+    "path": "tags/1.0.24/build/assets/js/BookingModal-BouxC4y3.js"
+   },
+   {
+    "isCopy": false,
+    "isDirectory": false,
+    "kind": "deleted",
+    "path": "tags/1.0.24/build/assets/js/BookingModal-CpbdVMoR.js"
+   },
+   {
+    "isCopy": false,
+    "isDirectory": false,
+    "kind": "added",
+    "path": "tags/1.0.24/build/assets/js/Calendar-Bpji-5qS.js"
+   },
+   {
+    "isCopy": false,
+    "isDirectory": false,
+    "kind": "deleted",
+    "path": "tags/1.0.24/build/assets/js/Calendar-sYhvYCzz.js"
+   },
+   {
+    "isCopy": false,
+    "isDirectory": false,
+    "kind": "added",
+    "path": "tags/1.0.24/build/assets/js/CategorySelect-CMbo4Mwf.js"
+   },
+   {
+    "isCopy": false,
+    "isDirectory": false,
+    "kind": "deleted",
+    "path": "tags/1.0.24/build/assets/js/CategorySelect-Dah7Gy-D.js"
+   },
+   {
+    "isCopy": false,
+    "isDirectory": false,
+    "kind": "deleted",
+    "path": "tags/1.0.24/build/assets/js/CrudLayout-C815KBhY.js"
+   },
+   {
+    "isCopy": false,
+    "isDirectory": false,
+    "kind": "added",
+    "path": "tags/1.0.24/build/assets/js/CrudLayout-DcxS6-zH.js"
+   },
+   {
+    "isCopy": false,
+    "isDirectory": false,
+    "kind": "deleted",
+    "path": "tags/1.0.24/build/assets/js/CustomFieldAnswersChip-Bps56kex.js"
+   },
+   {
+    "isCopy": false,
+    "isDirectory": false,
+    "kind": "added",
+    "path": "tags/1.0.24/build/assets/js/CustomFieldAnswersChip-VwQuBm_9.js"
+   },
+   {
+    "isCopy": false,
+    "isDirectory": false,
+    "kind": "deleted",
+    "path": "tags/1.0.24/build/assets/js/Dashboard--V37Z4-_.js"
+   },
+   {
+    "isCopy": false,
+    "isDirectory": false,
+    "kind": "added",
+    "path": "tags/1.0.24/build/assets/js/Dashboard-DtQtlYIE.js"
+   },
+   {
+    "isCopy": false,
+    "isDirectory": false,
+    "kind": "deleted",
+    "path": "tags/1.0.24/build/assets/js/EmbeddedChat-C5_wMKxl.js"
+   },
+   {
+    "isCopy": false,
+    "isDirectory": false,
+    "kind": "added",
+    "path": "tags/1.0.24/build/assets/js/EmbeddedChat-D9LOT5Jo.js"
+   },
+   {
+    "isCopy": false,
+    "isDirectory": false,
+    "kind": "added",
+    "path": "tags/1.0.24/build/assets/js/EmployeeForm-7Dy2SL-T.js"
+   },
+   {
+    "isCopy": false,
+    "isDirectory": false,
+    "kind": "deleted",
+    "path": "tags/1.0.24/build/assets/js/EmployeeForm-CSfdA7ui.js"
+   },
+   {
+    "isCopy": false,
+    "isDirectory": false,
+    "kind": "added",
+    "path": "tags/1.0.24/build/assets/js/PaymentSection-CzQzGYBp.js"
+   },
+   {
+    "isCopy": false,
+    "isDirectory": false,
+    "kind": "deleted",
+    "path": "tags/1.0.24/build/assets/js/PaymentSection-DZRXRz9P.js"
+   },
+   {
+    "isCopy": false,
+    "isDirectory": false,
+    "kind": "added",
+    "path": "tags/1.0.24/build/assets/js/Tabs-0DdmP4yU.js"
+   },
+   {
+    "isCopy": false,
+    "isDirectory": false,
+    "kind": "deleted",
+    "path": "tags/1.0.24/build/assets/js/Tabs-BFbVtKYy.js"
+   },
+   {
+    "isCopy": false,
+    "isDirectory": false,
+    "kind": "added",
+    "path": "tags/1.0.24/build/assets/js/date-picker-BtL3Mu8l.js"
+   },
+   {
+    "isCopy": false,
+    "isDirectory": false,
+    "kind": "deleted",
+    "path": "tags/1.0.24/build/assets/js/date-picker-C-eMUaoo.js"
+   },
+   {
+    "isCopy": false,
+    "isDirectory": false,
+    "kind": "deleted",
+    "path": "tags/1.0.24/build/assets/js/dateTimeFormat-Df_ir-x_.js"
+   },
+   {
+    "isCopy": false,
+    "isDirectory": false,
+    "kind": "added",
+    "path": "tags/1.0.24/build/assets/js/dateTimeFormat-DwhAaEaa.js"
+   },
+   {
+    "isCopy": false,
+    "isDirectory": false,
+    "kind": "added",
+    "path": "tags/1.0.24/build/assets/js/dateTimeFormat-q7HoApyW.js"
+   },
+   {
+    "isCopy": false,
+    "isDirectory": false,
+    "kind": "deleted",
+    "path": "tags/1.0.24/build/assets/js/dateTimeFormat-yH4yHSCh.js"
+   },
+   {
+    "isCopy": false,
+    "isDirectory": false,
+    "kind": "added",
+    "path": "tags/1.0.24/build/assets/js/employeeList-C8-gtu-q.js"
+   }
+  ],
+  "commitMessage": "Release Radius Booking - Al-Powered Appointment & Service Booking 1.0.24\n\nReleaseDock-Release-ID: 34629C18-132D-4671-9B07-748F19721D10\n",
+  "createdAt": 817293342.635911,
+  "diffExcerpt": "Index: /Users/me/svn/radius-booking/tags/1.0.24/README.md\n===================================================================\nIndex: /Users/me/svn/radius-booking/tags/1.0.24/assets/icon/calendar.svg\n===================================================================\nIndex: /Users/me/svn/radius-booking/tags/1.0.24/assets/js/auth.js\n===================================================================\nIndex: /Users/me/svn/radius-booking/tags/1.0.24/assets/js/cl-booking.js\n===================================================================\nIndex: /Users/me/svn/radius-booking/tags/1.0.24/assets/js/cl-listing-form.js\n===================================================================\nIndex: /Users/me/svn/radius-booking/tags/1.0.24/build/assets/css/chatbot-D7zChmpF.css\n===================================================================\nIndex: /Users/me/svn/radius-booking/tags/1.0.24/build/assets/css/employeeList-B6d7qszk.css\n===================================================================\nIndex: /Users/me/svn/radius-booking/tags/1.0.24/build/assets/css/eventBooking-SboTGNwl.css\n===================================================================\nIndex: /Users/me/svn/radius-booking/tags/1.0.24/build/assets/css/frontend-index-BKqkfWO6.css\n===================================================================\n--- /Users/me/svn/radius-booking/tags/1.0.24/build/assets/css/frontend-index-BKqkfWO6.css\t(nonexistent)\n+++ /Users/me/svn/radius-booking/tags/1.0.24/build/assets/css/frontend-index-BKqkfWO6.css\t(working copy)\n@@ -0,0 +1 @@\n+.rtrb-input-group select{padding-top:0;padding-bottom:0}.rtrb-input-group button{box-shadow:0 1px 2px #ebebeb!important;color:var(--title)!important}.rtrb-input-group button svg{width:22px!important;height:22px!important;stroke:#7f8699;opacity:1!important}.rtrb-input-group [data-state=open],.rtrb-input-group button:focus{box-shadow:none!important;border-color:#a5c0d8!important}body .rtrb-input-group label,body .rtrb-step-card{margin-bottom:.625rem;displ",
+  "diffTruncated": true,
+  "fingerprint": "293fdbbbb7a45588e06fb5a47aa6bbd8bb19459cb94d1c8ad5292769f6a01592",
+  "workingCopyRevision": 3822478
+ },
+ "previousVersion": "1.0.23",
+ "productID": "EE90AEAA-DAB2-45F4-805D-58DE936B984C",
+ "productName": "Radius Booking - Al-Powered Appointment & Service Booking",
+ "productSlug": "radius-booking",
+ "productType": "plugin",
+ "releaseKind": "version",
+ "repository": {
+  "authentication": "cachedBySVN",
+  "currentVersion": "1.0.23",
+  "currentVersionSource": "trunk readme Stable tag",
+  "existingVersions": [
+   "1.0.10",
+   "1.0.11",
+   "1.0.12",
+   "1.0.13",
+   "1.0.14",
+   "1.0.15",
+   "1.0.16",
+   "1.0.17",
+   "1.0.18",
+   "1.0.19",
+   "1.0.20",
+   "1.0.21",
+   "1.0.22",
+   "1.0.23",
+   "1.0.4",
+   "1.0.5",
+   "1.0.6",
+   "1.0.7",
+   "1.0.8",
+   "1.0.9"
+  ],
+  "latestWordPressVersion": "7.1.5",
+  "notes": [],
+  "outOfDatePaths": [],
+  "readmeTitle": "Radius Booking \u2013 Appointment Booking Calendar & Scheduling for Services & Events",
+  "releasePathExists": false,
+  "remoteRevision": 3816115,
+  "repositoryExists": true,
+  "structureProblems": [],
+  "svnVersion": "1.14.5",
+  "workingCopyChanges": [],
+  "workingCopyExists": true,
+  "workingCopyRevision": 3822478
+ },
+ "revisionBefore": 3816115,
+ "source": {
+  "zip": {
+   "path": "/Users/me/Downloads/radius-booking.1.0.24.zip"
+  }
+ },
+ "sourceSHA256": "ea68bee9f613e9fd4bc85ee0708ffe942557747435e24448a2bab04477963db4",
+ "stagingPath": "/Users/me/Library/Application Support/ReleaseDock/ReleaseDockData/Staging/34629C18-132D-4671-9B07-748F19721D10",
+ "state": "completed",
+ "svnURL": "https://plugins.svn.wordpress.org/radius-booking",
+ "transitions": [
+  {
+   "at": 817293326.03244,
+   "to": "detected"
+  },
+  {
+   "at": 817293326.460314,
+   "from": "detected",
+   "note": "Inspected 1488 files; version 1.0.24",
+   "to": "inspected"
+  },
+  {
+   "at": 817293339.694091,
+   "from": "inspected",
+   "note": "All required checks passed (2 warning(s))",
+   "to": "validated"
+  },
+  {
+   "at": 817293342.037967,
+   "from": "validated",
+   "note": "Staged 1488 files into tags/1.0.24",
+   "to": "staged"
+  },
+  {
+   "at": 817293342.641596,
+   "from": "staged",
+   "note": "Preview: 100 added, 112 modified, 98 deleted",
+   "to": "previewed"
+  },
+  {
+   "at": 817293378.680103,
+   "from": "previewed",
+   "note": "Approved by user",
+   "to": "approved"
+  },
+  {
+   "at": 817293387.30236,
+   "from": "approved",
+   "note": "Committing to https://plugins.svn.wordpress.org/radius-booking",
+   "to": "publishing"
+  },
+  {
+   "at": 817293596.070622,
+   "from": "publishing",
+   "note": "Committed revision 3822482",
+   "to": "verifying"
+  },
+  {
+   "at": 817293629.052646,
+   "from": "verifying",
+   "note": "Verified; revision 3822482",
+   "to": "completed"
+  }
+ ],
+ "updatedAt": 817293629.052646,
+ "validation": {
+  "blockOnWarnings": false,
+  "results": [
+   {
+    "check": "sourceIntegrity",
+    "message": "ZIP SHA-256 ea68bee9f613e9fd\u2026, 1488 files",
+    "name": "Source integrity",
+    "severity": "info",
+    "status": "passed"
+   },
+   {
+    "check": "packageStructure",
+    "message": "Package structure is safe",
+    "name": "Package structure",
+    "severity": "info",
+    "status": "passed"
+   },
+   {
+    "check": "forbiddenFiles",
+    "message": "No forbidden files in the release candidate",
+    "name": "Forbidden files",
+    "severity": "info",
+    "status": "passed"
+   },
+   {
+    "check": "productIdentity",
+    "message": "Plugin Name \"Radius Booking - Al-Powered Appointment & Service Booking\" matches",
+    "name": "Product identity",
+    "severity": "info",
+    "status": "passed"
+   },
+   {
+    "check": "versionValidity",
+    "message": "Version 1.0.24",
+    "name": "Version validity",
+    "severity": "info",
+    "status": "passed"
+   },
+   {
+    "check": "versionIncrease",
+    "message": "1.0.24 is newer than 1.0.23",
+    "name": "Version increase",
+    "severity": "info",
+    "status": "passed"
+   },
+   {
+    "check": "existingTag",
+    "message": "tags/1.0.24 does not exist yet",
+    "name": "Existing release tag",
+    "severity": "info",
+    "status": "passed"
+   },
+   {
+    "check": "metadataValidity",
+    "message": "Stable tag 1.0.24 matches the plugin version",
+    "name": "Metadata validity",
+    "severity": "info",
+    "status": "passed"
+   },
+   {
+    "check": "metadataValidity",
+    "filePath": "readme.txt",
+    "message": "readme is 26 KB; WordPress.org recommends under 10 KB",
+    "name": "Metadata validity",
+    "severity": "warning",
+    "status": "warning",
+    "suggestion": "Keep the latest changelog entries in the readme and move older ones to changelog.txt."
+   },
+   {
+    "check": "changelogEntry",
+    "message": "Changelog has an entry for 1.0.24",
+    "name": "Changelog entry",
+    "severity": "info",
+    "status": "passed"
+   },
+   {
+    "check": "requiredFiles",
+    "message": "Main plugin file radius-booking.php is at the package root",
+    "name": "Required files",
+    "severity": "info",
+    "status": "passed"
+   },
+   {
+    "check": "requiredFiles",
+    "message": "readme.txt present",
+    "name": "Required files",
+    "severity": "info",
+    "status": "passed"
+   },
+   {
+    "check": "svnConnectivity",
+    "message": "Connected (svn 1.14.5, r3816115)",
+    "name": "SVN connectivity",
+    "severity": "info",
+    "status": "passed"
+   },
+   {
+    "check": "workingCopyClean",
+    "message": "Working copy is clean",
+    "name": "Working copy cleanliness",
+    "severity": "info",
+    "status": "passed"
+   },
+   {
+    "check": "remoteFreshness",
+    "message": "Working copy is up to date (r3822478)",
+    "name": "Remote repository freshness",
+    "severity": "info",
+    "status": "passed"
+   },
+   {
+    "check": "authentication",
+    "message": "svn has cached credentials for this repository",
+    "name": "Authentication",
+    "severity": "info",
+    "status": "passed"
+   },
+   {
+    "check": "releaseDiff",
+    "message": "100 added, 112 modified, 98 deleted; creates tags/1.0.24",
+    "name": "Release diff",
+    "severity": "info",
+    "status": "passed"
+   },
+   {
+    "check": "packageSize",
+    "message": "Package is 12 MiB (warning threshold 10 MiB)",
+    "name": "Package size",
+    "severity": "warning",
+    "status": "warning"
+   },
+   {
+    "check": "portableFilenames",
+    "message": "File names are portable",
+    "name": "Portable file names",
+    "severity": "info",
+    "status": "passed"
+   },
+   {
+    "check": "testedUpTo",
+    "message": "Tested up to 7.1 covers the current WordPress release 7.1.5",
+    "name": "Tested up to",
+    "severity": "info",
+    "status": "passed"
+   },
+   {
+    "check": "phpSyntax",
+    "message": "453 PHP file(s) parse with PHP 8.5.7",
+    "name": "PHP syntax",
+    "severity": "info",
+    "status": "passed"
+   },
+   {
+    "check": "pluginCheck",
+    "message": "Not set up: choose a local WordPress install with Plugin Check in Settings",
+    "name": "Plugin Check",
+    "severity": "info",
+    "status": "skipped"
+   }
+  ]
+ },
+ "verification": {
+  "checksumMismatches": [],
+  "committedRevision": 3822482,
+  "missingFiles": [],
+  "notes": [],
+  "stableTagMatches": true,
+  "tagExists": true,
+  "tagURL": "https://plugins.svn.wordpress.org/radius-booking/tags/1.0.24",
+  "unexpectedFiles": []
+ },
+ "verifiedNotCommitted": false,
+ "version": "1.0.24",
+ "workingCopyModified": false
+}

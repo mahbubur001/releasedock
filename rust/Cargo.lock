@@ -506,6 +506,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "rd-records"
+version = "0.1.0"
+dependencies = [
+ "rd-inspection",
+ "rd-model",
+ "rd-support",
+ "rd-versioning",
+ "serde",
+ "serde_json",
+ "thiserror",
+]
+
+[[package]]
 name = "rd-support"
 version = "0.1.0"
 dependencies = [

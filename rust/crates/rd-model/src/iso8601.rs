@@ -2,7 +2,7 @@
 //! `2026-11-26T09:30:00Z` (UTC, whole seconds), which is what Swift's `ISO8601DateFormatter`
 //! produces and accepts by default.
 
-use rd_model::SwiftDate;
+use crate::time::SwiftDate;
 use serde::{Deserialize, Deserializer, Serializer};
 
 pub fn format(date: SwiftDate) -> String {

@@ -41,7 +41,7 @@ impl TranscriptScope {
 #[serde(rename_all = "camelCase")]
 pub struct TranscriptEntry {
     pub id: Id,
-    #[serde(with = "crate::iso8601")]
+    #[serde(with = "rd_model::iso8601")]
     pub date: SwiftDate,
     #[serde(rename = "productID")]
     pub product_id: Id,
