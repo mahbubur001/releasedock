@@ -6,6 +6,15 @@
     <description>ReleaseDock updates</description>
     <language>en</language>
     <item>
+      <title>Version 0.3.0</title>
+      <pubDate>Thu, 26 Nov 2026 08:37:49 GMT</pubDate>
+      <sparkle:version>9</sparkle:version>
+      <sparkle:shortVersionString>0.3.0</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+      <description><![CDATA[<h3>Added</h3><ul><li><b>Transcript</b> of every <code>svn</code> command ReleaseDock runs for a release or a working-copy action: the command, exit code, duration and the end of its output. It appears in each release's report and from the terminal button on a product's Working Copy section. Passwords go through stdin and never appear.</li><li><b>Commit message templates</b> in New Release: write the summary with <code>{name}</code>, <code>{slug}</code>, <code>{version}</code> and <code>{previous}</code>, pick from suggested or earlier templates, and each product remembers its last one. ReleaseDock still adds its release ID on the next line so an interrupted commit can be found.</li><li>Clear explanations with a fix for common problems: a missing working copy folder (Check Out Again), an unreachable SVN server (Try Again), a locked working copy (Clean Up), a folder that isn't a working copy, and Subversion not installed or too old (copy the Homebrew command, Check Again).</li><li>Version Bump and Restore Older Version keep what you typed when you cancel or something fails, and bring it back when you reopen them.</li></ul><h3>Fixed</h3><ul><li>Revision numbers no longer show digit grouping (<code>r3822484</code>, not <code>r38,22,484</code>).</li><li>The app name and version at the bottom of the sidebar no longer wrap next to the Settings button.</li></ul>]]></description>
+      <enclosure url="https://github.com/mahbubur001/releasedock/releases/download/v0.3.0/ReleaseDock-0.3.0.zip" length="7320366" type="application/octet-stream" sparkle:edSignature="+f4r+zcu9u6wPEA2+3UfEaNBmSSqN9PCeUs5NyCl2l/Xt/oZN3UpnZUHi2fahVgKM3vO8I8yoP3uKsMdnmvbAQ=="/>
+    </item>
+    <item>
       <title>Version 0.2.3</title>
       <pubDate>Wed, 25 Nov 2026 10:42:55 GMT</pubDate>
       <sparkle:version>8</sparkle:version>
