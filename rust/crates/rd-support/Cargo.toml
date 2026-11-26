@@ -1,0 +1,20 @@
+[package]
+name = "rd-support"
+description = "Shared helpers: hashing, path safety, secret redaction, release notes, commit templates"
+version = "0.1.0"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+thiserror.workspace = true
+regex.workspace = true
+sha2.workspace = true
+hex.workspace = true
+
+[dev-dependencies]
+tempfile.workspace = true
+
+[lints]
+workspace = true
