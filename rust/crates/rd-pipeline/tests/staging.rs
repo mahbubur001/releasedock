@@ -221,7 +221,9 @@ fn release_zip_has_the_slug_folder_and_round_trips() {
         );
     }
 
-    // And so does Info-ZIP, where installed.
+    // And so does Info-ZIP, where installed. Unix only: the MSYS `unzip` that comes with Git
+    // for Windows can't open native `C:\...` paths.
+    #[cfg(unix)]
     if let Ok(unzip) = which::which("unzip") {
         let status = std::process::Command::new(unzip)
             .arg("-tq")
