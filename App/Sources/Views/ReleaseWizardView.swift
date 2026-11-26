@@ -158,6 +158,8 @@ private struct ReleaseWizardContent: View {
                     Label("Automatic publishing is not enabled for this product; you will be asked to confirm.", systemImage: "info.circle")
                         .font(.caption).foregroundStyle(.secondary)
                 }
+                SectionHeading("Commit Message")
+                CommitTemplateField(wizard: wizard)
                 SectionHeading("Package")
                 if let source = wizard.source {
                     SourceCard(source: source, product: wizard.product, canBump: bumpableFolder != nil) {
@@ -702,5 +704,55 @@ struct CredentialsSheet: View {
         .padding(20)
         .frame(width: 440)
         .onAppear { username = product.svnUsername ?? "" }
+    }
+}
+
+/// The release commit's summary line, with tokens filled in once the version is known.
+private struct CommitTemplateField: View {
+    @Bindable var wizard: ReleaseWizardModel
+
+    private var defaultTemplate: String {
+        wizard.effectiveKind == .readmeUpdate ? CommitMessageTemplate.defaultReadmeUpdate : CommitMessageTemplate.defaultVersion
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            HStack(spacing: 8) {
+                TextField("Commit message", text: $wizard.commitTemplate, prompt: Text(defaultTemplate))
+                    .textFieldStyle(.roundedBorder)
+                    .font(.body.monospaced())
+                Menu("Templates") {
+                    Section("Suggested") {
+                        ForEach([defaultTemplate] + CommitMessageTemplate.presets.filter { $0 != defaultTemplate }, id: \.self) { template in
+                            SwiftUI.Button(template) { wizard.commitTemplate = template == defaultTemplate ? "" : template }
+                        }
+                    }
+                    if !wizard.recentCommitTemplates.isEmpty {
+                        Section("Used Before") {
+                            ForEach(wizard.recentCommitTemplates, id: \.self) { template in
+                                SwiftUI.Button(template) { wizard.commitTemplate = template }
+                            }
+                        }
+                    }
+                }
+                .fixedSize()
+            }
+            if let problem = wizard.commitTemplateProblem {
+                Label(problem, systemImage: "exclamationmark.triangle.fill").font(.caption).foregroundStyle(.red)
+            } else {
+                Text("For example “\(example)”. Tokens: \(CommitMessageTemplate.tokens.joined(separator: " ")). ReleaseDock adds its release ID on the next line so an interrupted commit can be found.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+        .onChange(of: wizard.productID) { wizard.commitTemplate = wizard.product?.commitMessageTemplate ?? "" }
+        .onAppear { if wizard.commitTemplate.isEmpty { wizard.commitTemplate = wizard.product?.commitMessageTemplate ?? "" } }
+    }
+
+    private var example: String {
+        let template = wizard.commitTemplate.trimmingCharacters(in: .whitespaces).isEmpty ? defaultTemplate : wizard.commitTemplate
+        let product = wizard.product
+        return CommitMessageTemplate.render(template, name: product?.name ?? "Plugin", slug: product?.slug ?? "plugin", version: "1.2.0", previous: product?.currentVersion ?? "1.1.0")
     }
 }

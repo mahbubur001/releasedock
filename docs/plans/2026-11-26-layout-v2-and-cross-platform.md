@@ -83,13 +83,13 @@ Platform-neutral, so it is useful whichever stack is chosen.
 
 **Exit:** preview approved on 2026-11-26 (`design-preview/layout-v2.html`, kept out of git because it holds copied plugin images).
 
-### Phase 2: Small P1 items in the current macOS app ⬜
+### Phase 2: Small P1 items in the current macOS app ✅
 Low effort, immediately useful, and specified once so they port easily:
-- ⬜ SVN transcript, recorded in the core per release and per product (P1 #5).
-- ⬜ Release message history and templates (P1 #7).
-- ⬜ Remember sheet state after Cancel or a failure (P1 #9).
-- ⬜ Designed empty and error states (P1 #8).
-- ⬜ Release 0.3.0.
+- ✅ SVN transcript, recorded in the core per release and per product (P1 #5).
+- ✅ Release message templates, with earlier ones per product (P1 #7).
+- ✅ Remember typed text in the bump and restore sheets after Cancel or a failure (P1 #9).
+- ✅ Designed error states with a fix for working copy and Subversion problems (P1 #8).
+- ✅ Release 0.3.0.
 
 ### Phase 3: Rust core (Tauri) ⬜
 - ⬜ Workspace: `releasedock-core` crate (no UI), `src-tauri` app, `ui/` (React + TypeScript + Vite).

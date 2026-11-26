@@ -33,6 +33,8 @@ public struct AppPaths: Sendable {
     public var releases: URL { root.appendingPathComponent("Releases", isDirectory: true) }
     public var backups: URL { root.appendingPathComponent("Backups", isDirectory: true) }
     public var logs: URL { root.appendingPathComponent("Logs", isDirectory: true) }
+    /// One JSON-lines file of svn commands per product.
+    public var transcripts: URL { root.appendingPathComponent("Transcripts", isDirectory: true) }
     public var database: URL { root.appendingPathComponent("Database", isDirectory: true) }
     public var databaseFile: URL { database.appendingPathComponent("releasedock.sqlite") }
 

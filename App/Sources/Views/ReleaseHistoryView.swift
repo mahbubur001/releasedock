@@ -117,7 +117,7 @@ private struct HistoryRow: View {
                 VStack(alignment: .trailing, spacing: 3) {
                     StatusPill(text: release.state.displayName, color: release.state.tint)
                     if let revision = release.committedRevision {
-                        Text("r\(revision)").font(.caption.monospacedDigit()).foregroundStyle(.secondary)
+                        Text(verbatim: "r\(revision)").font(.caption.monospacedDigit()).foregroundStyle(.secondary)
                     }
                 }
             }
@@ -160,6 +160,7 @@ private struct ReleaseHistoryDetail: View {
                     if let inspection = record.inspection { ExcludedSection(inspection: inspection) }
                     packageSection
                     timeline
+                    transcriptSection
                 }
                 .padding(.horizontal, 24)
                 .padding(.vertical, 20)
@@ -265,6 +266,16 @@ private struct ReleaseHistoryDetail: View {
                         GroupedRow { key("Git commit"); value(commit, mono: true) }
                     }
                 }
+            }
+        }
+    }
+
+    @ViewBuilder private var transcriptSection: some View {
+        let entries = model.transcriptEntries(productID: record.productID, releaseID: record.id)
+        if !entries.isEmpty {
+            VStack(alignment: .leading, spacing: 8) {
+                SectionHeading("Transcript") { CopyButton(text: TranscriptList.text(entries)) }
+                TranscriptList(entries: entries)
             }
         }
     }

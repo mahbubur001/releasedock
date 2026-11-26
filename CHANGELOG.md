@@ -4,6 +4,18 @@ All notable changes to ReleaseDock are documented here. The format follows [Keep
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-11-26
+
+### Added
+- **Transcript** of every `svn` command ReleaseDock runs for a release or a working-copy action: the command, exit code, duration and the end of its output. It appears in each release's report and from the terminal button on a product's Working Copy section. Passwords go through stdin and never appear.
+- **Commit message templates** in New Release: write the summary with `{name}`, `{slug}`, `{version}` and `{previous}`, pick from suggested or earlier templates, and each product remembers its last one. ReleaseDock still adds its release ID on the next line so an interrupted commit can be found.
+- Clear explanations with a fix for common problems: a missing working copy folder (Check Out Again), an unreachable SVN server (Try Again), a locked working copy (Clean Up), a folder that isn't a working copy, and Subversion not installed or too old (copy the Homebrew command, Check Again).
+- Version Bump and Restore Older Version keep what you typed when you cancel or something fails, and bring it back when you reopen them.
+
+### Fixed
+- Revision numbers no longer show digit grouping (`r3822484`, not `r38,22,484`).
+- The app name and version at the bottom of the sidebar no longer wrap next to the Settings button.
+
 ## [0.2.3] - 2026-11-25
 
 ### Added

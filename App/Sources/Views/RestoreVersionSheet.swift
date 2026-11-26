@@ -15,6 +15,7 @@ struct RestoreVersionSheet: View {
     @State private var notes = ""
     @State private var notesEdited = false
     @State private var dryRun = false
+    @State private var started = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
@@ -51,6 +52,7 @@ struct RestoreVersionSheet: View {
         .padding(20)
         .frame(width: 560)
         .task { await load() }
+        .onDisappear { model.drafts[draftKey] = started || !notesEdited ? nil : notes }
         #if DEBUG
         // UI verification: RELEASEDOCK_UI_TEST_RESTORE=auto prepares the suggested restore once possible.
         .onChange(of: canStart, initial: true) { _, ready in
@@ -119,6 +121,10 @@ struct RestoreVersionSheet: View {
             options = loaded
             restoring = loaded.olderVersions.first ?? ""
             newVersion = loaded.suggestedVersion ?? ""
+            if let saved = model.drafts[draftKey] {
+                notes = saved
+                notesEdited = true
+            }
             suggestNotes()
         } catch {
             loadError = error.localizedDescription
@@ -130,7 +136,10 @@ struct RestoreVersionSheet: View {
         notes = "Restores the \(restoring) code" + (options?.currentVersion.map { " after a problem in \($0)." } ?? ".")
     }
 
+    private var draftKey: String { "restore-notes-\(product.id)" }
+
     private func start() {
+        started = true
         let (productID, old, new, entry, mode) = (product.id, restoring, newVersion, notes, dryRun ? ReleaseMode.dryRun : .assisted)
         model.wizardProductID = productID
         model.selection = .wizard

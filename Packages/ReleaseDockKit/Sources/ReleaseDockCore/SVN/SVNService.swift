@@ -55,6 +55,8 @@ public final class SVNService: SVNServicing, @unchecked Sendable {
     /// ("Committing transaction…"); a short timeout there turns a successful commit into
     /// E175012 and an uncertain outcome.
     public var commitHTTPTimeoutSeconds: Int
+    /// Records commands run inside a `SVNTranscript.scope`.
+    public let transcript: SVNTranscribing?
 
     public init(
         runner: ProcessRunning = ProcessRunner(),
@@ -62,9 +64,11 @@ public final class SVNService: SVNServicing, @unchecked Sendable {
         commandTimeout: Duration = .seconds(300),
         commitTimeout: Duration = .seconds(1800),
         httpTimeoutSeconds: Int = 120,
-        commitHTTPTimeoutSeconds: Int = 1800
+        commitHTTPTimeoutSeconds: Int = 1800,
+        transcript: SVNTranscribing? = nil
     ) {
         self.runner = runner
+        self.transcript = transcript
         preferredExecutable = executable
         self.commandTimeout = commandTimeout
         self.commitTimeout = commitTimeout
@@ -127,10 +131,27 @@ public final class SVNService: SVNServicing, @unchecked Sendable {
             timeout: timeout ?? commandTimeout
         )
         let start = Date()
-        let result = try await runner.run(request)
+        // As shown in the transcript: no global options, and the password only as --password-from-stdin.
+        let shown = arguments + (credentials.map { ["--username", $0.username, "--password-from-stdin"] } ?? [])
+        let result: ProcessResult
+        do {
+            result = try await runner.run(request)
+        } catch {
+            var partial: ProcessResult?
+            if case ProcessRunnerError.timedOut(let r) = error { partial = r }
+            if case ProcessRunnerError.cancelled(let r) = error { partial = r }
+            transcribe(shown, workingDirectory: workingDirectory, result: partial, failure: error.localizedDescription, since: start)
+            throw error
+        }
+        transcribe(shown, workingDirectory: workingDirectory, result: result, failure: nil, since: start)
         Log.svn.debug("svn \(arguments.first ?? "", privacy: .public) exit=\(result.exitCode) in \(Date().timeIntervalSince(start), format: .fixed(precision: 2))s")
         guard result.succeeded || !throwOnFailure else { throw Self.error(from: result) }
         return result
+    }
+
+    private func transcribe(_ arguments: [String], workingDirectory: URL?, result: ProcessResult?, failure: String?, since start: Date) {
+        guard let transcript, let scope = SVNTranscript.scope else { return }
+        transcript.record(SVNTranscript.entry(scope: scope, arguments: arguments, workingDirectory: workingDirectory, result: result, failure: failure, duration: Date().timeIntervalSince(start)))
     }
 
     static func errorCodes(in stderr: String) -> [String] {

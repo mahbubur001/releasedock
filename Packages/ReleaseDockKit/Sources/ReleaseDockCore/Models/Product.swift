@@ -123,6 +123,8 @@ public struct Product: Codable, Identifiable, Hashable, Sendable {
     /// Opt-in GitHub release after each version release; needs `githubRepositoryURL`.
     public var githubRelease: GitHubReleaseSettings?
     public var svnUsername: String?
+    /// Commit summary used last for this product (`CommitMessageTemplate` tokens).
+    public var commitMessageTemplate: String?
     public var createdAt: Date
     public var updatedAt: Date
 

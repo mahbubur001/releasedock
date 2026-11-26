@@ -30,6 +30,8 @@ final class ReleaseWizardModel {
     var source: ReleaseSource?
     var modeOverride: ReleaseMode?
     var kind: ReleaseKind = .version
+    /// Commit summary with `CommitMessageTemplate` tokens; empty uses the default for the kind.
+    var commitTemplate = ""
     private(set) var record: ReleaseRecord?
     private(set) var isRunning = false
     private(set) var activity: String?
@@ -65,7 +67,7 @@ final class ReleaseWizardModel {
         }
     }
 
-    var canStart: Bool { product != nil && source != nil && !isRunning && record == nil && model.svnInstallation != nil }
+    var canStart: Bool { product != nil && source != nil && !isRunning && record == nil && model.svnInstallation != nil && commitTemplateProblem == nil }
 
     var canApprove: Bool {
         guard let record, !isRunning, record.mode != .dryRun else { return false }
@@ -110,6 +112,23 @@ final class ReleaseWizardModel {
         errorMessage = nil
         modeOverride = nil
         kind = .version
+        commitTemplate = product?.commitMessageTemplate ?? ""
+    }
+
+    var commitTemplateProblem: String? {
+        commitTemplate.trimmingCharacters(in: .whitespaces).isEmpty ? nil : CommitMessageTemplate.problem(commitTemplate)
+    }
+
+    /// Templates used before for the selected product, newest first.
+    var recentCommitTemplates: [String] {
+        guard let product else { return [] }
+        var seen = Set<String>()
+        return model.releases(for: product.id)
+            .sorted { $0.createdAt > $1.createdAt }
+            .compactMap(\.commitTemplate)
+            .filter { seen.insert($0).inserted }
+            .prefix(5)
+            .map { $0 }
     }
 
     private func observeEvents() {
@@ -154,7 +173,9 @@ final class ReleaseWizardModel {
         guard let product, let source else { return }
         observeEvents()
         await run {
-            let created = try await model.pipeline.createRelease(productID: product.id, source: source, mode: effectiveMode, kind: effectiveKind)
+            let template = commitTemplate.trimmingCharacters(in: .whitespacesAndNewlines)
+            let created = try await model.pipeline.createRelease(productID: product.id, source: source, mode: effectiveMode, kind: effectiveKind, commitTemplate: template.isEmpty ? nil : template)
+            model.rememberCommitTemplate(template.isEmpty ? nil : template, for: product)
             record = created
             return try await model.pipeline.prepare(created.id)
         }

@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		083B354C0FF7C285D2E9F091 /* TranscriptView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B7944898FDD9689D272E442 /* TranscriptView.swift */; };
 		0DEB5F3BEC17E5FB213FF4C7 /* ReleaseDockCore in Frameworks */ = {isa = PBXBuildFile; productRef = E6CBA37F55AC39D96207ACAB /* ReleaseDockCore */; };
 		1AE3DFDCF0D485075AE1E659 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C58D84B9A3A99990ACB5B7C /* Theme.swift */; };
 		1C96EEE35A75FF9D3A7104F4 /* ProductEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4753C1B025E3B529C0E8B7C4 /* ProductEditorView.swift */; };
@@ -44,6 +45,7 @@
 		2F478EDBE9334187ADB48AED /* ReleaseDockApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReleaseDockApp.swift; sourceTree = "<group>"; };
 		32AC0AC90DE217058614E95A /* DashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardView.swift; sourceTree = "<group>"; };
 		337D4647CE01008B8CC02A25 /* ProductsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProductsView.swift; sourceTree = "<group>"; };
+		3B7944898FDD9689D272E442 /* TranscriptView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranscriptView.swift; sourceTree = "<group>"; };
 		401E89C7B7CAC59DA47FE5B4 /* Debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Debug.xcconfig; sourceTree = "<group>"; };
 		4753C1B025E3B529C0E8B7C4 /* ProductEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProductEditorView.swift; sourceTree = "<group>"; };
 		67188E8428EB7AF570C07664 /* SparkleUpdateService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SparkleUpdateService.swift; sourceTree = "<group>"; };
@@ -112,6 +114,7 @@
 				05A9A10F06D5B7E0C55567D5 /* SettingsView.swift */,
 				B82672979B500FB1A5B7326C /* Sidebar.swift */,
 				8C58D84B9A3A99990ACB5B7C /* Theme.swift */,
+				3B7944898FDD9689D272E442 /* TranscriptView.swift */,
 				00637DBB30F9EA9C162E9243 /* UpdateWindowView.swift */,
 				D0F41A17350358924C21555D /* VersionBumpSheet.swift */,
 			);
@@ -277,6 +280,7 @@
 				1EBFAFC81FBB72ED3464EF0D /* Sidebar.swift in Sources */,
 				A623318B8D560AC74EB8775B /* SparkleUpdateService.swift in Sources */,
 				1AE3DFDCF0D485075AE1E659 /* Theme.swift in Sources */,
+				083B354C0FF7C285D2E9F091 /* TranscriptView.swift in Sources */,
 				DB148F3BF7CE1050D7E534E1 /* UpdateWindowView.swift in Sources */,
 				6E04595F8415E97C15B10566 /* UserNotificationService.swift in Sources */,
 				53DA40882A325237A87703B3 /* VersionBumpSheet.swift in Sources */,

@@ -154,12 +154,16 @@ public actor ReleasePipelineService {
     // MARK: Create
 
     /// Registers a new release attempt for a ZIP or folder source.
-    public func createRelease(productID: UUID, source: ReleaseSource, mode: ReleaseMode? = nil, kind: ReleaseKind = .version) throws -> ReleaseRecord {
+    public func createRelease(productID: UUID, source: ReleaseSource, mode: ReleaseMode? = nil, kind: ReleaseKind = .version, commitTemplate: String? = nil) throws -> ReleaseRecord {
         let product = try product(productID)
         if kind == .readmeUpdate, product.type != .plugin {
             throw ReleaseError.invalidState("Readme updates without a new version are only available for plugins.")
         }
-        let record = ReleaseRecord(product: product, source: source, mode: mode ?? product.releaseMode, kind: kind)
+        if let commitTemplate, let problem = CommitMessageTemplate.problem(commitTemplate) {
+            throw ReleaseError.invalidState(problem)
+        }
+        var record = ReleaseRecord(product: product, source: source, mode: mode ?? product.releaseMode, kind: kind)
+        record.commitTemplate = commitTemplate?.trimmingCharacters(in: .whitespacesAndNewlines)
         try deps.releases.save(record)
         emit(record, "Release detected from \(source.kind == .zip ? "ZIP" : "folder") \(URL(fileURLWithPath: source.path).lastPathComponent)")
         return record
@@ -178,7 +182,7 @@ public actor ReleasePipelineService {
     /// Exports `oldVersion` from the repository and bumps it to `newVersion`, which must be
     /// newer than every released version. The result is an ordinary folder release that runs
     /// every check; WordPress.org never moves backwards, so sites on the broken version update.
-    public func createRestoreRelease(productID: UUID, restoring oldVersion: String, as newVersion: String, changelogNotes: String, mode: ReleaseMode? = nil) async throws -> ReleaseRecord {
+    private func createRestoreReleaseUnscoped(productID: UUID, restoring oldVersion: String, as newVersion: String, changelogNotes: String, mode: ReleaseMode?) async throws -> ReleaseRecord {
         let product = try product(productID)
         let strategy = deps.strategies.strategy(for: product.type)
         let snapshot = try await strategy.inspectRemote(product: product, candidateVersion: newVersion, svn: deps.svn)
@@ -221,7 +225,7 @@ public actor ReleasePipelineService {
 
     /// Inspects, validates, stages and previews the release. A dry run completes here.
     /// Validation failures end the release in `failed` with the report attached.
-    public func prepare(_ id: UUID) async throws -> ReleaseRecord {
+    private func prepareUnscoped(_ id: UUID) async throws -> ReleaseRecord {
         var record = try load(id)
         guard record.state == .detected else { throw ReleaseError.invalidState("Release is \(record.state.displayName); preparation already ran.") }
         let product = try product(record.productID)
@@ -421,7 +425,8 @@ public actor ReleasePipelineService {
     }
 
     func commitMessage(record: ReleaseRecord) -> String {
-        var summary = record.kind == .readmeUpdate ? "Update readme for \(record.productName) \(record.version ?? "")" : "Release \(record.productName) \(record.version ?? "")"
+        let template = record.commitTemplate ?? (record.kind == .readmeUpdate ? CommitMessageTemplate.defaultReadmeUpdate : CommitMessageTemplate.defaultVersion)
+        var summary = CommitMessageTemplate.render(template, name: record.productName, slug: record.productSlug, version: record.version, previous: record.previousVersion)
         if let restored = record.restoresVersion { summary += " (restores the \(restored) code)" }
         return "\(summary)\n\n\(record.commitMarker)\n"
     }
@@ -466,7 +471,7 @@ public actor ReleasePipelineService {
 
     /// Records approval of the current preview. Automatic approval passes only when
     /// every `AutomationGate` condition holds.
-    public func approve(_ id: UUID, kind: ApprovalKind) async throws -> ReleaseRecord {
+    private func approveUnscoped(_ id: UUID, kind: ApprovalKind) async throws -> ReleaseRecord {
         let product = try product(try load(id).productID)
         return try await withProductLock(product.id) {
             var record = try load(id)
@@ -509,7 +514,7 @@ public actor ReleasePipelineService {
 
     // MARK: Publish (Approved → Completed)
 
-    public func publish(_ id: UUID) async throws -> ReleaseRecord {
+    private func publishUnscoped(_ id: UUID) async throws -> ReleaseRecord {
         var record = try load(id)
         let product = try product(record.productID)
         guard record.state == .approved, let approval = record.approval else {
@@ -769,7 +774,7 @@ public actor ReleasePipelineService {
     }
 
     /// Establishes what happened to an uncertain commit by inspecting the repository.
-    public func recover(_ id: UUID) async throws -> ReleaseRecord {
+    private func recoverUnscoped(_ id: UUID) async throws -> ReleaseRecord {
         var record = try load(id)
         guard record.state == .recoveryRequired else { throw ReleaseError.invalidState("Release does not require recovery.") }
         let product = try product(record.productID)
@@ -818,7 +823,7 @@ public actor ReleasePipelineService {
     // MARK: Cancel / abandon
 
     /// Cancels a release that has not started publishing, restoring the working copy.
-    public func cancel(_ id: UUID) async throws -> ReleaseRecord {
+    private func cancelUnscoped(_ id: UUID) async throws -> ReleaseRecord {
         var record = try load(id)
         let product = try product(record.productID)
         guard !record.state.mayHaveCommitted, !record.state.isTerminal else {
@@ -843,7 +848,7 @@ public actor ReleasePipelineService {
     }
 
     /// Ends a recovery whose commit was verified absent.
-    public func abandon(_ id: UUID) async throws -> ReleaseRecord {
+    private func abandonUnscoped(_ id: UUID) async throws -> ReleaseRecord {
         var record = try load(id)
         let product = try product(record.productID)
         guard record.state == .recoveryRequired, record.verifiedNotCommitted else {
@@ -875,7 +880,7 @@ public actor ReleasePipelineService {
 
     /// Explicit user action for a dirty working copy: backs up the diff and unversioned
     /// files, then reverts. Returns the backup location.
-    public func revertWorkingCopy(productID: UUID) async throws -> URL? {
+    private func revertWorkingCopyUnscoped(productID: UUID) async throws -> URL? {
         let product = try product(productID)
         return try await withProductLock(product.id) {
             try await resetWorkingCopy(product: product, backupName: "\(product.slug)-\(ISO8601DateFormatter().string(from: Date()).replacingOccurrences(of: ":", with: "-"))-revert.diff")
@@ -949,7 +954,7 @@ public actor ReleasePipelineService {
 
     /// `svn update` (or the sparse checkout when there is no working copy yet). Local changes
     /// are kept; where they collide with the server, svn leaves conflicts to resolve.
-    public func updateWorkingCopy(productID: UUID) async throws -> WorkingCopyState {
+    private func updateWorkingCopyUnscoped(productID: UUID) async throws -> WorkingCopyState {
         let product = try product(productID)
         try ensureNoStagedRelease(product)
         try await withProductLock(product.id) {
@@ -965,7 +970,7 @@ public actor ReleasePipelineService {
 
     /// Resolves the given conflicts (paths relative to the working copy). Taking the server
     /// version backs up the local files first. Returns the new state and the backup, if any.
-    public func resolveConflicts(productID: UUID, paths: [String], keeping side: ConflictResolution) async throws -> (state: WorkingCopyState, backup: URL?) {
+    private func resolveConflictsUnscoped(productID: UUID, paths: [String], keeping side: ConflictResolution) async throws -> (state: WorkingCopyState, backup: URL?) {
         let product = try product(productID)
         try ensureNoStagedRelease(product)
         let backup: URL? = try await withProductLock(product.id) {
@@ -1038,5 +1043,54 @@ public actor ReleasePipelineService {
             record.manifestPath = url.path
             try deps.releases.save(record)
         }
+    }
+}
+
+// MARK: Transcript
+
+extension ReleasePipelineService {
+    /// Runs `body` with its svn commands recorded in the product's transcript.
+    private func transcribed<T>(_ operation: String, productID: UUID, releaseID: UUID? = nil, _ body: () async throws -> T) async throws -> T {
+        try await SVNTranscript.$scope.withValue(TranscriptScope(productID: productID, releaseID: releaseID, operation: operation), operation: body)
+    }
+
+    public func prepare(_ id: UUID) async throws -> ReleaseRecord {
+        try await transcribed("Prepare", productID: try load(id).productID, releaseID: id) { try await prepareUnscoped(id) }
+    }
+
+    public func approve(_ id: UUID, kind: ApprovalKind) async throws -> ReleaseRecord {
+        try await transcribed("Approve", productID: try load(id).productID, releaseID: id) { try await approveUnscoped(id, kind: kind) }
+    }
+
+    public func publish(_ id: UUID) async throws -> ReleaseRecord {
+        try await transcribed("Publish", productID: try load(id).productID, releaseID: id) { try await publishUnscoped(id) }
+    }
+
+    public func recover(_ id: UUID) async throws -> ReleaseRecord {
+        try await transcribed("Inspect repository", productID: try load(id).productID, releaseID: id) { try await recoverUnscoped(id) }
+    }
+
+    public func cancel(_ id: UUID) async throws -> ReleaseRecord {
+        try await transcribed("Cancel", productID: try load(id).productID, releaseID: id) { try await cancelUnscoped(id) }
+    }
+
+    public func abandon(_ id: UUID) async throws -> ReleaseRecord {
+        try await transcribed("Abandon", productID: try load(id).productID, releaseID: id) { try await abandonUnscoped(id) }
+    }
+
+    public func revertWorkingCopy(productID: UUID) async throws -> URL? {
+        try await transcribed("Revert working copy", productID: productID) { try await revertWorkingCopyUnscoped(productID: productID) }
+    }
+
+    public func updateWorkingCopy(productID: UUID) async throws -> WorkingCopyState {
+        try await transcribed("Update working copy", productID: productID) { try await updateWorkingCopyUnscoped(productID: productID) }
+    }
+
+    public func resolveConflicts(productID: UUID, paths: [String], keeping side: ConflictResolution) async throws -> (state: WorkingCopyState, backup: URL?) {
+        try await transcribed("Resolve conflicts", productID: productID) { try await resolveConflictsUnscoped(productID: productID, paths: paths, keeping: side) }
+    }
+
+    public func createRestoreRelease(productID: UUID, restoring oldVersion: String, as newVersion: String, changelogNotes: String, mode: ReleaseMode? = nil) async throws -> ReleaseRecord {
+        try await transcribed("Prepare restore", productID: productID) { try await createRestoreReleaseUnscoped(productID: productID, restoring: oldVersion, as: newVersion, changelogNotes: changelogNotes, mode: mode) }
     }
 }

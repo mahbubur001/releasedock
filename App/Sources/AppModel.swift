@@ -50,6 +50,7 @@ final class AppModel {
     let store: Store
     let keychain: KeychainServicing
     let svn: SVNService
+    let transcript: SVNTranscript
     let productService: ProductService
     let repositorySetup: RepositorySetupService
     let pipeline: ReleasePipelineService
@@ -57,6 +58,9 @@ final class AppModel {
     let diagnostics: DiagnosticsService
     @ObservationIgnored private var directoryMonitor: Task<Void, Never>?
     @ObservationIgnored let codeCheckConfiguration = CodeCheckConfigurationStore()
+    /// Text typed into a sheet that was cancelled or failed, kept for this session so
+    /// reopening the sheet brings it back. Keyed by sheet and product.
+    @ObservationIgnored var drafts: [String: String] = [:]
 
     var products: [Product] = []
     var releases: [ReleaseRecord] = []
@@ -94,10 +98,12 @@ final class AppModel {
         settings = loadedSettings
         codeCheckConfiguration.value = CodeCheckConfiguration(pluginCheckWordPressPath: loadedSettings.pluginCheckWordPressPath)
         let commitMinutes = loadedSettings.commitTimeoutMinutes ?? AppSettings.defaultCommitTimeoutMinutes
+        transcript = SVNTranscript(folder: paths.transcripts)
         svn = SVNService(
             executable: loadedSettings.svnExecutablePath.isEmpty ? nil : URL(fileURLWithPath: loadedSettings.svnExecutablePath),
             commitTimeout: .seconds(commitMinutes * 60),
-            commitHTTPTimeoutSeconds: commitMinutes * 60
+            commitHTTPTimeoutSeconds: commitMinutes * 60,
+            transcript: transcript
         )
         productService = ProductService(repository: store, paths: paths)
         repositorySetup = RepositorySetupService(svn: svn)
@@ -264,6 +270,19 @@ final class AppModel {
         }
     }
 
+    /// Transcript entries, newest operation first; commands within an operation keep their order.
+    func transcriptEntries(productID: UUID, releaseID: UUID? = nil) -> [TranscriptEntry] {
+        var runs: [[TranscriptEntry]] = []
+        for entry in transcript.entries(productID: productID, releaseID: releaseID, limit: 400) {
+            if let last = runs.last?.last, last.operation == entry.operation, last.releaseID == entry.releaseID {
+                runs[runs.count - 1].append(entry)
+            } else {
+                runs.append([entry])
+            }
+        }
+        return runs.reversed().flatMap { $0 }
+    }
+
     func product(_ id: UUID?) -> Product? {
         guard let id else { return nil }
         return products.first { $0.id == id }
@@ -293,6 +312,22 @@ final class AppModel {
         updated.svnUsername = username
         try keychain.setPassword(password, for: .svn(host: host, username: username))
         try productService.save(updated)
+        reload()
+    }
+
+    /// `svn cleanup` after an interrupted command left the working copy locked.
+    func cleanUpWorkingCopy(_ product: Product) async throws {
+        try await SVNTranscript.$scope.withValue(TranscriptScope(productID: product.id, operation: "Clean up working copy")) {
+            try await svn.cleanup(product.workingCopyURL)
+        }
+    }
+
+    /// Keeps the commit message template as the product's default for its next release.
+    func rememberCommitTemplate(_ template: String?, for product: Product) {
+        guard product.commitMessageTemplate != template else { return }
+        var updated = product
+        updated.commitMessageTemplate = template
+        try? productService.save(updated)
         reload()
     }
 

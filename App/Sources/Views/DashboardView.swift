@@ -101,10 +101,18 @@ struct DashboardView: View {
     }
 
     @ViewBuilder private var banners: some View {
-        if let problem = model.svnProblem {
-            Label(problem, systemImage: "exclamationmark.triangle.fill")
-                .foregroundStyle(.orange)
-                .card(padding: 12)
+        if model.svnInstallation == nil, model.svnProblem != nil {
+            ProblemCard(title: "Subversion isn't installed", message: "ReleaseDock uses the svn command to talk to WordPress.org. Install it with Homebrew, then check again.") {
+                Button("Copy “brew install subversion”") {
+                    NSPasteboard.general.clearContents()
+                    NSPasteboard.general.setString("brew install subversion", forType: .string)
+                }
+                Button("Check Again") { Task { await model.detectSVN() } }.buttonStyle(.borderedProminent)
+            }
+        } else if let problem = model.svnProblem {
+            ProblemCard(title: "Subversion needs an update", message: problem) {
+                Button("Check Again") { Task { await model.detectSVN() } }.buttonStyle(.borderedProminent)
+            }
         }
     }
 

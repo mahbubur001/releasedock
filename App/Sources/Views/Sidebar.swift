@@ -46,8 +46,8 @@ struct Sidebar: View {
                     .resizable()
                     .frame(width: 28, height: 28)
                 VStack(alignment: .leading, spacing: 0) {
-                    Text("ReleaseDock").font(.callout.weight(.semibold))
-                    Text("\(AppModel.appVersion) · WordPress.org releases").font(.caption).foregroundStyle(.secondary)
+                    Text("ReleaseDock").font(.callout.weight(.semibold)).lineLimit(1)
+                    Text("Version \(AppModel.appVersion)").font(.caption).foregroundStyle(.secondary).lineLimit(1)
                 }
                 Spacer(minLength: 4)
                 Button {

@@ -124,6 +124,9 @@ struct ProductDetailView: View {
     @State private var restoring = false
     @State private var workingCopy: WorkingCopyState?
     @State private var workingCopyError: String?
+    @State private var workingCopyErrorKind: SVNErrorKind?
+    @State private var showingTranscript = false
+    @State private var cleaningUp = false
     @State private var updating = false
     @State private var showChanges = false
     @State private var resolvingConflicts = false
@@ -233,6 +236,9 @@ struct ProductDetailView: View {
         .sheet(isPresented: $restoring) {
             RestoreVersionSheet(product: product)
         }
+        .sheet(isPresented: $showingTranscript) {
+            TranscriptSheet(product: product)
+        }
         .sheet(isPresented: $resolvingConflicts) {
             ConflictResolutionSheet(product: product, conflicts: workingCopy?.conflicts ?? []) { state in
                 workingCopy = state
@@ -242,6 +248,8 @@ struct ProductDetailView: View {
         #if DEBUG
         // UI verification: RELEASEDOCK_UI_TEST_RESTORE=1 opens the restore sheet; =auto also prepares it.
         .onAppear { if ProcessInfo.processInfo.environment["RELEASEDOCK_UI_TEST_RESTORE"] != nil, product.currentVersion != nil { restoring = true } }
+        // UI verification: RELEASEDOCK_UI_TEST_TRANSCRIPT=1 opens the product's transcript.
+        .onAppear { if ProcessInfo.processInfo.environment["RELEASEDOCK_UI_TEST_TRANSCRIPT"] != nil { showingTranscript = true } }
         #endif
     }
 
@@ -279,6 +287,7 @@ struct ProductDetailView: View {
                 SwiftUI.Button(hasWorkingCopy ? "Update Working Copy" : "Check Out Working Copy") { update() }.disabled(updating || reverting)
                 SwiftUI.Button("Revert Working Copy…") { confirmRevert = true }.disabled(!hasWorkingCopy)
                 SwiftUI.Button("Restore Older Version…") { restoring = true }.disabled(product.currentVersion == nil || model.wizard.isRunning)
+                SwiftUI.Button("Show Transcript…") { showingTranscript = true }
                 Divider()
                 SwiftUI.Button("Delete Product…", role: .destructive, action: onDelete)
             } label: {
@@ -321,7 +330,7 @@ struct ProductDetailView: View {
                             if release.kind == .readmeUpdate { Text("readme").font(.caption).foregroundStyle(.secondary) }
                             Text(release.createdAt.formatted(date: .abbreviated, time: .shortened)).font(.callout).foregroundStyle(.secondary)
                             Spacer()
-                            if let revision = release.committedRevision { Text("r\(revision)").font(.caption.monospaced()).foregroundStyle(.secondary) }
+                            if let revision = release.committedRevision { Text(verbatim: "r\(revision)").font(.caption.monospaced()).foregroundStyle(.secondary) }
                             StatusPill(text: release.state.displayName, color: release.state.tint)
                             Image(systemName: "chevron.right").font(.caption.weight(.semibold)).foregroundStyle(.tertiary)
                         }
@@ -378,7 +387,15 @@ struct ProductDetailView: View {
             .buttonStyle(.borderless)
             .help("Refresh the status")
             .disabled(updating || reverting)
+            Button {
+                showingTranscript = true
+            } label: {
+                Image(systemName: "terminal")
+            }
+            .buttonStyle(.borderless)
+            .help("Show the svn commands ReleaseDock ran for this product")
         }
+        workingCopyProblem
         GroupedRows {
             GroupedRow(isFirst: true) {
                 label("Status")
@@ -438,6 +455,47 @@ struct ProductDetailView: View {
         }
     }
 
+    /// The working copy can't be read: say why and offer the fix.
+    @ViewBuilder private var workingCopyProblem: some View {
+        let folder = (product.workingCopyPath as NSString).abbreviatingWithTildeInPath
+        if !FileManager.default.fileExists(atPath: product.workingCopyPath), workingCopy?.exists == false, product.currentVersion != nil {
+            ProblemCard(title: "Working copy folder is missing", message: "\(folder) was moved or deleted. Check it out again, or edit the product to point to its new location.", systemImage: "folder.badge.questionmark") {
+                Button("Check Out Again") { update() }.buttonStyle(.borderedProminent).disabled(updating)
+                Button("Edit Product…", action: onEdit)
+            }
+        } else if workingCopyError != nil {
+            switch workingCopyErrorKind {
+            case .network?:
+                ProblemCard(title: "Can't reach \(product.svnRepositoryURL.host ?? "the SVN server")", message: "Your Mac is offline or the server isn't answering. Nothing was changed.", systemImage: "wifi.exclamationmark", color: .red) {
+                    Button("Try Again") { Task { await loadWorkingCopy() } }.buttonStyle(.borderedProminent)
+                }
+            case .workingCopyLocked?:
+                ProblemCard(title: "The working copy is locked", message: "An earlier svn command was interrupted and left \(folder) locked. Clean Up releases the lock; your changes stay.", systemImage: "lock.fill") {
+                    Button(cleaningUp ? "Cleaning Up…" : "Clean Up") { cleanUp() }.buttonStyle(.borderedProminent).disabled(cleaningUp)
+                }
+            case .notAWorkingCopy?:
+                ProblemCard(title: "This folder isn't a working copy", message: "\(folder) exists but has no .svn data. Choose another folder or check out into an empty one.", systemImage: "folder.badge.minus") {
+                    Button("Edit Product…", action: onEdit).buttonStyle(.borderedProminent)
+                }
+            default:
+                EmptyView()
+            }
+        }
+    }
+
+    private func cleanUp() {
+        cleaningUp = true
+        Task {
+            defer { cleaningUp = false }
+            do {
+                try await model.cleanUpWorkingCopy(product)
+                await loadWorkingCopy()
+            } catch {
+                model.show(error, title: "Could not clean up the working copy")
+            }
+        }
+    }
+
     @ViewBuilder private var workingCopyStatus: some View {
         Group {
             if let workingCopyError {
@@ -447,7 +505,7 @@ struct ProductDetailView: View {
                     Text("Not checked out yet").foregroundStyle(.secondary)
                 } else {
                     HStack(spacing: 6) {
-                        if let revision = state.revision { Text("r\(revision)").font(.callout.monospaced()).foregroundStyle(.secondary) }
+                        if let revision = state.revision { Text(verbatim: "r\(revision)").font(.callout.monospaced()).foregroundStyle(.secondary) }
                         if !state.conflicts.isEmpty {
                             StatusPill(text: "\(state.conflicts.count) conflict(s)", color: .red)
                         } else if state.isClean {
@@ -469,8 +527,10 @@ struct ProductDetailView: View {
         do {
             workingCopy = try await model.pipeline.workingCopyState(productID: product.id)
             workingCopyError = nil
+            workingCopyErrorKind = nil
         } catch {
             workingCopyError = error.localizedDescription
+            workingCopyErrorKind = (error as? SVNError)?.kind
         }
     }
 

@@ -5,6 +5,7 @@ import SwiftUI
 /// the user clicks Apply, and applying refuses if a file changed after the preview.
 struct VersionBumpSheet: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(AppModel.self) private var model
     let product: Product
     let folder: URL
     var onApplied: (String) -> Void = { _ in }
@@ -48,6 +49,7 @@ struct VersionBumpSheet: View {
         .padding(20)
         .frame(width: 620)
         .onAppear(perform: load)
+        .onDisappear(perform: keepDraft)
     }
 
     @ViewBuilder private var form: some View {
@@ -102,7 +104,22 @@ struct VersionBumpSheet: View {
         }
     }
 
+    private var draftKey: String { "bump-\(product.id)" }
+
+    /// Keeps typed changelog notes and the version after Cancel or a failed apply.
+    private func keepDraft() {
+        if applied {
+            model.drafts[draftKey + "-notes"] = nil
+            model.drafts[draftKey + "-version"] = nil
+        } else {
+            model.drafts[draftKey + "-notes"] = notes.isEmpty ? nil : notes
+            model.drafts[draftKey + "-version"] = newVersion.isEmpty ? nil : newVersion
+        }
+    }
+
     private func load() {
+        if let saved = model.drafts[draftKey + "-notes"] { notes = saved }
+        if let saved = model.drafts[draftKey + "-version"] { newVersion = saved }
         current = try? ProductDetector().detect(at: folder, expectedType: product.type, mainPluginFile: product.mainPluginFile, slug: product.slug).version
         if let current, newVersion.isEmpty { newVersion = VersionBumpService.suggest(.patch, from: current) ?? "" }
         refresh()

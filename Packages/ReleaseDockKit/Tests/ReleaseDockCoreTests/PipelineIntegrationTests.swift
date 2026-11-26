@@ -11,6 +11,7 @@ final class PipelineIntegrationTests: XCTestCase {
     var notifications: RecordingNotifications!
     var pipeline: ReleasePipelineService!
     var paths: AppPaths!
+    var transcript: SVNTranscript!
 
     override func setUp() async throws {
         guard LocalSVNRepository.isAvailable else { throw XCTSkip("svn/svnadmin not installed") }
@@ -19,7 +20,8 @@ final class PipelineIntegrationTests: XCTestCase {
         store = try Store.inMemory()
         paths = AppPaths(root: work.path("data"))
         try paths.createAll()
-        svn = FaultInjectingSVN(base: SVNService(commandTimeout: .seconds(60)))
+        transcript = SVNTranscript(folder: paths.transcripts)
+        svn = FaultInjectingSVN(base: SVNService(commandTimeout: .seconds(60), transcript: transcript))
         notifications = RecordingNotifications()
         pipeline = ReleasePipelineService(dependencies: PipelineDependencies(
             products: store, releases: store, svn: svn, git: StubGit(), keychain: InMemoryKeychain(),

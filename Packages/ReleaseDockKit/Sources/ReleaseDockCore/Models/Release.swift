@@ -270,6 +270,8 @@ public struct ReleaseRecord: Codable, Hashable, Sendable, Identifiable {
     public var directoryStatus: DirectoryStatus?
     /// Set when this release restores an older released version's code under a new version.
     public var restoresVersion: String?
+    /// Commit summary chosen for this release, with `CommitMessageTemplate` tokens; nil = default.
+    public var commitTemplate: String?
     public var createdAt: Date
     public var updatedAt: Date
 

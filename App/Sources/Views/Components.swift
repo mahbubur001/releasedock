@@ -177,3 +177,30 @@ private struct ArrowKeyMonitor: NSViewRepresentable {
         // The monitor is removed in viewDidMoveToWindow when the view leaves its window.
     }
 }
+
+/// A problem explained in one sentence with the action that fixes it, in place of
+/// a bare error line: icon, title, message, buttons.
+struct ProblemCard<Actions: View>: View {
+    let title: String
+    let message: String
+    var systemImage = "exclamationmark.triangle.fill"
+    var color: Color = .orange
+    @ViewBuilder var actions: Actions
+
+    var body: some View {
+        HStack(alignment: .top, spacing: 14) {
+            TintedSymbol(systemImage: systemImage, color: color, size: 40)
+            VStack(alignment: .leading, spacing: 4) {
+                Text(title).font(.headline)
+                Text(message)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .textSelection(.enabled)
+                HStack(spacing: 8) { actions }
+                    .padding(.top, 6)
+            }
+            Spacer(minLength: 0)
+        }
+        .card(padding: 16)
+    }
+}
