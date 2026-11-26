@@ -1,0 +1,37 @@
+[package]
+name = "releasedock-desktop"
+version = "0.1.0"
+description = "ReleaseDock: publish WordPress.org plugins and themes"
+authors = ["Mahbubur Rahman"]
+license = "MIT"
+edition = "2024"
+publish = false
+
+[lib]
+# The `_lib` suffix keeps the library name distinct from the binary on Windows
+# (https://github.com/rust-lang/cargo/issues/8519).
+name = "releasedock_desktop_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+tauri-plugin-opener = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+thiserror = "2"
+base64 = "0.22"
+tokio = { version = "1", features = ["sync"] }
+rd-model = { path = "../../rust/crates/rd-model" }
+rd-records = { path = "../../rust/crates/rd-records" }
+rd-store = { path = "../../rust/crates/rd-store" }
+rd-svn = { path = "../../rust/crates/rd-svn" }
+
+[profile.release]
+codegen-units = 1
+lto = true
+opt-level = 3
+panic = "abort"
+strip = true

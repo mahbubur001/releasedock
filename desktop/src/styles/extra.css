@@ -1,0 +1,18 @@
+/* Pieces the preview drew with fixed markup. */
+.product-icon { flex: none; box-shadow: 0 0 0 .5px var(--separator); object-fit: cover; }
+.product-glyph { flex: none; display: grid; place-items: center; color: #fff; }
+.product-glyph svg { width: 55%; height: 55%; }
+.product-glyph.plugin { background: linear-gradient(#4aa8ff, #0a6be0); }
+.product-glyph.theme { background: linear-gradient(#d17df5, #8f3bd1); }
+.prod-card { display: flex; gap: 12px; align-items: center; cursor: default; }
+.prod-card:hover { box-shadow: var(--card-ring), 0 0 0 1px var(--blue); }
+.prod-card .txt { min-width: 0; flex: 1; }
+.prod-card .n { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.prod-card .m { font-size: 11px; }
+.prod-card .v { font-size: 22px; font-weight: 700; }
+.mini-feed .row { align-items: baseline; }
+.big { font-size: 26px; font-weight: 700; letter-spacing: -.5px; }
+.stats { display: flex; gap: 18px; margin-top: 6px; color: var(--label-2); font-size: 12px; }
+.stats span::before { content: "●"; margin-right: 5px; font-size: 9px; color: var(--green); }
+.stats span:nth-child(2)::before { color: var(--blue); }
+.stats span:nth-child(3)::before { color: var(--gray); }
