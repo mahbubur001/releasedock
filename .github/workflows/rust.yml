@@ -1,0 +1,54 @@
+# Tests the Rust core (rust/) on macOS, Windows and Linux. Runs on pushes and pull requests
+# that touch rust/; free on GitHub-hosted runners for public repositories.
+name: Rust core
+
+on:
+  push:
+    branches: [main]
+    paths: ["rust/**", ".github/workflows/rust.yml"]
+  pull_request:
+    paths: ["rust/**", ".github/workflows/rust.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: rust-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, windows-latest, ubuntu-latest]
+    defaults:
+      run:
+        working-directory: rust
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Rust toolchain
+        run: rustup toolchain install stable --profile minimal --component clippy,rustfmt && rustup default stable
+
+      - name: Subversion (integration tests skip without it)
+        shell: bash
+        run: |
+          case "$RUNNER_OS" in
+            macOS) brew install subversion ;;
+            Linux) sudo apt-get update -q && sudo apt-get install -y -q subversion ;;
+            Windows) echo "No svn on Windows runners; SVN integration tests are skipped." ;;
+          esac
+
+      - name: Format
+        run: cargo fmt --all --check
+
+      - name: Clippy
+        run: cargo clippy --workspace --all-targets -- -D warnings
+
+      - name: Test
+        run: cargo test --workspace
