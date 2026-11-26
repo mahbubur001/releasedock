@@ -6,7 +6,9 @@ mod support;
 use rd_svn::*;
 use std::sync::Arc;
 use std::time::Duration;
-use support::{RecordingRunner, TempDir, stand_in_executable};
+#[cfg(unix)]
+use support::TempDir;
+use support::{RecordingRunner, stand_in_executable};
 
 // MARK: ProcessRunnerTests
 
