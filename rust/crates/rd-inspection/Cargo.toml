@@ -1,0 +1,28 @@
+[package]
+name = "rd-inspection"
+description = "Read-only inspection of release packages: defensive ZIP reader, ZIP and folder inspection, file classification, directory assets"
+version = "0.1.0"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+rd-support = { path = "../rd-support" }
+rd-model = { path = "../rd-model" }
+thiserror.workspace = true
+regex.workspace = true
+sha2.workspace = true
+hex.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+# Raw DEFLATE (RFC 1951) decompression only; the ZIP container is parsed by our own reader.
+flate2 = "1"
+# Pixel dimensions from image headers (replaces ImageIO).
+imagesize = "0.14"
+
+[dev-dependencies]
+tempfile.workspace = true
+
+[lints]
+workspace = true

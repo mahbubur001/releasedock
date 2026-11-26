@@ -1,0 +1,26 @@
+[package]
+name = "rd-versioning"
+description = "PHP version_compare, WordPress headers, readme parser, product detector, version service and version bump"
+version = "0.1.0"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+rd-support = { path = "../rd-support" }
+rd-model = { path = "../rd-model" }
+thiserror.workspace = true
+regex.workspace = true
+serde.workspace = true
+tempfile.workspace = true
+# Pixel size of theme screenshots without decoding them (replaces ImageIO).
+imagesize = "0.15"
+# Local calendar date of the inserted changelog entry (Swift uses Calendar.current).
+chrono = { version = "0.4", default-features = false, features = ["clock"] }
+
+[dev-dependencies]
+serde_json.workspace = true
+
+[lints]
+workspace = true
