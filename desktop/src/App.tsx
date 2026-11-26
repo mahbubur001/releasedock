@@ -1,16 +1,17 @@
 import { useCallback, useEffect, useState } from "react";
-import { api, AppInfo, Product, ReleaseRow, SvnStatus } from "./api";
+import { api, AppInfo, Product, ReleaseRow, SvnStatus, UiTestRelease } from "./api";
 import { Sidebar, shortName } from "./components/Sidebar";
 import { Toolbar } from "./components/Toolbar";
 import { RefreshIcon, TerminalIcon, UpdateIcon } from "./components/Icons";
 import { Overview } from "./screens/Overview";
 import { ProductTabs, ProductView, useProductTab } from "./screens/ProductView";
 import { History } from "./screens/History";
+import { NewRelease } from "./screens/NewRelease";
 import { ago } from "./screens/format";
 
 export type Selection =
   | { kind: "overview" }
-  | { kind: "newRelease" }
+  | { kind: "newRelease"; productId?: string }
   | { kind: "history" }
   | { kind: "product"; id: string };
 
@@ -24,6 +25,7 @@ export default function App() {
   const [selection, setSelection] = useState<Selection>({ kind: "overview" });
   const [tab, setTab] = useProductTab();
   const [, tick] = useState(0);
+  const [autoRun, setAutoRun] = useState<UiTestRelease>();
 
   const reload = useCallback(async () => {
     try {
@@ -41,6 +43,11 @@ export default function App() {
     api.appInfo().then(setInfo);
     api.svnStatus().then(setSvn);
     reload();
+    api.uiTestRelease().then((test) => {
+      if (!test) return;
+      setAutoRun(test);
+      setSelection({ kind: "newRelease", productId: test.productId });
+    });
     const timer = setInterval(() => tick((n) => n + 1), 30_000);
     return () => clearInterval(timer);
   }, [reload]);
@@ -61,14 +68,14 @@ export default function App() {
             {product && <button className="tb-btn" title="Update Working Copy"><UpdateIcon />Update</button>}
             {product && <button className="tb-btn" title="Transcript"><TerminalIcon /></button>}
           </div>
-          <button className="btn blue" onClick={() => setSelection({ kind: "newRelease" })}>New Release…</button>
+          <button className="btn blue" onClick={() => setSelection({ kind: "newRelease", productId: product?.id })}>New Release…</button>
         </Toolbar>
         <div className="content">
           {error && <div className="pad"><div className="card"><b>Couldn't read ReleaseDock's data.</b><p className="muted selectable">{error}</p></div></div>}
           {!error && selection.kind === "overview" && <Overview products={products} releases={releases} onOpenProduct={(id) => setSelection({ kind: "product", id })} />}
           {!error && selection.kind === "history" && <History releases={releases} />}
-          {!error && selection.kind === "newRelease" && (
-            <div className="states" style={{ gridTemplateColumns: "1fr" }}><div className="card state"><h4>New Release is coming next</h4><p>The release flow is being connected to the Rust pipeline.</p></div></div>
+          {!error && selection.kind === "newRelease" && products.length > 0 && (
+            <NewRelease key={selection.productId ?? "any"} products={products} initialProductId={selection.productId} onChanged={reload} autoRun={autoRun} />
           )}
           {!error && product && <ProductView product={product} releases={releases.filter((r) => r.productId === product.id)} tab={tab} />}
         </div>

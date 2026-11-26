@@ -133,3 +133,33 @@ pub fn product_icon(state: State<'_, AppState>, product_id: String) -> CommandRe
     }
     Ok(None)
 }
+
+/// Debug builds only: `RELEASEDOCK_UI_TEST_RELEASE=<product id>|<source path>|<mode>` makes
+/// New Release run on launch, and `RELEASEDOCK_UI_TEST_PUBLISH=1` also publishes — allowed
+/// only for products whose repository is a local `file://` URL. Used to check the UI.
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct UiTestRelease {
+    product_id: String,
+    source_path: String,
+    mode: String,
+    publish: bool,
+}
+
+#[tauri::command]
+pub fn ui_test_release(state: State<'_, AppState>) -> Option<UiTestRelease> {
+    if !cfg!(debug_assertions) {
+        return None;
+    }
+    let spec = std::env::var("RELEASEDOCK_UI_TEST_RELEASE").ok()?;
+    let mut parts = spec.splitn(3, '|');
+    let (product_id, source_path, mode) = (parts.next()?.to_owned(), parts.next()?.to_owned(), parts.next()?.to_owned());
+    let local = state
+        .store
+        .as_ref()
+        .ok()
+        .and_then(|s| s.product(Id::parse(&product_id)?).ok().flatten())
+        .is_some_and(|p| p.svn_repository_url.starts_with("file://"));
+    let publish = local && std::env::var("RELEASEDOCK_UI_TEST_PUBLISH").as_deref() == Ok("1");
+    Some(UiTestRelease { product_id, source_path, mode, publish })
+}
